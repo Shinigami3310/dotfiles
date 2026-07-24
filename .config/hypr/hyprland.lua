@@ -12,6 +12,7 @@ local terminal = "kitty"
 local fileManager = "dolphin"
 local menu = "hyprlauncher"
 local browser = "firefox"
+local ide = "nvim"
 
 hl.env("XCURSOR_SIZE", "24")
 hl.env("HYPRCURSOR_SIZE", "24")
@@ -31,7 +32,7 @@ hl.bind(
 hl.bind(mainMod .. " + B", hl.dsp.exec_cmd(browser))
 hl.bind(mainMod .. " + F", hl.dsp.exec_cmd(fileManager))
 hl.bind(mainMod .. " + R", hl.dsp.exec_cmd(menu))
-
+hl.bind(mainMod .. " + N", hl.dsp.exec_cmd("kitty -e nvim"))
 -- Move focus with mainMod + arrow keys
 hl.bind(mainMod .. " + left", hl.dsp.focus({ direction = "left" }))
 hl.bind(mainMod .. " + right", hl.dsp.focus({ direction = "right" }))
@@ -46,8 +47,8 @@ hl.bind(mainMod .. " + SHIFT + F", hl.dsp.window.fullscreen({ mode = "maximized"
 
 -- Switch workspaces with mainMod + [0-9]
 -- Move active window to a workspace with mainMod + SHIFT + [0 - 9]
-for i = 1, 10 do
-	local key = i % 10
+for i = 1, 6 do
+	local key = i % 6
 	hl.bind(mainMod .. " + " .. key, hl.dsp.focus({ workspace = i }))
 	hl.bind(mainMod .. " + SHIFT + " .. key, hl.dsp.window.move({ workspace = i }))
 end
@@ -151,4 +152,9 @@ hl.window_rule({
 
 	move = "20 monitor_h-120",
 	float = true,
+})
+
+hl.window_rule({
+	match = { class = "firefox" }, -- Укажите класс вашего браузера
+	workspace = "2", -- Отправляем на второй рабочий стол
 })

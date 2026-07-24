@@ -1,0 +1,3 @@
+singleton Dyn Dyn.qml
+singleton Theme Theme.qml
+singleton Motion Motion.qml

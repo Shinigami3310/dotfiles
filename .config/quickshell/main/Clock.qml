@@ -15,6 +15,8 @@ Item {
     Text {
         id: clockText
         color: "white"
+        font.family: "SF Mono"
+        font.letterSpacing: -1
         font.pixelSize: 16
         text: Qt.formatDateTime(systemClock.date, "hh:mm")
     }
