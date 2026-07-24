@@ -6,8 +6,8 @@ import Quickshell
 Singleton {
     readonly property string font: "Inter"
 
-    readonly property color panelBg: Qt.alpha(Dyn.surfaceContainer, 0.94)
-    readonly property color panelBorder: Qt.alpha(Dyn.outline, 0.72)
+    readonly property color panelBg: Qt.alpha(Dyn.surfaceContainer, 0.96)
+    readonly property color panelBorder: Qt.alpha(Dyn.outline, 0.40)
     readonly property color panelInner: Dyn.surfaceContainerHigh
     readonly property color panelInnerSoft: Dyn.surfaceContainerLow
 
@@ -16,8 +16,8 @@ Singleton {
     readonly property color accentText: Dyn.onPrimaryContainer
 
     readonly property color text: Dyn.bright
-    readonly property color textMuted: Dyn.subtle
-    readonly property color textDim: Dyn.dim
+    readonly property color textMuted: Qt.alpha(Dyn.bright, 0.72)
+    readonly property color textDim: Qt.alpha(Dyn.bright, 0.52)
 
     readonly property color surface: Dyn.surface
     readonly property color surface1: Dyn.surfaceContainerLow

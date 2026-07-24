@@ -8,8 +8,6 @@ Item {
     property Component collapsedComponent
     property Component expandedComponent
 
-    property int paddingX: 20
-    property int paddingY: 10
     property int fadeDuration: Motion.fade
 
     property bool _showExpanded: false
@@ -19,32 +17,20 @@ Item {
     property Item _fromLoader: null
     property Item _toLoader: null
 
-    property int minCollapsedWidth: 120
+    readonly property int collapsedWidth: collapsedLoader.item ? collapsedLoader.item.implicitWidth : 0
+    readonly property int collapsedHeight: collapsedLoader.item ? collapsedLoader.item.implicitHeight : 0
 
-    readonly property int maxExpandedHeight: 500
-    readonly property int maxExpandedWidth: 500
+    readonly property int expandedWidth: expandedLoader.item ? expandedLoader.item.implicitWidth : 0
+    readonly property int expandedHeight: expandedLoader.item ? expandedLoader.item.implicitHeight : 0
 
-    readonly property int collapsedWidth: collapsedLoader.item ? Math.ceil(collapsedLoader.item.implicitWidth + paddingX * 2) : 0, minCollapsedWidth
-    readonly property int collapsedHeight: collapsedLoader.item ? Math.ceil(collapsedLoader.item.implicitHeight + paddingY * 2) : 0
-
-    readonly property int expandedWidth: expandedLoader.item ? Math.ceil(expandedLoader.item.implicitWidth + paddingX * 2) : 0
-    readonly property int expandedHeight: expandedLoader.item ? Math.ceil(expandedLoader.item.implicitHeight + paddingY * 2) : 0
-
-    readonly property int reservedWidth: Math.max(collapsedWidth, expandedWidth)
-    readonly property int reservedHeight: Math.max(collapsedHeight, expandedHeight)
-
-    readonly property int currentWidth: _showExpanded ? expandedWidth : collapsedWidth
-    readonly property int currentHeight: _showExpanded ? expandedHeight : collapsedHeight
-
-    implicitWidth: currentWidth
-    implicitHeight: currentHeight
+    implicitWidth: _showExpanded ? expandedWidth : collapsedWidth
+    implicitHeight: _showExpanded ? expandedHeight : collapsedHeight
 
     Loader {
         id: collapsedLoader
         anchors.centerIn: parent
         sourceComponent: root.collapsedComponent
         visible: opacity > 0
-        // opacity управляется через анимации
     }
 
     Loader {
@@ -52,7 +38,6 @@ Item {
         anchors.centerIn: parent
         sourceComponent: root.expandedComponent
         visible: opacity > 0
-        // opacity управляется через анимации
     }
 
     PropertyAnimation {

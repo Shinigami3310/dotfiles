@@ -1,5 +1,5 @@
 import QtQuick
-import "Singletons"
+import "../Singletons"
 
 Item {
     id: root
@@ -18,14 +18,14 @@ Item {
     Behavior on width {
         NumberAnimation {
             duration: Motion.expand
-            easing.type: Easing.InOutQuad
+            easing.type: Easing.OutQuad
         }
     }
 
     Behavior on height {
         NumberAnimation {
             duration: Motion.expand
-            easing.type: Easing.InOutQuad
+            easing.type: Easing.OutQuad
         }
     }
 

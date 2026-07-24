@@ -3,16 +3,17 @@ pragma Singleton
 import QtQuick
 
 QtObject {
-    // Base timing tokens.
-    readonly property int fast: 90
-    readonly property int standard: 140
-    readonly property int morph: 180
-    readonly property int panel: 220
-    readonly property int expand: 380
-    readonly property int settle: 380
+    readonly property real mult: 1.0
 
-    // Micro-interaction tokens.
-    readonly property int hover: 120
-    readonly property int click: 70
-    readonly property int fade: 280
+    readonly property int fast: Math.round(90 * mult)
+    readonly property int standard: Math.round(140 * mult)
+    readonly property int morph: Math.round(180 * mult)
+    readonly property int expand: Math.round(380 * mult)
+    readonly property int fade: Math.round(280 * mult)
+    readonly property int hover: Math.round(120 * mult)
+    readonly property int click: Math.round(70 * mult)
+
+    readonly property int easeStandard: Easing.InOutQuad
+    readonly property int easeOut: Easing.OutQuad
+    readonly property int easeIn: Easing.InQuad
 }
