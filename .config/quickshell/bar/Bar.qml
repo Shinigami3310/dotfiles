@@ -1,15 +1,16 @@
-import QtQuick
 import "../Singletons"
+import "../core"
+import Quickshell
 
-Item {
+import QtQuick
+
+SurfaceBase {
     id: root
-
+    wantsKeyboardFocus: true   // уже есть в SurfaceBase, но явно не помешает
+    canGoBack: true            // включает обработку Esc → backRequested
+    persistent: false
+    // ===== Уникальные свойства Bar =====
     property date dateTime: new Date()
-
-    property int firstWorkspaceId: 1
-    property int dotCount: 5
-    property int currentWorkspaceId: 1
-    property var occupiedWorkspaceIds: []
 
     property bool eyeActive: false
     property bool pomodoroActive: false
@@ -26,15 +27,14 @@ Item {
     signal settingsClicked
     signal batteryClicked
     signal powerClicked
+    signal workspaceActivated(int workspaceId)
 
     readonly property real leftWidth: workspaces.implicitWidth
     readonly property real centerWidth: centerClock.implicitWidth
     readonly property real rightWidth: actions.implicitWidth
 
-    implicitWidth: Math.ceil(leftWidth + centerWidth + rightWidth + blockSpacing * 2 + outerPaddingX * 2)
-    implicitHeight: Math.ceil(Math.max(workspaces.implicitHeight, centerClock.implicitHeight, actions.implicitHeight) + outerPaddingY * 2)
-    width: implicitWidth
-    height: implicitHeight
+    implicitWidth: leftWidth + centerWidth + rightWidth + blockSpacing * 2 + outerPaddingX * 2
+    implicitHeight: Math.max(workspaces.implicitHeight, centerClock.implicitHeight, actions.implicitHeight) + outerPaddingY * 2
 
     Workspaces {
         id: workspaces
@@ -42,8 +42,7 @@ Item {
         anchors.leftMargin: root.outerPaddingX
         anchors.verticalCenter: parent.verticalCenter
 
-        firstWorkspaceId: root.firstWorkspaceId
-        dotCount: root.dotCount
+        onWorkspaceActivated: root.workspaceActivated(workspaceId)
     }
 
     Clock {
@@ -58,10 +57,23 @@ Item {
         anchors.rightMargin: root.outerPaddingX
         anchors.verticalCenter: parent.verticalCenter
 
+        eyeActive: root.eyeActive
+        pomodoroActive: root.pomodoroActive
+        settingsActive: root.settingsActive
+        batteryActive: root.batteryActive
+        powerActive: root.powerActive
+
         onEyeClicked: root.eyeClicked()
         onPomodoroClicked: root.pomodoroClicked()
         onSettingsClicked: root.settingsClicked()
         onBatteryClicked: root.batteryClicked()
         onPowerClicked: root.powerClicked()
+    }
+    MouseArea {
+        anchors.fill: parent
+        acceptedButtons: Qt.RightButton
+        onClicked: {
+            root.backRequested();
+        }
     }
 }

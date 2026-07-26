@@ -1,5 +1,5 @@
 import QtQuick
-import "../Singletons"
+import "../../Singletons"
 
 Item {
     id: root
@@ -13,8 +13,6 @@ Item {
 
     implicitWidth: size
     implicitHeight: size
-    width: implicitWidth
-    height: implicitHeight
 
     readonly property bool hovered: hover.hovered
 
@@ -48,7 +46,7 @@ Item {
         anchors.centerIn: parent
         text: root.glyph
         font.family: Theme.font
-        font.pixelSize: 10
+        font.pixelSize: 20
         font.weight: Font.DemiBold
         color: active ? Theme.accent : Theme.textMuted
         antialiasing: true

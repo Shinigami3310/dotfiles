@@ -31,6 +31,10 @@ QtObject {
         return ws.toplevels.values.length > 0;
     }
 
+    function isActive(id) {
+        return id === currentWorkspaceId;
+    }
+
     function activateWorkspace(id) {
         var ws = workspaceById(id);
         if (ws) {

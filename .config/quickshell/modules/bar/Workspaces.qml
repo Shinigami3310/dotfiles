@@ -1,20 +1,15 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import "../Singletons"
-import "../services"
+import "../../Singletons"
+import "../../services"
 
 Item {
     id: root
 
-    property int firstWorkspaceId: 1
     property int dotCount: 5
-
-    property real dotSize: 8
-    property real gap: 6
-    property real hitSlop: 4
-
-    signal workspaceActivated(int workspaceId)
+    property real dotSize: 12
+    property real gap: 8
 
     implicitWidth: row.implicitWidth
     implicitHeight: row.implicitHeight
@@ -31,18 +26,16 @@ Item {
             model: root.dotCount
 
             delegate: Item {
-                id: slot
                 required property int index
 
-                readonly property int workspaceId: root.firstWorkspaceId + index
-                readonly property bool active: handler.isCurrent(workspaceId)
+                readonly property int workspaceId: index + 1
+                readonly property bool active: handler.isActive(workspaceId)
                 readonly property bool occupied: handler.isOccupied(workspaceId)
                 readonly property bool hovered: hover.hovered
 
                 width: root.dotSize
                 height: root.dotSize
-                scale: hovered ? 1.35 : 1.0
-                z: hovered ? 10 : 0
+                scale: hovered ? 1.5 : 1.0
                 transformOrigin: Item.Center
 
                 Behavior on scale {
@@ -60,7 +53,6 @@ Item {
 
                     border.width: occupied || active ? 0 : 1
                     border.color: active ? Theme.accent : Theme.separator
-                    opacity: active ? 1.0 : occupied ? 0.7 : 0.25
 
                     Behavior on color {
                         ColorAnimation {
@@ -72,12 +64,6 @@ Item {
                             duration: Motion.fast
                         }
                     }
-                    Behavior on opacity {
-                        NumberAnimation {
-                            duration: Motion.fast
-                            easing.type: Motion.easeStandard
-                        }
-                    }
                 }
 
                 HoverHandler {
@@ -86,19 +72,10 @@ Item {
 
                 MouseArea {
                     anchors.fill: parent
-                    anchors.leftMargin: -root.hitSlop
-                    anchors.rightMargin: -root.hitSlop
-                    anchors.topMargin: -root.hitSlop
-                    anchors.bottomMargin: -root.hitSlop
-
-                    hoverEnabled: true
                     acceptedButtons: Qt.LeftButton
+                    hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
-
-                    onClicked: {
-                        handler.activateWorkspace(workspaceId);
-                        root.workspaceActivated(workspaceId);
-                    }
+                    onClicked: handler.activateWorkspace(workspaceId)
                 }
             }
         }

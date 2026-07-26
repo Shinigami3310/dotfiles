@@ -1,16 +1,21 @@
 import QtQuick
-import "../Singletons"
+import Quickshell
+import "../../Singletons"
 
 Item {
     id: root
 
     signal clicked
 
-    property date dateTime: new Date()
     property real paddingX: 10
     property real paddingY: 5
     property int timePixelSize: 18
     property int datePixelSize: 10
+
+    SystemClock {
+        id: clock
+        precision: SystemClock.Minutes
+    }
 
     implicitWidth: column.implicitWidth + paddingX * 2
     implicitHeight: column.implicitHeight + paddingY * 2
@@ -21,7 +26,7 @@ Item {
         spacing: 2
 
         Text {
-            text: Qt.formatDateTime(root.dateTime, "hh:mm")
+            text: Qt.formatDateTime(clock.date, "hh:mm")
             font.family: Theme.font
             font.pixelSize: root.timePixelSize
             font.weight: Font.Medium
@@ -30,7 +35,7 @@ Item {
         }
 
         Text {
-            text: Qt.formatDateTime(root.dateTime, "ddd dd MMM").toUpperCase()
+            text: Qt.formatDateTime(clock.date, "ddd dd MMM").toUpperCase()
             font.family: Theme.font
             font.pixelSize: root.datePixelSize
             font.weight: Font.Medium
