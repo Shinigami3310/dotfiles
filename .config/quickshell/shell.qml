@@ -41,15 +41,18 @@ PanelWindow {
             surfaces: ({
                     start: {
                         component: startSurfaceComponent,
-                        escapePolicy: 0
+                        escapePolicy: 0,
+                        canGoBack: false
                     },
                     bar: {
                         component: barSurfaceComponent,
-                        wantsKeyboardFocus: true
+                        wantsKeyboardFocus: true,
+                        canGoBack: true
                     },
                     calendar: {
                         component: calendarSurfaceComponent,
-                        wantsKeyboardFocus: true
+                        wantsKeyboardFocus: true,
+                        canGoBack: true
                     }
                 })
         }
@@ -57,7 +60,7 @@ PanelWindow {
 
     Component {
         id: startSurfaceComponent
-        StartSurface {}
+        ClockSurface {}
     }
 
     Component {

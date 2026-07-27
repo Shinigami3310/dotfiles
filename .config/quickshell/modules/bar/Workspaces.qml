@@ -31,11 +31,10 @@ Item {
                 readonly property int workspaceId: index + 1
                 readonly property bool active: handler.isActive(workspaceId)
                 readonly property bool occupied: handler.isOccupied(workspaceId)
-                readonly property bool hovered: hover.hovered
 
                 width: root.dotSize
                 height: root.dotSize
-                scale: hovered ? 1.5 : 1.0
+                scale: mouseArea.containsMouse ? 1.5 : 1.0
                 transformOrigin: Item.Center
 
                 Behavior on scale {
@@ -48,11 +47,9 @@ Item {
                 Rectangle {
                     anchors.fill: parent
                     radius: width / 2
-
-                    color: active ? Theme.accent : occupied ? Theme.text : "transparent"
-
-                    border.width: occupied || active ? 0 : 1
-                    border.color: active ? Theme.accent : Theme.separator
+                    color: active ? Theme.accent : (occupied ? Theme.text : "transparent")
+                    border.width: 1
+                    border.color: active ? Theme.accent : (occupied ? Theme.text : Theme.separator)
 
                     Behavior on color {
                         ColorAnimation {
@@ -66,11 +63,8 @@ Item {
                     }
                 }
 
-                HoverHandler {
-                    id: hover
-                }
-
                 MouseArea {
+                    id: mouseArea
                     anchors.fill: parent
                     acceptedButtons: Qt.LeftButton
                     hoverEnabled: true

@@ -1,20 +1,18 @@
 import QtQuick
-import "../Singletons"
+import "../../Singletons"
 
 Item {
     id: root
 
-    property real size: 22
+    property real size: 15
     property int radius: 6
-    property string glyph: ""
+    property url source: ""
     property bool active: false
 
     signal clicked
 
     implicitWidth: size
     implicitHeight: size
-    width: implicitWidth
-    height: implicitHeight
 
     readonly property bool hovered: hover.hovered
 
@@ -44,20 +42,28 @@ Item {
         }
     }
 
+    Image {
+        anchors.fill: parent
+        visible: root.source !== ""
+        source: root.source
+        asynchronous: true
+        cache: true
+        smooth: true
+        fillMode: Image.PreserveAspectFit
+        sourceSize: Qt.size(root.size * 2, root.size * 2)
+    }
+
     Text {
-        anchors.centerIn: parent
-        text: root.glyph
+        anchors.fill: parent
+        visible: root.source === ""
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
         font.family: Theme.font
-        font.pixelSize: 10
+        font.pixelSize: Math.round(root.size)
         font.weight: Font.DemiBold
         color: active ? Theme.accent : Theme.textMuted
         antialiasing: true
-
-        Behavior on color {
-            ColorAnimation {
-                duration: Motion.fast
-            }
-        }
+        renderType: Text.NativeRendering
     }
 
     HoverHandler {

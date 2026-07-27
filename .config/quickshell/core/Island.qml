@@ -3,8 +3,6 @@ import "../Singletons"
 
 Item {
     id: root
-    property int paddingX: 18
-    property int paddingY: 10
     property int radius: 24
     property int borderWidth: 0
 
@@ -15,8 +13,8 @@ Item {
 
     clip: true
 
-    implicitWidth: content.implicitWidth + paddingX * 2
-    implicitHeight: content.implicitHeight + paddingY * 2
+    implicitWidth: content.implicitWidth
+    implicitHeight: content.implicitHeight
 
     Behavior on implicitWidth {
         NumberAnimation {

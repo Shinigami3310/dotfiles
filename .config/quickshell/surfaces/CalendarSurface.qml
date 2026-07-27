@@ -1,23 +1,25 @@
-pragma ComponentBehavior: Bound
-
 import QtQuick
 import Quickshell
 import "../core"
+import "../modules/bar"
 import "../Singletons"
+import "../services"
 
 SurfaceBase {
     id: root
 
     surfaceName: "calendar"
+    persistent: false
+    wantsKeyboardFocus: true
+    escapePolicy: escapeBack
+    canGoBack: true
 
     property real paddingX: 18
     property real paddingY: 16
-    property real panelGap: 16
     property real gridGap: 4
     property real cellSize: 30
-    property real detailWidth: 184
 
-    readonly property var loc: Qt.locale("en_US")
+    readonly property var locale: Qt.locale("en_US")
 
     SystemClock {
         id: sysClock
@@ -25,58 +27,44 @@ SurfaceBase {
     }
 
     readonly property date today: sysClock.date
-
     property int viewYear: today.getFullYear()
     property int viewMonth: today.getMonth()
-    property string selectedDate: ""
+    property string selectedDateKey: ""
 
-    readonly property int offset: firstWeekdayOffset(viewYear, viewMonth)
-    readonly property int monthLen: daysInMonth(viewYear, viewMonth)
-    readonly property int rows: Math.ceil((offset + monthLen) / 7)
-
-    readonly property real headerH: 28
-    readonly property real weekdayH: 16
-    readonly property real gridW: 7 * cellSize + 6 * gridGap
-    readonly property real gridH: headerH + 10 + weekdayH + 8 + rows * cellSize + Math.max(0, rows - 1) * gridGap
-
-    readonly property bool hasSelection: selectedDate.length > 0
-
-    implicitWidth: Math.ceil(content.implicitWidth + paddingX * 2)
-    implicitHeight: Math.ceil(content.implicitHeight + paddingY * 2)
-
-    function firstWeekdayOffset(year, month) {
-        var d = new Date(year, month, 1).getDay();
+    readonly property int firstWeekdayOffset: {
+        var d = new Date(viewYear, viewMonth, 1).getDay();
         return (d + 6) % 7;
     }
 
-    function daysInMonth(year, month) {
-        return new Date(year, month + 1, 0).getDate();
+    readonly property int daysInMonth: new Date(viewYear, viewMonth + 1, 0).getDate()
+
+    readonly property real headerHeight: 28
+    readonly property real weekdayHeight: 16
+    readonly property real gridWidth: 7 * cellSize + 6 * gridGap
+    readonly property real gridHeight: headerHeight + 10 + weekdayHeight + 8 + 6 * cellSize + 5 * gridGap
+
+    implicitWidth: gridWidth + paddingX * 2
+    implicitHeight: gridHeight + paddingY * 2
+
+    function resetView() {
+        viewYear = today.getFullYear();
+        viewMonth = today.getMonth();
+        selectedDateKey = "";
     }
 
-    function dateKey(day) {
+    function monthTitle() {
+        return locale.toString(new Date(viewYear, viewMonth, 1), "MMMM yyyy").toUpperCase();
+    }
+
+    function dayKey(day) {
         var mm = viewMonth + 1;
         var m = mm < 10 ? "0" + mm : "" + mm;
         var d = day < 10 ? "0" + day : "" + day;
         return viewYear + "-" + m + "-" + d;
     }
 
-    function keyToDate(key) {
-        var p = key.split("-");
-        return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
-    }
-
     function isToday(day) {
         return day === today.getDate() && viewMonth === today.getMonth() && viewYear === today.getFullYear();
-    }
-
-    function formatMonthTitle() {
-        return loc.toString(new Date(viewYear, viewMonth, 1), "MMMM yyyy").toUpperCase();
-    }
-
-    function formatSelectedDate() {
-        if (selectedDate.length === 0)
-            return "";
-        return loc.toString(keyToDate(selectedDate), "ddd dd MMM").toUpperCase();
     }
 
     function prevMonth() {
@@ -88,7 +76,7 @@ SurfaceBase {
         }
         viewMonth = m;
         viewYear = y;
-        selectedDate = "";
+        selectedDateKey = "";
     }
 
     function nextMonth() {
@@ -100,275 +88,193 @@ SurfaceBase {
         }
         viewMonth = m;
         viewYear = y;
-        selectedDate = "";
+        selectedDateKey = "";
     }
 
-    function resetView() {
-        viewYear = today.getFullYear();
-        viewMonth = today.getMonth();
-        selectedDate = "";
+    onActiveChanged: {
+        if (active)
+            resetView();
     }
 
-    function selectDay(day) {
-        var key = dateKey(day);
-        if (selectedDate === key) {
-            selectedDate = "";
-            return;
-        }
-        selectedDate = key;
+    MouseArea {
+        anchors.fill: parent
+        acceptedButtons: Qt.RightButton
+        onClicked: root.backRequested()
     }
-
-    onActiveChanged: if (active)
-        resetView()
 
     Item {
-        id: content
-        x: root.paddingX
-        y: root.paddingY
+        anchors.centerIn: parent
+        implicitWidth: gridWidth
+        implicitHeight: gridHeight
 
-        implicitWidth: row.implicitWidth
-        implicitHeight: row.implicitHeight
+        Column {
+            spacing: 8
 
-        Row {
-            id: row
-            spacing: root.hasSelection ? root.panelGap : 0
+            Row {
+                width: gridWidth
+                height: headerHeight
 
-            Item {
-                id: gridPane
-                width: root.gridW
-                height: root.gridH
+                Item {
+                    width: 22
+                    height: 22
 
-                Column {
-                    anchors.fill: parent
-                    spacing: 8
-
-                    Row {
-                        width: parent.width
-                        height: root.headerH
-
-                        IslandButton {
-                            size: 22
-                            glyph: "‹"
-                            onClicked: root.prevMonth()
-                        }
-
-                        Text {
-                            anchors.verticalCenter: parent.verticalCenter
-                            width: parent.width - 44
-                            horizontalAlignment: Text.AlignHCenter
-
-                            text: root.formatMonthTitle()
-                            font.family: Theme.font
-                            font.pixelSize: 13
-                            font.weight: Font.DemiBold
-                            color: Theme.text
-                            antialiasing: true
-                            elide: Text.ElideRight
-                        }
-
-                        IslandButton {
-                            anchors.right: parent.right
-                            size: 22
-                            glyph: "›"
-                            onClicked: root.nextMonth()
-                        }
+                    Text {
+                        anchors.centerIn: parent
+                        text: "‹"
+                        font.family: Theme.font
+                        font.pixelSize: 16
+                        font.weight: Font.DemiBold
+                        color: Theme.textMuted
+                        antialiasing: true
                     }
 
-                    Row {
-                        width: parent.width
-                        height: root.weekdayH
-                        spacing: root.gridGap
+                    MouseArea {
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        acceptedButtons: Qt.LeftButton
+                        onClicked: root.prevMonth()
+                    }
+                }
 
-                        Repeater {
-                            model: ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
+                Text {
+                    width: gridWidth - 44
+                    anchors.verticalCenter: parent.verticalCenter
+                    horizontalAlignment: Text.AlignHCenter
+                    text: root.monthTitle()
+                    font.family: Theme.font
+                    font.pixelSize: 13
+                    font.weight: Font.DemiBold
+                    color: Theme.text
+                    antialiasing: true
+                    elide: Text.ElideRight
+                }
 
-                            delegate: Text {
-                                width: root.cellSize
-                                horizontalAlignment: Text.AlignHCenter
+                Item {
+                    width: 22
+                    height: 22
 
-                                text: modelData
-                                font.family: Theme.font
-                                font.pixelSize: 9
-                                font.weight: Font.DemiBold
-                                color: Theme.textMuted
-                                antialiasing: true
-                            }
-                        }
+                    Text {
+                        anchors.centerIn: parent
+                        text: "›"
+                        font.family: Theme.font
+                        font.pixelSize: 16
+                        font.weight: Font.DemiBold
+                        color: Theme.textMuted
+                        antialiasing: true
                     }
 
-                    Grid {
-                        id: monthGrid
-                        width: parent.width
-                        columns: 7
-                        rowSpacing: root.gridGap
-                        columnSpacing: root.gridGap
+                    MouseArea {
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        acceptedButtons: Qt.LeftButton
+                        onClicked: root.nextMonth()
+                    }
+                }
+            }
+            Row {
+                width: gridWidth
+                height: weekdayHeight
+                spacing: gridGap
 
-                        Repeater {
-                            model: 42
+                Repeater {
+                    model: ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
 
-                            delegate: Item {
-                                required property int index
-
-                                width: root.cellSize
-                                height: root.cellSize
-
-                                readonly property int dayNumber: index - root.offset + 1
-                                readonly property bool inMonth: dayNumber >= 1 && dayNumber <= root.monthLen
-                                readonly property bool selected: inMonth && root.selectedDate === root.dateKey(dayNumber)
-                                readonly property bool todayMark: inMonth && root.isToday(dayNumber)
-                                readonly property bool hovered: area.containsMouse
-
-                                scale: hovered && inMonth ? 1.05 : 1.0
-                                transformOrigin: Item.Center
-                                opacity: inMonth ? 1.0 : 0.0
-                                z: hovered ? 10 : 0
-
-                                Behavior on scale {
-                                    NumberAnimation {
-                                        duration: Motion.fast
-                                        easing.type: Motion.easeStandard
-                                    }
-                                }
-
-                                Rectangle {
-                                    anchors.fill: parent
-                                    radius: 8
-
-                                    color: selected ? Theme.accent : hovered ? Theme.hover : "transparent"
-
-                                    border.width: selected || todayMark || hovered ? 1 : 0
-                                    border.color: selected ? Theme.accent : todayMark ? Theme.accent : Theme.separator
-
-                                    opacity: selected ? 1.0 : todayMark ? 0.95 : 0.55
-
-                                    Behavior on color {
-                                        ColorAnimation {
-                                            duration: Motion.fast
-                                        }
-                                    }
-                                    Behavior on border.color {
-                                        ColorAnimation {
-                                            duration: Motion.fast
-                                        }
-                                    }
-                                    Behavior on opacity {
-                                        NumberAnimation {
-                                            duration: Motion.fast
-                                            easing.type: Motion.easeStandard
-                                        }
-                                    }
-                                }
-
-                                Text {
-                                    anchors.centerIn: parent
-                                    text: inMonth ? dayNumber : ""
-                                    font.family: Theme.font
-                                    font.pixelSize: 11
-                                    font.weight: selected ? Font.DemiBold : Font.Medium
-                                    color: selected ? Theme.accentText : todayMark ? Theme.text : Theme.textMuted
-                                    antialiasing: true
-                                }
-
-                                MouseArea {
-                                    id: area
-                                    anchors.fill: parent
-                                    enabled: inMonth
-                                    hoverEnabled: true
-                                    acceptedButtons: Qt.LeftButton
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: root.selectDay(dayNumber)
-                                }
-                            }
-                        }
+                    delegate: Text {
+                        width: cellSize
+                        horizontalAlignment: Text.AlignHCenter
+                        text: modelData
+                        font.family: Theme.font
+                        font.pixelSize: 9
+                        font.weight: Font.DemiBold
+                        color: Theme.textMuted
+                        antialiasing: true
                     }
                 }
             }
 
-            Item {
-                id: detailPane
-                width: root.hasSelection ? root.detailWidth : 0
-                height: gridPane.height
-                clip: true
-                visible: width > 1
-                opacity: root.hasSelection ? 1 : 0
+            Grid {
+                width: gridWidth
+                columns: 7
+                rowSpacing: gridGap
+                columnSpacing: gridGap
 
-                Behavior on width {
-                    NumberAnimation {
-                        duration: Motion.expand
-                        easing.type: Easing.InOutQuad
-                    }
-                }
+                Repeater {
+                    model: 42
 
-                Behavior on opacity {
-                    NumberAnimation {
-                        duration: Motion.fade
-                        easing.type: Motion.easeStandard
-                    }
-                }
+                    delegate: Item {
+                        required property int index
 
-                Rectangle {
-                    anchors.fill: parent
-                    radius: 16
-                    color: Theme.surface2
-                    border.width: 1
-                    border.color: Theme.separator
-                }
+                        width: cellSize
+                        height: cellSize
 
-                Column {
-                    anchors.fill: parent
-                    anchors.margins: 12
-                    spacing: 10
+                        readonly property int dayNumber: index - root.firstWeekdayOffset + 1
+                        readonly property bool inMonth: dayNumber >= 1 && dayNumber <= root.daysInMonth
+                        readonly property bool selected: inMonth && root.selectedDateKey === root.dayKey(dayNumber)
+                        readonly property bool todayMark: inMonth && root.isToday(dayNumber)
+                        readonly property bool hovered: hover.hovered
 
-                    Row {
-                        width: parent.width
+                        scale: hovered && inMonth ? 1.05 : 1.0
+                        z: hovered ? 10 : 0
+                        transformOrigin: Item.Center
+
+                        Behavior on scale {
+                            NumberAnimation {
+                                duration: Motion.fast
+                                easing.type: Motion.easeStandard
+                            }
+                        }
+
+                        Rectangle {
+                            anchors.fill: parent
+                            radius: 8
+
+                            color: selected ? Theme.accent : hovered && inMonth ? Theme.hover : "transparent"
+                            border.width: selected || todayMark || hovered ? 1 : 0
+                            border.color: selected ? Theme.accent : todayMark ? Theme.accent : Theme.separator
+                            opacity: selected ? 1.0 : todayMark ? 0.95 : 0.55
+
+                            Behavior on color {
+                                ColorAnimation {
+                                    duration: Motion.fast
+                                }
+                            }
+                            Behavior on border.color {
+                                ColorAnimation {
+                                    duration: Motion.fast
+                                }
+                            }
+                            Behavior on opacity {
+                                NumberAnimation {
+                                    duration: Motion.fast
+                                    easing.type: Motion.easeStandard
+                                }
+                            }
+                        }
 
                         Text {
-                            text: "Selected"
+                            anchors.centerIn: parent
+                            text: inMonth ? dayNumber : ""
                             font.family: Theme.font
-                            font.pixelSize: 12
-                            font.weight: Font.DemiBold
-                            color: Theme.text
+                            font.pixelSize: 11
+                            font.weight: selected ? Font.DemiBold : Font.Medium
+                            color: selected ? Theme.accentText : todayMark ? Theme.text : Theme.textMuted
                             antialiasing: true
                         }
 
-                        Item {
-                            width: 1
-                            height: 1
+                        HoverHandler {
+                            id: hover
                         }
 
-                        IslandButton {
-                            size: 22
-                            glyph: "×"
-                            onClicked: root.selectedDate = ""
+                        MouseArea {
+                            anchors.fill: parent
+                            enabled: inMonth
+                            acceptedButtons: Qt.LeftButton
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: root.selectDay(dayNumber)
                         }
-                    }
-
-                    Text {
-                        width: parent.width
-                        wrapMode: Text.WordWrap
-                        text: root.formatSelectedDate()
-                        font.family: Theme.font
-                        font.pixelSize: 13
-                        font.weight: Font.Medium
-                        color: Theme.text
-                        antialiasing: true
-                    }
-
-                    Rectangle {
-                        width: parent.width
-                        height: 1
-                        color: Theme.separator
-                        opacity: 0.7
-                    }
-
-                    Text {
-                        width: parent.width
-                        wrapMode: Text.WordWrap
-                        text: "Event editor comes next."
-                        font.family: Theme.font
-                        font.pixelSize: 10
-                        color: Theme.textMuted
-                        antialiasing: true
                     }
                 }
             }

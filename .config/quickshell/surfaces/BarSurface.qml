@@ -1,23 +1,21 @@
 import QtQuick
-import Quickshell
 import "../core"
-import "../Singletons"
 import "../modules/bar"
+import "../Singletons"
 
 SurfaceBase {
     id: root
 
     surfaceName: "bar"
+    persistent: false
+    wantsKeyboardFocus: true
+    escapePolicy: escapeBack
+    canGoBack: true
 
-    property real outerPaddingX: 18
+    property real outerPaddingX: 22
     property real outerPaddingY: 8
     property real blockSpacing: 14
 
-    signal controlPanelRequested
-    signal batteryProfileRequested
-    signal powerRequested
-    implicitWidth: leftBlock.implicitWidth + centerBlock.implicitWidth + rightBlock.implicitWidth + blockSpacing * 2 + outerPaddingX * 2
-    implicitHeight: Math.max(leftBlock.implicitHeight, centerBlock.implicitHeight, rightBlock.implicitHeight) + outerPaddingY * 2
     Item {
         id: leftBlock
         anchors.left: parent.left
@@ -41,7 +39,7 @@ SurfaceBase {
 
         Clock {
             id: clock
-            onClicked: root.surfaceRequested("calendar", null)
+            onSurfaceRequested: root.surfaceRequested(newName, payload)
         }
     }
 
@@ -51,15 +49,17 @@ SurfaceBase {
         anchors.rightMargin: root.outerPaddingX
         anchors.verticalCenter: parent.verticalCenter
 
-        implicitWidth: rightActions.implicitWidth
+        implicitWidth: leftBlock.implicitWidth
         implicitHeight: rightActions.implicitHeight
+
         RightActions {
             id: rightActions
-            onSettingsClicked: root.controlPanelRequested()
-            onBatteryClicked: root.batteryProfileRequested()
-            onPowerClicked: root.powerRequested()
+            onSurfaceRequested: root.surfaceRequested(newName, payload)
         }
     }
+
+    implicitWidth: leftBlock.implicitWidth + centerBlock.implicitWidth + rightBlock.implicitWidth + blockSpacing * 2 + outerPaddingX * 2
+    implicitHeight: Math.max(leftBlock.implicitHeight, centerBlock.implicitHeight, rightBlock.implicitHeight) + outerPaddingY * 2
 
     MouseArea {
         anchors.fill: parent

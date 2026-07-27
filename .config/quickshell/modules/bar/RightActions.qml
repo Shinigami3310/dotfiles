@@ -1,15 +1,12 @@
 import QtQuick
-import "../../Singletons"
 
 Item {
     id: root
 
-    property int buttonSize: 25
-    property int spacing: 8
+    property real spacing: 8
 
-    signal settingsClicked
-    signal batteryClicked
-    signal powerClicked
+    signal surfaceRequested(string newName, var payload)
+    signal powerRequested
 
     implicitWidth: row.implicitWidth
     implicitHeight: row.implicitHeight
@@ -18,22 +15,20 @@ Item {
         id: row
         spacing: root.spacing
 
-        ActionIcon {
-            size: root.buttonSize
-            glyph: "⚙"
-            onClicked: root.settingsClicked()
+        EyeToggle {}
+
+        PomodoroToggle {}
+
+        SettingsToggle {
+            onSurfaceRequested: root.surfaceRequested(newName, payload)
         }
 
-        ActionIcon {
-            size: root.buttonSize
-            glyph: "▣"
-            onClicked: root.batteryClicked()
+        BatteryToggle {
+            onSurfaceRequested: root.surfaceRequested(newName, payload)
         }
 
-        ActionIcon {
-            size: root.buttonSize
-            glyph: "⏻"
-            onClicked: root.powerClicked()
+        PowerToggle {
+            onPowerRequested: root.powerRequested()
         }
     }
 }
