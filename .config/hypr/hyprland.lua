@@ -32,7 +32,10 @@ hl.bind(
 hl.bind(mainMod .. " + B", hl.dsp.exec_cmd(browser))
 hl.bind(mainMod .. " + F", hl.dsp.exec_cmd(fileManager))
 hl.bind(mainMod .. " + R", hl.dsp.exec_cmd(menu))
-hl.bind(mainMod .. " + N", hl.dsp.exec_cmd("kitty -e nvim"))
+hl.bind(
+	mainMod .. " + N",
+	hl.dsp.exec_cmd("qs ipc -c ~/.config/quickshell/NotificationCenter call notification-center toggle")
+)
 -- Move focus with mainMod + arrow keys
 hl.bind(mainMod .. " + left", hl.dsp.focus({ direction = "left" }))
 hl.bind(mainMod .. " + right", hl.dsp.focus({ direction = "right" }))

@@ -96,7 +96,8 @@ PanelWindow {
     Connections {
         target: EyeService
         function onSurfaceRequested(newName) {
-            host.open(newName);
+            if (!isFullscreen)
+                host.open(newName);
         }
     }
 }

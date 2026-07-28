@@ -5,7 +5,6 @@ import "../modules/start"
 
 SurfaceBase {
     surfaceName: "clock"
-    canGoBack: false
 
     implicitWidth: clock.implicitWidth
     implicitHeight: clock.implicitHeight
