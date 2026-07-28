@@ -4,57 +4,51 @@ import "../Singletons"
 FocusScope {
     id: root
 
-    readonly property int escapeIgnore: 0
-    readonly property int escapeBack: 1
-    readonly property int escapeClose: 2
-
     property string surfaceName: ""
     property bool active: false
-    property bool persistent: false
-    property bool wantsKeyboardFocus: false
-    property int escapePolicy: escapeBack
-    property bool canGoBack: false
-    property var payload: null
+    property bool canGoBack: true
 
-    signal surfaceRequested(string newName, var payload)
+    signal surfaceRequested(string newName)
     signal backRequested
     signal closeRequested
-    signal sizeChanged
-    signal focusRequested
 
-    focus: active && wantsKeyboardFocus
-    Keys.enabled: active && wantsKeyboardFocus
+    readonly property bool keyboardActive: active && canGoBack
 
-    Keys.onEscapePressed: {
-        if (escapePolicy === escapeIgnore)
-            return;
-        if (escapePolicy === escapeBack || canGoBack) {
-            backRequested();
-            return;
-        }
+    focus: keyboardActive
+    Keys.enabled: keyboardActive
 
-        closeRequested();
+    Timer {
+        id: escTimer
+        interval: 250
+        repeat: false
+        onTriggered: backRequested()
     }
 
-    onImplicitWidthChanged: sizeChanged()
-    onImplicitHeightChanged: sizeChanged()
+    Keys.onEscapePressed: {
+        if (!canGoBack)
+            return;
+        if (escTimer.running) {
+            escTimer.stop();
+            closeRequested();
+        } else
+            escTimer.start();
+    }
 
-    function enter(newPayload) {
-        payload = newPayload;
-        active = true;
-
-        if (wantsKeyboardFocus) {
-            focusRequested();
-            forceActiveFocus();
+    MouseArea {
+        anchors.fill: parent
+        acceptedButtons: Qt.RightButton
+        propagateComposedEvents: true
+        onClicked: {
+            if (canGoBack)
+                backRequested();
         }
+    }
+
+    function enter() {
+        active = true;
     }
 
     function exit(nextSurfaceName) {
         active = false;
-    }
-
-    function reset() {
-        payload = null;
-        canGoBack = false;
     }
 }

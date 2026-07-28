@@ -4,6 +4,8 @@ import Quickshell.Wayland
 import "core"
 import "Singletons"
 import "surfaces"
+import "services"
+import "services/Demons"
 
 PanelWindow {
     id: root
@@ -17,6 +19,7 @@ PanelWindow {
 
     exclusiveZone: 0
     color: "transparent"
+    WlrLayershell.layer: WlrLayer.Overlay
 
     focusable: true
 
@@ -24,11 +27,18 @@ PanelWindow {
         item: island
     }
 
+    readonly property bool isFullscreen: modeController.isFullscreen
+
+    ModeController {
+        id: modeController
+        host: host
+    }
+
     Island {
         id: island
 
         anchors.top: parent.top
-        anchors.topMargin: 10
+        anchors.topMargin: isFullscreen ? 0 : 8
         anchors.horizontalCenter: parent.horizontalCenter
 
         backgroundColor: Theme.panelBg
@@ -36,26 +46,31 @@ PanelWindow {
 
         SurfaceHost {
             id: host
-            initialSurfaceName: "start"
+            initialSurfaceName: isFullscreen ? "strip" : "clock"
 
             surfaces: ({
-                    start: {
-                        component: startSurfaceComponent,
-                        escapePolicy: 0,
-                        canGoBack: false
+                    clock: {
+                        component: startSurfaceComponent
+                    },
+                    strip: {
+                        component: stripSurfaceComponent
                     },
                     bar: {
-                        component: barSurfaceComponent,
-                        wantsKeyboardFocus: true,
-                        canGoBack: true
+                        component: barSurfaceComponent
                     },
                     calendar: {
-                        component: calendarSurfaceComponent,
-                        wantsKeyboardFocus: true,
-                        canGoBack: true
+                        component: calendarSurfaceComponent
+                    },
+                    eye: {
+                        component: eyeSurfaceComponent
                     }
                 })
         }
+    }
+
+    Component {
+        id: stripSurfaceComponent
+        StripSurface {}
     }
 
     Component {
@@ -71,5 +86,17 @@ PanelWindow {
     Component {
         id: calendarSurfaceComponent
         CalendarSurface {}
+    }
+
+    Component {
+        id: eyeSurfaceComponent
+        EyeSurface {}
+    }
+
+    Connections {
+        target: EyeService
+        function onSurfaceRequested(newName) {
+            host.open(newName);
+        }
     }
 }

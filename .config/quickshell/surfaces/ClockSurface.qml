@@ -5,7 +5,6 @@ import "../modules/start"
 
 SurfaceBase {
     surfaceName: "clock"
-    escapePolicy: escapeIgnore
     canGoBack: false
 
     implicitWidth: clock.implicitWidth
@@ -14,6 +13,6 @@ SurfaceBase {
     StartClock {
         id: clock
         anchors.centerIn: parent
-        onSurfaceRequested: parent.surfaceRequested(newName, payload)
+        onSurfaceRequested: parent.surfaceRequested("bar")
     }
 }

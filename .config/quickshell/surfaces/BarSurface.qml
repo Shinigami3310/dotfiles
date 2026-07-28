@@ -7,10 +7,6 @@ SurfaceBase {
     id: root
 
     surfaceName: "bar"
-    persistent: false
-    wantsKeyboardFocus: true
-    escapePolicy: escapeBack
-    canGoBack: true
 
     property real outerPaddingX: 22
     property real outerPaddingY: 8
@@ -39,7 +35,7 @@ SurfaceBase {
 
         Clock {
             id: clock
-            onSurfaceRequested: root.surfaceRequested(newName, payload)
+            onSurfaceRequested: root.surfaceRequested("calendar")
         }
     }
 
@@ -54,16 +50,10 @@ SurfaceBase {
 
         RightActions {
             id: rightActions
-            onSurfaceRequested: root.surfaceRequested(newName, payload)
+            onSurfaceRequested: root.surfaceRequested(newName)
         }
     }
 
     implicitWidth: leftBlock.implicitWidth + centerBlock.implicitWidth + rightBlock.implicitWidth + blockSpacing * 2 + outerPaddingX * 2
     implicitHeight: Math.max(leftBlock.implicitHeight, centerBlock.implicitHeight, rightBlock.implicitHeight) + outerPaddingY * 2
-
-    MouseArea {
-        anchors.fill: parent
-        acceptedButtons: Qt.RightButton
-        onClicked: root.backRequested()
-    }
 }

@@ -1,0 +1,2 @@
+singleton EyeService EyeService.qml
+singleton PomodoroService PomodoroService.qml

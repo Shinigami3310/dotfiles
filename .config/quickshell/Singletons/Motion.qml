@@ -6,7 +6,7 @@ QtObject {
     readonly property real mult: 1.0
 
     readonly property int fast: Math.round(90 * mult)
-    readonly property int standard: Math.round(140 * mult)
+    readonly property int standard: Math.round(240 * mult)
     readonly property int morph: Math.round(180 * mult)
     readonly property int expand: Math.round(380 * mult)
     readonly property int fade: Math.round(280 * mult)

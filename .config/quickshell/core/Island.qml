@@ -4,7 +4,7 @@ import "../Singletons"
 Item {
     id: root
     property int radius: 24
-    property int borderWidth: 0
+    property int borderWidth: 2
 
     property color backgroundColor: Theme.panelBg
     property color borderColor: Theme.panelBorder
@@ -18,14 +18,14 @@ Item {
 
     Behavior on implicitWidth {
         NumberAnimation {
-            duration: Motion.expand
+            duration: Motion.standard
             easing.type: Easing.InOutQuad
         }
     }
 
     Behavior on implicitHeight {
         NumberAnimation {
-            duration: Motion.expand
+            duration: Motion.standard
             easing.type: Easing.InOutQuad
         }
     }
@@ -42,8 +42,6 @@ Item {
     Item {
         id: content
         anchors.centerIn: parent
-        clip: true
-
         implicitWidth: childrenRect.width
         implicitHeight: childrenRect.height
     }

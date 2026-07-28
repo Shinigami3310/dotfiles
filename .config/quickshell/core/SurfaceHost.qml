@@ -6,60 +6,38 @@ Item {
 
     property var surfaces: ({})
     property string initialSurfaceName: ""
+
     property string currentName: ""
-    property var currentPayload: null
-
-    property bool busy: false
-
-    property string queuedName: ""
-    property var queuedPayload: null
-
-    property string pendingName: ""
-    property var pendingPayload: null
+    property Item currentItem: null
 
     property var history: []
-    property var cache: ({})
+    property bool busy: false
 
-    property Item currentItem: null
     property Item outgoingItem: null
+    property string pendingName: ""
     property Item pendingItem: null
 
-    signal sizeChanged
     signal surfaceChanged(string name)
 
-    clip: true
-
-    implicitWidth: currentItem ? Math.ceil(currentItem.implicitWidth) : 0
-    implicitHeight: currentItem ? Math.ceil(currentItem.implicitHeight) : 0
+    implicitWidth: currentItem?.implicitWidth ?? 0
+    implicitHeight: currentItem?.implicitHeight ?? 0
 
     Item {
         id: stage
         anchors.fill: parent
-        clip: true
     }
 
     Connections {
         target: root.currentItem
         ignoreUnknownSignals: true
-
-        function onSurfaceRequested(newName, payload) {
-            root.open(newName, payload);
+        function onSurfaceRequested(newName) {
+            root.open(newName);
         }
-
         function onBackRequested() {
             root.back();
         }
-
         function onCloseRequested() {
-            root.back();
-        }
-
-        function onSizeChanged() {
-            root.sizeChanged();
-        }
-
-        function onFocusRequested() {
-            root._focusCurrent();
+            root.close();
         }
     }
 
@@ -67,8 +45,6 @@ Item {
         id: resizeTimer
         interval: Motion.expand
         repeat: false
-        running: false
-
         onTriggered: root._startFadeIn()
     }
 
@@ -87,15 +63,11 @@ Item {
 
             root.currentItem = root.pendingItem;
             root.currentName = root.pendingName;
-            root.currentPayload = root.pendingPayload;
             root.pendingItem = null;
 
             root.currentItem.visible = true;
             root.currentItem.opacity = 0;
-            root.currentItem.enter(root.currentPayload);
-            root._focusCurrent();
-
-            root.sizeChanged();
+            root.currentItem.enter();
             resizeTimer.restart();
         }
     }
@@ -111,181 +83,111 @@ Item {
         onStopped: {
             root.busy = false;
             root.surfaceChanged(root.currentName);
-
-            if (root.queuedName !== "") {
-                var nextName = root.queuedName;
-                var nextPayload = root.queuedPayload;
-
-                root.queuedName = "";
-                root.queuedPayload = null;
-
-                Qt.callLater(function () {
-                    root.open(nextName, nextPayload);
-                });
-            }
         }
     }
 
     function _spec(name) {
-        if (!root.surfaces)
-            return null;
-        return root.surfaces[name] ? root.surfaces[name] : null;
+        return (surfaces && surfaces[name]) ? surfaces[name] : null;
     }
 
-    function _focusCurrent() {
-        if (root.currentItem && root.currentItem.forceActiveFocus)
-            root.currentItem.forceActiveFocus();
-    }
-
-    function _createSurface(name, payload) {
-        var spec = _spec(name);
+    function _createSurface(name) {
+        const spec = _spec(name);
         if (!spec)
             return null;
 
-        var component = spec.component !== undefined ? spec.component : spec;
-        var persistent = spec.persistent === true;
-        var wantsKeyboardFocus = spec.wantsKeyboardFocus === true;
-        var escapePolicy = spec.escapePolicy !== undefined ? spec.escapePolicy : 1;
-        var canGoBack = spec.canGoBack === true;
-
-        if (persistent && root.cache[name]) {
-            var cached = root.cache[name];
-            cached.parent = stage;
-            cached.surfaceName = name;
-            cached.active = false;
-            cached.payload = payload;
-            cached.visible = false;
-            cached.opacity = 0;
-            return cached;
-        }
-
-        var created = component.createObject(stage, {
-            "surfaceName": name,
-            "active": false,
-            "persistent": persistent,
-            "wantsKeyboardFocus": wantsKeyboardFocus,
-            "escapePolicy": escapePolicy,
-            "canGoBack": canGoBack,
-            "payload": payload,
-            "visible": false,
-            "opacity": 0
+        const component = spec.component !== undefined ? spec.component : spec;
+        return component.createObject(root, {
+            surfaceName: name,
+            active: false,
+            visible: false,
+            opacity: 0
         });
-
-        if (!created)
-            return null;
-
-        if (persistent)
-            root.cache[name] = created;
-
-        return created;
     }
 
     function _releaseOutgoing() {
-        if (!root.outgoingItem)
+        if (!outgoingItem)
             return;
-        var item = root.outgoingItem;
-        var name = item.surfaceName;
-
-        if (item.persistent) {
-            item.exit(root.pendingName);
-            item.active = false;
-            item.visible = false;
-            item.opacity = 0;
-            if (name !== "")
-                root.cache[name] = item;
-        } else {
-            item.destroy();
-        }
-
-        root.outgoingItem = null;
+        const item = outgoingItem;
+        item.exit(pendingName);
+        item.destroy();
+        outgoingItem = null;
     }
 
-    function open(name, payload, pushHistory) {
-        if (!name)
+    function _startFadeIn() {
+        if (!currentItem) {
+            busy = false;
             return;
-        if (root.busy) {
-            if (root.queuedName === name)
-                return;
-            root.queuedName = name;
-            root.queuedPayload = payload;
+        }
+        fadeIn.target = currentItem;
+        fadeIn.restart();
+    }
+
+    function open(name, pushHistory) {
+        if (!name || busy)
+            return;
+
+        if (currentItem && currentName === name) {
+            currentItem.enter();
             return;
         }
 
-        if (root.currentItem && root.currentName === name) {
-            root.currentPayload = payload;
-            root.currentItem.enter(payload);
-            root._focusCurrent();
-            return;
-        }
-
-        var spec = _spec(name);
+        const spec = _spec(name);
         if (!spec)
             return;
-        if (pushHistory !== false && root.currentName !== "" && (root.history.length === 0 || root.history[root.history.length - 1] !== root.currentName)) {
-            root.history.push(root.currentName);
+
+        if (pushHistory !== false && currentName !== "" && (history.length === 0 || history[history.length - 1] !== currentName)) {
+            history.push(currentName);
         }
 
-        root.pendingName = name;
-        root.pendingPayload = payload;
-        root.pendingItem = root._createSurface(name, payload);
-
-        if (!root.pendingItem)
+        pendingName = name;
+        pendingItem = _createSurface(name);
+        if (!pendingItem)
             return;
-        if (!root.currentItem) {
-            root.currentItem = root.pendingItem;
-            root.pendingItem = null;
-            root.currentName = name;
-            root.currentPayload = payload;
 
-            root.currentItem.visible = true;
-            root.currentItem.opacity = 1;
-            root.currentItem.enter(payload);
-            root._focusCurrent();
-            root.surfaceChanged(root.currentName);
+        if (!currentItem) {
+            currentItem = pendingItem;
+            pendingItem = null;
+            currentName = name;
+            currentItem.visible = true;
+            currentItem.opacity = 1;
+            currentItem.enter();
+            surfaceChanged(currentName);
             return;
         }
 
-        root.busy = true;
-        root.outgoingItem = root.currentItem;
-        root.outgoingItem.exit(name);
+        busy = true;
+        outgoingItem = currentItem;
+        outgoingItem.exit(name);
 
-        root.pendingItem.visible = true;
-        root.pendingItem.opacity = 0;
+        pendingItem.visible = true;
+        pendingItem.opacity = 0;
 
-        fadeOut.target = root.outgoingItem;
+        fadeOut.target = outgoingItem;
         fadeOut.restart();
     }
 
     function back() {
-        if (root.history.length > 0) {
-            var previous = root.history.pop();
-            root.open(previous, null, false);
+        if (busy)
+            return;
+        if (history.length > 0) {
+            const previous = history.pop();
+            open(previous, false);
             return;
         }
-
-        if (root.initialSurfaceName !== "" && root.currentName !== root.initialSurfaceName)
-            root.open(root.initialSurfaceName, null, false);
+        if (currentName !== initialSurfaceName)
+            open(initialSurfaceName, false);
     }
 
-    function closeCurrent() {
-        root.back();
-    }
-
-    function _startFadeIn() {
-        if (!root.currentItem) {
-            root.busy = false;
+    function close() {
+        if (busy)
             return;
+        if (currentName !== initialSurfaceName) {
+            history.length = 0;
+            open(initialSurfaceName, false);
         }
-
-        fadeIn.target = root.currentItem;
-        fadeIn.restart();
     }
 
     Component.onCompleted: {
-        if (root.initialSurfaceName !== "") {
-            Qt.callLater(function () {
-                root.open(root.initialSurfaceName, null, false);
-            });
-        }
+        open(initialSurfaceName);
     }
 }

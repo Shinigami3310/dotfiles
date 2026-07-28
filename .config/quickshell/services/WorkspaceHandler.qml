@@ -22,5 +22,8 @@ QtObject {
         Quickshell.execDetached(["hyprctl", "eval", "hl.dispatch(hl.dsp.focus({ workspace = " + id + " }))"]);
     }
 
-    Component.onCompleted: Hyprland.refreshWorkspaces()
+    Component.onCompleted: {
+        Hyprland.refreshWorkspaces();
+        Hyprland.refreshToplevels();
+    }
 }

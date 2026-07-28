@@ -29,7 +29,7 @@ Item {
 
     Timer {
         id: initTimer
-        interval: Motion.expand + Motion.fade
+        interval: Motion.standard + Motion.fade
         running: true
         repeat: false
         onTriggered: root.ready = true

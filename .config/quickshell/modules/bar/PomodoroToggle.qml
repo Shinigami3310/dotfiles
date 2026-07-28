@@ -1,14 +1,12 @@
 import QtQuick
+import "../../services/Demons/"
 
 Icon {
     source: "../../assets/icons/pomodoro.png"
-
-    signal toggled(bool active)
-
-    function toggle() {
-        active = !active;
-        toggled(active);
+    active: PomodoroService.active
+    MouseArea {
+        anchors.fill: parent
+        acceptedButtons: Qt.LeftButton
+        onClicked: PomodoroService.toggle()
     }
-
-    onClicked: toggle()
 }
