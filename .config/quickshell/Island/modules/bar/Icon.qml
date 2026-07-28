@@ -4,7 +4,7 @@ import "../../Singletons"
 Item {
     id: root
 
-    property real size: 20
+    property real size: 18
     property int radius: 4
     property url source: ""
     property bool active: false

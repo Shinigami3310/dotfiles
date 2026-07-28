@@ -27,8 +27,6 @@ Item {
             onSurfaceRequested: root.surfaceRequested(newName, payload)
         }
 
-        PowerToggle {
-            onPowerRequested: root.powerRequested()
-        }
+        PowerToggle {}
     }
 }

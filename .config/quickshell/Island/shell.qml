@@ -92,7 +92,12 @@ PanelWindow {
         id: eyeSurfaceComponent
         EyeSurface {}
     }
-
+    Connections {
+        target: PowerService
+        function onCloseRequested() {
+            host.close();
+        }
+    }
     Connections {
         target: EyeService
         function onSurfaceRequested(newName) {
