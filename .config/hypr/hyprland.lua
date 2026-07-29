@@ -36,6 +36,7 @@ hl.bind(
 	mainMod .. " + N",
 	hl.dsp.exec_cmd("qs ipc -c ~/.config/quickshell/NotificationCenter call notification-center toggle")
 )
+hl.bind(mainMod .. " + P", hl.dsp.exec_cmd("~/.local/bin/toggle-powermenu"))
 -- Move focus with mainMod + arrow keys
 hl.bind(mainMod .. " + left", hl.dsp.focus({ direction = "left" }))
 hl.bind(mainMod .. " + right", hl.dsp.focus({ direction = "right" }))

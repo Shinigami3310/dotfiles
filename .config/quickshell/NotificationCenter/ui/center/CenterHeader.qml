@@ -1,10 +1,11 @@
 import QtQuick
 import QtQuick.Layouts
 import "../../config"
+import "../../services"
 
 RowLayout {
     id: root
-    property var service
+    property NotificationService service
 
     signal clearAllRequested
 
@@ -22,86 +23,93 @@ RowLayout {
         spacing: 6
         Layout.alignment: Qt.AlignVCenter
 
+        // Фильтр Low
         Rectangle {
             width: 12
             height: 12
             radius: 6
-            color: (root.service && root.service.filterLow) ? Colors.borderLow : Colors.surfaceContainer
+            color: service?.filterLow ? Colors.borderLow : Colors.surfaceContainer
             border.width: 1
             border.color: Colors.borderLow
             MouseArea {
                 anchors.fill: parent
-                onClicked: if (root.service)
-                    root.service.filterLow = !root.service.filterLow
+                onClicked: {
+                    if (service)
+                        service.filterLow = !service.filterLow;
+                }
             }
         }
+        // Фильтр Normal
         Rectangle {
             width: 12
             height: 12
             radius: 6
-            color: (root.service && root.service.filterNormal) ? Colors.borderNormal : Colors.surfaceContainer
+            color: service?.filterNormal ? Colors.borderNormal : Colors.surfaceContainer
             border.width: 1
             border.color: Colors.borderNormal
             MouseArea {
                 anchors.fill: parent
-                onClicked: if (root.service)
-                    root.service.filterNormal = !root.service.filterNormal
+                onClicked: {
+                    if (service)
+                        service.filterNormal = !service.filterNormal;
+                }
             }
         }
+        // Фильтр Critical
         Rectangle {
             width: 12
             height: 12
             radius: 6
-            color: (root.service && root.service.filterCritical) ? Colors.borderCritical : Colors.surfaceContainer
+            color: service?.filterCritical ? Colors.borderCritical : Colors.surfaceContainer
             border.width: 1
             border.color: Colors.borderCritical
             MouseArea {
                 anchors.fill: parent
-                onClicked: if (root.service)
-                    root.service.filterCritical = !root.service.filterCritical
+                onClicked: {
+                    if (service)
+                        service.filterCritical = !service.filterCritical;
+                }
             }
         }
     }
 
-    // --- Кнопка DND Mode ---
+    // Кнопка DND
     Rectangle {
         width: 50
         height: 24
         radius: 12
-        color: (root.service && root.service.dndEnabled) ? Colors.primary : Colors.surfaceContainer
-
+        color: service?.dndEnabled ? Colors.primary : Colors.surfaceContainer
         Text {
             anchors.centerIn: parent
             text: "DND"
             font.pixelSize: 10
             font.bold: true
-            color: (root.service && root.service.dndEnabled) ? Colors.surface : Colors.muted
+            color: service?.dndEnabled ? Colors.surface : Colors.muted
         }
-
         MouseArea {
             anchors.fill: parent
-            onClicked: if (root.service)
-                root.service.toggleDnd()
+            onClicked: {
+                if (service)
+                    service.toggleDnd();
+            }
         }
     }
 
-    // --- Кнопка Очистки Истории ---
+    // Кнопка очистки
     Rectangle {
         width: 24
         height: 24
         radius: 12
         color: Colors.surfaceContainer
-
         Text {
             anchors.centerIn: parent
             text: "🗑"
             font.pixelSize: 12
             color: Colors.text
         }
-
         MouseArea {
             anchors.fill: parent
-            onClicked: root.clearAllRequested()
+            onClicked: clearAllRequested()
         }
     }
 }

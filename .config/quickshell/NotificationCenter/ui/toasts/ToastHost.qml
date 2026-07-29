@@ -1,13 +1,14 @@
 import QtQuick
 import Quickshell
 import Quickshell.Wayland
+import "../../services/"
 import "../../config"
 
 PanelWindow {
     id: root
 
-    property var store
-    property var service
+    property NotificationStore store
+    property NotificationService service
 
     WlrLayershell.layer: WlrLayer.Overlay
     exclusionMode: ExclusionMode.Ignore
@@ -16,7 +17,6 @@ PanelWindow {
         top: true
         right: true
     }
-
     margins {
         top: Settings.cornerMargin
         right: Settings.cornerMargin
@@ -31,61 +31,43 @@ PanelWindow {
         anchors.fill: parent
         spacing: Settings.toastSpacing
         interactive: false
-        model: root.store ? root.store.activeToastsModel : null
+        model: root.store?.activeToastsModel ?? null
 
         delegate: ToastItem {
-            notification: ({
-                    id: model.id,
-                    source: model.source,
-                    summary: model.summary,
-                    text: model.text,
-                    icon: model.icon,
-                    time: model.time,
-                    importance: model.importance
-                })
-            onDismissRequested: if (root.service)
-                root.service.closeToastOnly(model.id)
+            width: ListView.view.width
+            service: root.service
+            notificationData: QtObject {
+                readonly property string id: model.id ?? ""
+                readonly property string source: model.source ?? ""
+                readonly property string summary: model.summary ?? ""
+                readonly property string text: model.text ?? ""
+                readonly property string icon: model.icon ?? ""
+                readonly property date time: model.time
+                readonly property string importance: model.importance ?? ""
+                readonly property string actionsJson: model.actionsJson ?? ""
+                // Парсинг сразу при создании, чтобы гарантировать готовый массив
+                readonly property var actions: {
+                    try { return JSON.parse(model.actionsJson || "[]"); }
+                    catch (e) { return []; }
+                }
+            }
+            onDismissRequested: root.service?.closeToastOnly(model.id, Constants.closeReason.dismissed)
+            onActionInvoked: (actionKey) => root.service?.invokeAction(model.id, actionKey)
         }
 
         add: Transition {
             ParallelAnimation {
-                NumberAnimation {
-                    property: "opacity"
-                    from: 0
-                    to: 1
-                    duration: 200
-                    easing.type: Easing.OutCubic
-                }
-                NumberAnimation {
-                    property: "x"
-                    from: 120
-                    to: 0
-                    duration: 200
-                    easing.type: Easing.OutCubic
-                }
+                NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 200; easing.type: Easing.OutCubic }
+                NumberAnimation { property: "x"; from: 120; to: 0; duration: 200; easing.type: Easing.OutCubic }
             }
         }
-
         displaced: Transition {
-            NumberAnimation {
-                properties: "y"
-                duration: 200
-                easing.type: Easing.OutCubic
-            }
+            NumberAnimation { properties: "y"; duration: 200; easing.type: Easing.OutCubic }
         }
-
         remove: Transition {
             ParallelAnimation {
-                NumberAnimation {
-                    property: "opacity"
-                    to: 0
-                    duration: 200
-                }
-                NumberAnimation {
-                    property: "x"
-                    to: 120
-                    duration: 200
-                }
+                NumberAnimation { property: "opacity"; to: 0; duration: 200 }
+                NumberAnimation { property: "x"; to: 120; duration: 200 }
             }
         }
     }

@@ -11,4 +11,10 @@ QtObject {
             dbus: "dbus",
             api: "api"
         })
+    readonly property var closeReason: ({
+            expired: 1,
+            dismissed: 2,
+            closed: 3,
+            undefined: 4
+        })
 }

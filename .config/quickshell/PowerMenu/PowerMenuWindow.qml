@@ -19,25 +19,18 @@ PanelWindow {
     }
 
     WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
+    WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
 
     function open() {
         visible = true;
         Qt.callLater(function () {
-            contentRoot.forceActiveFocus();
+            powerOffBtn.forceActiveFocus();
         });
     }
 
     function close() {
         visible = false;
-    }
-
-    function toggle() {
-        if (visible) {
-            close();
-        } else {
-            open();
-        }
+        Qt.quit();
     }
 
     function runDetached(command) {
@@ -45,50 +38,32 @@ PanelWindow {
     }
 
     function closeAndRun(command) {
+        runDetached(command);
         close();
-        Qt.callLater(function () {
-            runDetached(command);
-        });
     }
 
     function reboot() {
-        closeAndRun(["systemctl", "reboot"]);
+        closeAndRun(["/usr/bin/systemctl", "reboot"]);
     }
 
     function suspend() {
-        closeAndRun(["systemctl", "suspend"]);
+        closeAndRun(["/usr/bin/systemctl", "suspend"]);
     }
 
     function powerOff() {
-        closeAndRun(["systemctl", "poweroff"]);
+        closeAndRun(["/usr/bin/systemctl", "poweroff"]);
     }
 
     function hibernate() {
-        closeAndRun(["systemctl", "hibernate"]);
+        closeAndRun(["/usr/bin/systemctl", "hibernate"]);
     }
 
     function lockScreen() {
-        closeAndRun(["loginctl", "lock-session", "self"]);
-    }
-
-    IpcHandler {
-        target: "powermenu"
-
-        function open(): void {
-            root.open();
-        }
-
-        function close(): void {
-            root.close();
-        }
-
-        function toggle(): void {
-            root.toggle();
-        }
+        closeAndRun(["/usr/bin/hyprlock"]);
     }
 
     BackgroundEffect.blurRegion: Region {
-        item: root.contentItem
+        item: contentRoot
     }
 
     Item {
@@ -96,9 +71,60 @@ PanelWindow {
         anchors.fill: parent
         focus: true
 
+        readonly property var buttons: [rebootBtn, suspendBtn, powerOffBtn, hibernateBtn, lockBtn]
+        property int lastIndex: 2 // Индекс кнопки по умолчанию (Power Off)
+
+        // Навигация вперед
+        function focusNext() {
+            var currentIndex = -1;
+            for (var i = 0; i < buttons.length; i++) {
+                if (buttons[i].activeFocus) {
+                    currentIndex = i;
+                    break;
+                }
+            }
+
+            if (currentIndex !== -1) {
+                // Если фокус уже на кнопке — сдвигаем право (без зацикливания)
+                if (currentIndex < buttons.length - 1) {
+                    buttons[currentIndex + 1].forceActiveFocus();
+                }
+            } else {
+                // Если мышь увели и фокус исчез — возобновляем с места остановки
+                buttons[lastIndex].forceActiveFocus();
+            }
+        }
+
+        // Навигация назад
+        function focusPrevious() {
+            var currentIndex = -1;
+            for (var i = 0; i < buttons.length; i++) {
+                if (buttons[i].activeFocus) {
+                    currentIndex = i;
+                    break;
+                }
+            }
+
+            if (currentIndex !== -1) {
+                // Если фокус на кнопке — сдвигаем влево (без зацикливания)
+                if (currentIndex > 0) {
+                    buttons[currentIndex - 1].forceActiveFocus();
+                }
+            } else {
+                // Если мышь увели и фокус исчез — возобновляем с места остановки
+                buttons[lastIndex].forceActiveFocus();
+            }
+        }
+
         Keys.onPressed: function (event) {
             if (event.key === Qt.Key_Escape) {
                 root.close();
+                event.accepted = true;
+            } else if (event.key === Qt.Key_Right || event.key === Qt.Key_Down) {
+                focusNext();
+                event.accepted = true;
+            } else if (event.key === Qt.Key_Left || event.key === Qt.Key_Up) {
+                focusPrevious();
                 event.accepted = true;
             }
         }
@@ -117,61 +143,69 @@ PanelWindow {
         Item {
             id: card
             anchors.centerIn: parent
-            width: buttonsRow.width
-            height: 124
+            width: buttonsRow.implicitWidth
+            height: buttonsRow.implicitHeight
 
-            Column {
+            Row {
+                id: buttonsRow
                 anchors.centerIn: parent
-                spacing: 14
+                spacing: 18
 
-                Row {
-                    id: buttonsRow
-                    spacing: 18
+                ActionButton {
+                    id: rebootBtn
+                    glyph: "↻"
+                    label: "Reboot"
+                    accent: "#FFCC80"
+                    onActiveFocusChanged: if (activeFocus)
+                        contentRoot.lastIndex = 0
+                    onFocusCleared: contentRoot.forceActiveFocus()
+                    onActivated: root.reboot()
+                }
 
-                    ActionButton {
-                        glyph: "↻"
-                        label: "Reboot"
-                        accent: "#FFCC80"
-                        onActivated: root.reboot()
-                    }
+                ActionButton {
+                    id: suspendBtn
+                    glyph: "⏾"
+                    label: "Suspend"
+                    accent: "#90CAF9"
+                    onActiveFocusChanged: if (activeFocus)
+                        contentRoot.lastIndex = 1
+                    onFocusCleared: contentRoot.forceActiveFocus()
+                    onActivated: root.suspend()
+                }
 
-                    ActionButton {
-                        glyph: "⏾"
-                        label: "Suspend"
-                        accent: "#90CAF9"
-                        onActivated: root.suspend()
-                    }
+                ActionButton {
+                    id: powerOffBtn
+                    glyph: "⏻"
+                    label: "Power Off"
+                    accent: "#EF9A9A"
+                    onActiveFocusChanged: if (activeFocus)
+                        contentRoot.lastIndex = 2
+                    onFocusCleared: contentRoot.forceActiveFocus()
+                    onActivated: root.powerOff()
+                }
 
-                    ActionButton {
-                        glyph: "⏻"
-                        label: "Power Off"
-                        accent: "#EF9A9A"
-                        onActivated: root.powerOff()
-                    }
+                ActionButton {
+                    id: hibernateBtn
+                    glyph: "☾"
+                    label: "Hibernate"
+                    accent: "#CE93D8"
+                    onActiveFocusChanged: if (activeFocus)
+                        contentRoot.lastIndex = 3
+                    onFocusCleared: contentRoot.forceActiveFocus()
+                    onActivated: root.hibernate()
+                }
 
-                    ActionButton {
-                        glyph: "☾"
-                        label: "Hibernate"
-                        accent: "#CE93D8"
-                        onActivated: root.hibernate()
-                    }
-
-                    ActionButton {
-                        glyph: "🔒"
-                        label: "Lock"
-                        accent: "#A5D6A7"
-                        onActivated: root.lockScreen()
-                    }
+                ActionButton {
+                    id: lockBtn
+                    glyph: "🔒"
+                    label: "Lock"
+                    accent: "#A5D6A7"
+                    onActiveFocusChanged: if (activeFocus)
+                        contentRoot.lastIndex = 4
+                    onFocusCleared: contentRoot.forceActiveFocus()
+                    onActivated: root.lockScreen()
                 }
             }
-        }
-    }
-
-    onVisibleChanged: {
-        if (visible) {
-            Qt.callLater(function () {
-                contentRoot.forceActiveFocus();
-            });
         }
     }
 }

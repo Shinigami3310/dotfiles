@@ -9,8 +9,8 @@ QtObject {
     property bool isWorking: true
     property int currentCycle: 1
 
-    readonly property int workDuration: 25 * 1
-    readonly property int shortBreakDuration: 5 * 1
+    readonly property int workDuration: 25 * 60
+    readonly property int shortBreakDuration: 5 * 60
 
     property int remainingTime: workDuration
 

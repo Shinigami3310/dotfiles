@@ -14,5 +14,5 @@ QtObject {
 
     readonly property int centerWidth: 420
     readonly property int centerMaxHeight: 520
-    readonly property int maxHistoryItems: 200
+    readonly property int maxHistoryItems: 50
 }

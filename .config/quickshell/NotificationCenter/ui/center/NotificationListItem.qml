@@ -5,27 +5,34 @@ import "../../config"
 Rectangle {
     id: root
 
-    property var notification
+    property QtObject notificationData
     signal dismissRequested
+    signal actionInvoked(string actionKey)
 
     implicitHeight: contentColumn.implicitHeight + 18
     radius: 10
     color: Colors.panelAlt
 
-    readonly property string notifSource: notification?.source ?? ""
-    readonly property string notifSummary: notification?.summary ?? ""
-    readonly property string notifText: notification?.text ?? ""
-    readonly property string notifIcon: notification?.icon ?? ""
+    readonly property var actions: {
+        try {
+            return JSON.parse(notificationData?.actionsJson || "[]");
+        } catch (e) {
+            return [];
+        }
+    }
 
     border.width: 1
     border.color: {
-        if (!notification)
+        if (!notificationData)
             return Colors.outlineVariant;
-        if (notification.importance === Constants.importance.critical)
+        switch (notificationData.importance) {
+        case Constants.importance.critical:
             return Colors.borderCritical;
-        if (notification.importance === Constants.importance.low)
+        case Constants.importance.low:
             return Colors.borderLow;
-        return Colors.borderNormal;
+        default:
+            return Colors.borderNormal;
+        }
     }
 
     ColumnLayout {
@@ -36,82 +43,109 @@ Rectangle {
             right: parent.right
             margins: 10
         }
-        spacing: 4
+        spacing: 6
 
-        // --- Шапка элемента (Иконка, Источник, Время, Закрыть) ---
         RowLayout {
             Layout.fillWidth: true
             spacing: 6
 
             Image {
-                visible: root.notification && root.notification.icon !== ""
-                source: root.notification ? root.notification.icon : ""
+                visible: notificationData?.icon !== ""
+                source: notificationData?.icon ?? ""
                 Layout.preferredWidth: 14
                 Layout.preferredHeight: 14
                 fillMode: Image.PreserveAspectFit
                 asynchronous: true
+                onStatusChanged: {
+                    if (status === Image.Error)
+                        source = "";
+                }
             }
-
             Text {
-                text: root.notification ? (root.notification.source || "") : ""
+                text: notificationData?.source ?? ""
                 color: Colors.muted
                 font.pixelSize: 11
                 font.bold: true
                 Layout.fillWidth: true
                 elide: Text.ElideRight
             }
-
             Text {
-                text: {
-                    if (!root.notification || !root.notification.time)
-                        return "";
-                    var t = root.notification.time;
-                    return (t instanceof Date) ? ("0" + t.getHours()).slice(-2) + ":" + ("0" + t.getMinutes()).slice(-2) : "";
-                }
+                text: notificationData?.time ? Qt.formatTime(notificationData.time, "hh:mm") : ""
                 color: Colors.muted
                 font.pixelSize: 10
             }
-
             Rectangle {
                 width: 16
                 height: 16
                 radius: 8
                 color: closeArea.containsMouse ? Colors.surfaceContainer : "transparent"
-
                 Text {
                     anchors.centerIn: parent
                     text: "✕"
                     font.pixelSize: 10
                     color: Colors.muted
                 }
-
                 MouseArea {
                     id: closeArea
                     anchors.fill: parent
-                    hoverEnabled: true
-                    onClicked: root.dismissRequested()
+                    hoverEnabled: false
+                    onClicked: dismissRequested()
                 }
             }
         }
 
-        // --- Заголовок (Summary) — если есть ---
         Text {
-            visible: root.notification && root.notification.summary !== "" && root.notification.summary !== root.notification.text
+            visible: notificationData?.summary !== "" && notificationData?.summary !== notificationData?.text
             Layout.fillWidth: true
-            text: root.notification ? root.notification.summary : ""
+            text: notificationData?.summary ?? ""
             color: Colors.text
             font.pixelSize: 12
             font.bold: true
             elide: Text.ElideRight
         }
 
-        // --- Текст сообщения ---
         Text {
             Layout.fillWidth: true
-            text: root.notification ? (root.notification.text || "") : ""
+            text: notificationData?.text ?? ""
             color: Colors.text
             wrapMode: Text.Wrap
             font.pixelSize: 12
+        }
+
+        RowLayout {
+            id: actionsRow
+            visible: actions.length > 0
+            Layout.fillWidth: true
+            spacing: 6
+            Layout.topMargin: 4
+
+            Repeater {
+                model: actions
+                delegate: Rectangle {
+                    required property var modelData
+                    implicitWidth: actionText.implicitWidth + 16
+                    implicitHeight: 22
+                    radius: 6
+                    color: btnArea.containsMouse ? Colors.surfaceContainer : Colors.surface
+                    border.width: 1
+                    border.color: Colors.outlineVariant
+
+                    Text {
+                        id: actionText
+                        anchors.centerIn: parent
+                        text: modelData.text || modelData.key
+                        color: Colors.primary
+                        font.pixelSize: 11
+                        font.bold: true
+                    }
+                    MouseArea {
+                        id: btnArea
+                        anchors.fill: parent
+                        hoverEnabled: false
+                        onClicked: actionInvoked(modelData.key)
+                    }
+                }
+            }
         }
     }
 }

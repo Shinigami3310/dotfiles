@@ -3,24 +3,24 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
 import "../../config"
+import "../../services/"
 
 PanelWindow {
     id: root
 
-    property var store
-    property var service
+    property NotificationStore store
+    property NotificationService service
 
-    readonly property bool hasHistory: root.store && root.store.historyModel.count > 0
+    readonly property bool hasHistory: store?.historyModel.count > 0
 
     WlrLayershell.layer: WlrLayer.Overlay
     exclusionMode: ExclusionMode.Ignore
-    WlrLayershell.keyboardFocus: root.visible ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
+    WlrLayershell.keyboardFocus: visible ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
     anchors {
         top: true
         right: true
     }
-
     margins {
         top: Settings.cornerMargin
         right: Settings.cornerMargin
@@ -32,9 +32,8 @@ PanelWindow {
     visible: false
 
     onVisibleChanged: {
-        if (visible) {
+        if (visible)
             mainRect.forceActiveFocus();
-        }
     }
 
     Shortcut {
@@ -47,7 +46,7 @@ PanelWindow {
     MouseArea {
         anchors.fill: parent
         acceptedButtons: Qt.RightButton
-        onClicked: function (mouse) {
+        onClicked: mouse => {
             if (mouse.button === Qt.RightButton)
                 root.visible = false;
         }
@@ -61,7 +60,6 @@ PanelWindow {
             border.width: 1.5
             border.color: Colors.borderNormal
             focus: true
-
             Keys.onEscapePressed: root.visible = false
 
             ColumnLayout {
@@ -72,23 +70,20 @@ PanelWindow {
                     right: parent.right
                     margins: 12
                 }
-                spacing: root.hasHistory ? 10 : 0
+                spacing: hasHistory ? 10 : 0
 
                 CenterHeader {
                     Layout.fillWidth: true
                     service: root.service
-                    onClearAllRequested: if (root.store)
-                        root.store.clear()
+                    onClearAllRequested: root.store?.clear()
                 }
 
                 NotificationList {
                     Layout.fillWidth: true
-                    visible: root.hasHistory
+                    visible: hasHistory
                     store: root.store
-                    onDismissRequested: function (notificationId) {
-                        if (root.store)
-                            root.store.removeById(notificationId);
-                    }
+                    service: root.service
+                    onDismissRequested: id => root.service?.close(id, Constants.closeReason.dismissed)
                 }
             }
         }

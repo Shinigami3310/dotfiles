@@ -13,12 +13,10 @@ ShellRoot {
     NotificationStore {
         id: appStore
     }
-
     NotificationService {
         id: appService
         store: appStore
     }
-
     NotificationRouter {
         id: appRouter
         service: appService
@@ -31,17 +29,14 @@ ShellRoot {
 
     IpcHandler {
         target: "notification-center"
-
         function toggle(): void {
             centerWindow.visible = !centerWindow.visible;
         }
-
         function toggleDnd(): void {
             appService.toggleDnd();
         }
-
         function getDndState(): bool {
-            return appService.dndEnabled ? true : false;
+            return appService.dndEnabled;
         }
     }
 

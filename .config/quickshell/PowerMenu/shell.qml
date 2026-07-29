@@ -5,6 +5,6 @@ ShellRoot {
     PowerMenuWindow {
         id: powerMenu
 
-        Component.onCompleted: open()
+        Component.onCompleted: powerMenu.open()
     }
 }
