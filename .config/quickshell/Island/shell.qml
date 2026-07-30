@@ -1,5 +1,6 @@
 import QtQuick
 import Quickshell
+import Quickshell.Io
 import Quickshell.Wayland
 import "core"
 import "Singletons"
@@ -72,6 +73,12 @@ PanelWindow {
                     },
                     bluetooth: {
                         component: bluetoothSurfaceComponent
+                    },
+                    volume: {
+                        component: volumeSurfaceComponent
+                    },
+                    brightness: {
+                        component: brightnessSurfaceComponent
                     }
                 })
         }
@@ -113,6 +120,29 @@ PanelWindow {
         id: bluetoothSurfaceComponent
         BluetoothSurface {}
     }
+    Component {
+        id: volumeSurfaceComponent
+        VolumeSurface {}
+    }
+    Component {
+        id: brightnessSurfaceComponent
+        BrightnessSurface {}
+    }
+
+    IpcHandler {
+        target: "island"
+
+        function openVolume(): void {
+            if (!root.isFullscreen)
+                AudioService.openPanel();
+        }
+
+        function openBrightness(): void {
+            if (!root.isFullscreen)
+                BrightnessService.openPanel();
+        }
+    }
+
     Connections {
         target: PowerService
         function onCloseRequested() {
@@ -121,6 +151,20 @@ PanelWindow {
     }
     Connections {
         target: EyeService
+        function onSurfaceRequested(newName) {
+            if (!isFullscreen)
+                host.open(newName);
+        }
+    }
+    Connections {
+        target: AudioService
+        function onSurfaceRequested(newName) {
+            if (!isFullscreen)
+                host.open(newName);
+        }
+    }
+    Connections {
+        target: BrightnessService
         function onSurfaceRequested(newName) {
             if (!isFullscreen)
                 host.open(newName);
