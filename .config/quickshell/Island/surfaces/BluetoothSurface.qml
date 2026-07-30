@@ -11,6 +11,6 @@ SurfaceBase {
 
     BluetoothSelector {
         id: bluetooth
-        anchors.centerIn: parent
+        anchors.fill: parent
     }
 }

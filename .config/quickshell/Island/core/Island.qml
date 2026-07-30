@@ -41,7 +41,8 @@ Item {
 
     Item {
         id: content
-        anchors.centerIn: parent
+        anchors.top: parent.top
+        anchors.horizontalCenter: parent.horizontalCenter
         implicitWidth: childrenRect.width
         implicitHeight: childrenRect.height
     }

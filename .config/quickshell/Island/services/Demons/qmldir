@@ -7,3 +7,5 @@ singleton DndService DndService.qml
 singleton SystemStatsService SystemStatsService.qml
 singleton WifiService WifiService.qml
 singleton BrightnessService BrightnessService.qml
+singleton BatteryService BatteryService.qml
+singleton AppService AppService.qml

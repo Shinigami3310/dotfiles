@@ -11,6 +11,6 @@ SurfaceBase {
 
     WifiSelector {
         id: wifi
-        anchors.centerIn: parent
+        anchors.fill: parent
     }
 }

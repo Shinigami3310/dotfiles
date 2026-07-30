@@ -3,7 +3,7 @@ import QtQuick
 Icon {
     source: "../../assets/icons/battery.png"
 
-    signal surfaceRequested(string newName, var payload)
+    signal surfaceRequested(string newName)
 
-    onClicked: surfaceRequested("battery-profile", null)
+    onClicked: surfaceRequested("battery")
 }

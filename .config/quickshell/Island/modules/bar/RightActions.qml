@@ -24,7 +24,7 @@ Item {
         }
 
         BatteryToggle {
-            onSurfaceRequested: root.surfaceRequested()
+            onSurfaceRequested: (newName) => root.surfaceRequested(newName)
         }
 
         PowerToggle {}

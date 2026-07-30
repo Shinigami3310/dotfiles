@@ -19,8 +19,12 @@ Item {
 
     Column {
         id: layout
-        anchors.centerIn: parent
-        width: parent.width - 32
+        anchors.top: parent.top
+        anchors.topMargin: 16
+        anchors.left: parent.left
+        anchors.leftMargin: 16
+        anchors.right: parent.right
+        anchors.rightMargin: 16
         spacing: 16
 
         RowLayout {

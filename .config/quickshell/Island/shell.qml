@@ -21,8 +21,14 @@ PanelWindow {
     exclusiveZone: 0
     color: "transparent"
     WlrLayershell.layer: WlrLayer.Overlay
-
-    focusable: true
+    // В вашем файле окна Quickshell:
+    WlrLayershell.anchors: {
+        top: true;
+        // left / right - по необходимости
+    }
+    WlrLayershell.keyboardFocus: host.currentName === "launcher"
+            ? WlrKeyboardFocus.OnDemand
+            : WlrKeyboardFocus.None
 
     mask: Region {
         item: island
@@ -79,6 +85,12 @@ PanelWindow {
                     },
                     brightness: {
                         component: brightnessSurfaceComponent
+                    },
+                    battery: {
+                        component: batterySurfaceComponent
+                    },
+                    launcher: {
+                        component: launcherSurfaceComponent
                     }
                 })
         }
@@ -128,7 +140,14 @@ PanelWindow {
         id: brightnessSurfaceComponent
         BrightnessSurface {}
     }
-
+    Component {
+        id: batterySurfaceComponent
+        BatterySurface {}
+    }
+    Component {
+        id: launcherSurfaceComponent
+        LauncherSurface {}
+    }
     IpcHandler {
         target: "island"
 
@@ -140,6 +159,11 @@ PanelWindow {
         function openBrightness(): void {
             if (!root.isFullscreen)
                 BrightnessService.openPanel();
+        }
+
+        function openLauncher(): void {
+            if (!root.isFullscreen)
+                host.open("launcher");
         }
     }
 

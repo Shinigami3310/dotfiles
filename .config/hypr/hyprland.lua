@@ -49,6 +49,7 @@ hl.bind(mainMod .. " + SHIFT + down", hl.dsp.window.move({ direction = "down" })
 
 hl.bind(mainMod .. " + SHIFT + F", hl.dsp.window.fullscreen({ mode = "maximized" }))
 
+hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("qs ipc -c Island call island openLauncher"))
 -- Switch workspaces with mainMod + [0-9]
 -- Move active window to a workspace with mainMod + SHIFT + [0 - 9]
 for i = 1, 6 do
