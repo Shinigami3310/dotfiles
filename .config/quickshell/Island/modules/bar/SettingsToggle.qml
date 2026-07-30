@@ -3,7 +3,7 @@ import QtQuick
 Icon {
     source: "../../assets/icons/settings.png"
 
-    signal surfaceRequested(string newName, var payload)
+    signal surfaceRequested(string newName)
 
-    onClicked: surfaceRequested("control-panel", null)
+    onClicked: surfaceRequested("controlPanel")
 }

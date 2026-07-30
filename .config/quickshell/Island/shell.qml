@@ -63,6 +63,15 @@ PanelWindow {
                     },
                     eye: {
                         component: eyeSurfaceComponent
+                    },
+                    controlPanel: {
+                        component: controlPanelComponent
+                    },
+                    wifi: {
+                        component: wifiSurfaceComponent
+                    },
+                    bluetooth: {
+                        component: bluetoothSurfaceComponent
                     }
                 })
         }
@@ -91,6 +100,18 @@ PanelWindow {
     Component {
         id: eyeSurfaceComponent
         EyeSurface {}
+    }
+    Component {
+        id: controlPanelComponent
+        ControlPanelSurface {}
+    }
+    Component {
+        id: wifiSurfaceComponent
+        WifiSurface {}
+    }
+    Component {
+        id: bluetoothSurfaceComponent
+        BluetoothSurface {}
     }
     Connections {
         target: PowerService

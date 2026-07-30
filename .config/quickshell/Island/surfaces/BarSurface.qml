@@ -7,7 +7,6 @@ SurfaceBase {
     id: root
 
     surfaceName: "bar"
-
     property real outerPaddingX: 22
     property real outerPaddingY: 8
     property real blockSpacing: 14
@@ -50,7 +49,9 @@ SurfaceBase {
 
         RightActions {
             id: rightActions
-            onSurfaceRequested: root.surfaceRequested(newName)
+            onSurfaceRequested: newName => {
+                root.surfaceRequested(newName);
+            }
         }
     }
 

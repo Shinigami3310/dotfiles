@@ -1,3 +1,9 @@
 singleton EyeService EyeService.qml
 singleton PomodoroService PomodoroService.qml
 singleton PowerService PowerService.qml
+singleton AudioService AudioService.qml
+singleton BluetoothService BluetoothService.qml
+singleton DndService DndService.qml
+singleton SystemStatsService SystemStatsService.qml
+singleton WifiService WifiService.qml
+singleton BrightnessService BrightnessService.qml

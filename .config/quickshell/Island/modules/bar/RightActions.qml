@@ -5,7 +5,7 @@ Item {
 
     property real spacing: 8
 
-    signal surfaceRequested(string newName, var payload)
+    signal surfaceRequested(string newName)
     signal powerRequested
 
     implicitWidth: row.implicitWidth
@@ -20,11 +20,11 @@ Item {
         PomodoroToggle {}
 
         SettingsToggle {
-            onSurfaceRequested: root.surfaceRequested(newName, payload)
+            onSurfaceRequested: root.surfaceRequested("controlPanel")
         }
 
         BatteryToggle {
-            onSurfaceRequested: root.surfaceRequested(newName, payload)
+            onSurfaceRequested: root.surfaceRequested()
         }
 
         PowerToggle {}
