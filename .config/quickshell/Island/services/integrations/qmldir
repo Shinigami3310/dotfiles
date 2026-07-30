@@ -1,0 +1,4 @@
+singleton AudioService AudioService.qml
+singleton BrightnessService BrightnessService.qml
+singleton EyeReminderService EyeReminderService.qml
+singleton PomodoroService PomodoroService.qml

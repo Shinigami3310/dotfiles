@@ -1,6 +1,6 @@
 import QtQuick
 import "../core"
-import "../modules/controlPanel"
+import "../features/ControlPanel"
 
 SurfaceBase {
     id: root

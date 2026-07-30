@@ -1,7 +1,7 @@
 import QtQuick
 import "../core"
-import "../modules/bar"
-import "../Singletons"
+import "../features/Bar"
+import "../theme"
 
 SurfaceBase {
     id: root

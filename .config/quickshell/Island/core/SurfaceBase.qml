@@ -1,5 +1,5 @@
 import QtQuick
-import "../Singletons"
+import "../theme"
 
 FocusScope {
     id: root
@@ -8,7 +8,7 @@ FocusScope {
     property bool active: false
     property bool canGoBack: true
 
-    signal surfaceRequested(string newName)
+    signal surfaceRequested(string name)
     signal backRequested
     signal closeRequested
 
@@ -17,21 +17,10 @@ FocusScope {
     focus: keyboardActive
     Keys.enabled: keyboardActive
 
-    Timer {
-        id: escTimer
-        interval: 250
-        repeat: false
-        onTriggered: backRequested()
-    }
-
+    // optional
     Keys.onEscapePressed: {
-        if (!canGoBack)
-            return;
-        if (escTimer.running) {
-            escTimer.stop();
+        if (canGoBack)
             closeRequested();
-        } else
-            escTimer.start();
     }
 
     MouseArea {

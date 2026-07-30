@@ -1,7 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Hyprland
-import "../Singletons"
+import "../theme"
 
 QtObject {
     id: root
@@ -14,13 +14,7 @@ QtObject {
         id: switchTimer
         interval: Motion.fade * 2 + Motion.standard
         repeat: false
-        onTriggered: {
-            if (root.isFullscreen) {
-                host.close();
-            } else {
-                host.close();
-            }
-        }
+        onTriggered: host.close()
     }
 
     onIsFullscreenChanged: switchTimer.restart()

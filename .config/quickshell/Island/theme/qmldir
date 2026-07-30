@@ -1,0 +1,3 @@
+singleton Palette Palette.qml
+singleton Theme Theme.qml
+singleton Motion Motion.qml

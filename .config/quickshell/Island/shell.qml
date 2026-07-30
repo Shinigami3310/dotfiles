@@ -3,10 +3,10 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import "core"
-import "Singletons"
+import "theme"
 import "surfaces"
 import "services"
-import "services/Demons"
+import "services/integrations"
 
 PanelWindow {
     id: root
@@ -21,14 +21,10 @@ PanelWindow {
     exclusiveZone: 0
     color: "transparent"
     WlrLayershell.layer: WlrLayer.Overlay
-    // В вашем файле окна Quickshell:
     WlrLayershell.anchors: {
         top: true;
-        // left / right - по необходимости
     }
-    WlrLayershell.keyboardFocus: host.currentName === "launcher"
-            ? WlrKeyboardFocus.OnDemand
-            : WlrKeyboardFocus.None
+    WlrLayershell.keyboardFocus: host.currentName === "launcher" ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
     mask: Region {
         item: island
@@ -43,7 +39,6 @@ PanelWindow {
 
     Island {
         id: island
-
         anchors.top: parent.top
         anchors.topMargin: isFullscreen ? 0 : 8
         anchors.horizontalCenter: parent.horizontalCenter
@@ -53,117 +48,38 @@ PanelWindow {
 
         SurfaceHost {
             id: host
-            initialSurfaceName: isFullscreen ? "strip" : "clock"
-
-            surfaces: ({
-                    clock: {
-                        component: startSurfaceComponent
-                    },
-                    strip: {
-                        component: stripSurfaceComponent
-                    },
-                    bar: {
-                        component: barSurfaceComponent
-                    },
-                    calendar: {
-                        component: calendarSurfaceComponent
-                    },
-                    eye: {
-                        component: eyeSurfaceComponent
-                    },
-                    controlPanel: {
-                        component: controlPanelComponent
-                    },
-                    wifi: {
-                        component: wifiSurfaceComponent
-                    },
-                    bluetooth: {
-                        component: bluetoothSurfaceComponent
-                    },
-                    volume: {
-                        component: volumeSurfaceComponent
-                    },
-                    brightness: {
-                        component: brightnessSurfaceComponent
-                    },
-                    battery: {
-                        component: batterySurfaceComponent
-                    },
-                    launcher: {
-                        component: launcherSurfaceComponent
-                    }
-                })
+            initialSurfaceName: isFullscreen ? "strip" : "homeClock"   // изменено с "clock"
+            surfaces: catalog
         }
     }
 
-    Component {
-        id: stripSurfaceComponent
-        StripSurface {}
+    // Экземпляр каталога (синглтон)
+    SurfaceCatalog {
+        id: catalog
     }
 
-    Component {
-        id: startSurfaceComponent
-        ClockSurface {}
-    }
-
-    Component {
-        id: barSurfaceComponent
-        BarSurface {}
-    }
-
-    Component {
-        id: calendarSurfaceComponent
-        CalendarSurface {}
-    }
-
-    Component {
-        id: eyeSurfaceComponent
-        EyeSurface {}
-    }
-    Component {
-        id: controlPanelComponent
-        ControlPanelSurface {}
-    }
-    Component {
-        id: wifiSurfaceComponent
-        WifiSurface {}
-    }
-    Component {
-        id: bluetoothSurfaceComponent
-        BluetoothSurface {}
-    }
-    Component {
-        id: volumeSurfaceComponent
-        VolumeSurface {}
-    }
-    Component {
-        id: brightnessSurfaceComponent
-        BrightnessSurface {}
-    }
-    Component {
-        id: batterySurfaceComponent
-        BatterySurface {}
-    }
-    Component {
-        id: launcherSurfaceComponent
-        LauncherSurface {}
-    }
     IpcHandler {
         target: "island"
-
-        function openVolume(): void {
+        function openVolume() {
             if (!root.isFullscreen)
-                AudioService.openPanel();
+                AudioService.openPanel();   // внутри сервиса должно вызывать surfaceRequested("volumeSlider")
         }
-
-        function openBrightness(): void {
+        function openBrightness() {
             if (!root.isFullscreen)
-                BrightnessService.openPanel();
+                BrightnessService.openPanel(); // внутри должно быть "brightnessSlider"
         }
-
-        function openLauncher(): void {
+        function openLauncher() {
             if (!root.isFullscreen)
-                host.open("launcher");
+                host.open("appLauncher");   // изменено с "launcher"
+        }
+    }
+
+    // Хелпер для открытия поверхностей по запросу сервисов
+    QtObject {
+        id: surfaceOpener
+        function open(name) {
+            if (!root.isFullscreen)
+                host.open(name);
         }
     }
 
@@ -175,23 +91,20 @@ PanelWindow {
     }
     Connections {
         target: EyeService
-        function onSurfaceRequested(newName) {
-            if (!isFullscreen)
-                host.open(newName);
+        function onSurfaceRequested(n) {
+            surfaceOpener.open("eyeReminder");
         }
-    }
+    }  // принудительно маппим
     Connections {
         target: AudioService
-        function onSurfaceRequested(newName) {
-            if (!isFullscreen)
-                host.open(newName);
+        function onSurfaceRequested(n) {
+            surfaceOpener.open("volumeSlider");
         }
     }
     Connections {
         target: BrightnessService
-        function onSurfaceRequested(newName) {
-            if (!isFullscreen)
-                host.open(newName);
+        function onSurfaceRequested(n) {
+            surfaceOpener.open("brightnessSlider");
         }
     }
 }

@@ -1,5 +1,5 @@
 import QtQuick
-import "../Singletons"
+import "../theme"
 
 Item {
     id: root
@@ -96,7 +96,7 @@ Item {
             return null;
 
         const component = spec.component !== undefined ? spec.component : spec;
-        return component.createObject(root, {
+        return component.createObject(stage, {
             surfaceName: name,
             active: false,
             visible: false,

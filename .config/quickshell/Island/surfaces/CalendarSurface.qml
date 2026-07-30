@@ -2,7 +2,7 @@ import QtQuick
 import Quickshell
 import "../core"
 import "../Singletons"
-import "../modules/calendar"
+import "../features/Calendar"
 
 SurfaceBase {
     surfaceName: "calendar"
