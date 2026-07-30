@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Effects // Нужен для окрашивания SVG под цвета темы (Qt 6)
-import "../../Singletons/"
+import "../../theme"
 
 Item {
     id: root

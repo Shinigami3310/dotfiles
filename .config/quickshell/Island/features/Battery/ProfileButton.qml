@@ -1,7 +1,7 @@
 import QtQuick
 import "../../services"
 
-import "../../Singletons/"
+import "../../theme"
 
 Rectangle {
     id: root

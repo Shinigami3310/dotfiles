@@ -1,7 +1,7 @@
 import QtQuick
 import Quickshell
 import "../core"
-import "../Singletons"
+import "../theme"
 import "../features/Calendar"
 
 SurfaceBase {

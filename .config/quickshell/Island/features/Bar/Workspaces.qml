@@ -1,7 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import "../../Singletons"
+import "../../theme"
 import "../../services"
 
 Item {

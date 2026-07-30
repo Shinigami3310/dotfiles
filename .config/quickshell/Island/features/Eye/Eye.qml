@@ -1,5 +1,5 @@
 import QtQuick
-import "../../Singletons"
+import "../../theme"
 import "../../services/integrations/"
 
 Item {

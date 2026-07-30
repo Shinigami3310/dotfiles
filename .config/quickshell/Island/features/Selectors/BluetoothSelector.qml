@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
-import "../../Singletons/"
+import "../../theme"
 import "../../services/"
 
 Item {

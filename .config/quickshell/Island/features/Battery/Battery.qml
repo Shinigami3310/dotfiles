@@ -1,6 +1,6 @@
 import QtQuick
 import "../../services"
-import "../../Singletons/"
+import "../../theme"
 
 Item {
     id: root

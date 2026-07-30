@@ -21,9 +21,7 @@ PanelWindow {
     exclusiveZone: 0
     color: "transparent"
     WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.anchors: {
-        top: true;
-    }
+    WlrLayershell.anchors.top: true
     WlrLayershell.keyboardFocus: host.currentName === "launcher" ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
     mask: Region {
@@ -90,7 +88,7 @@ PanelWindow {
         }
     }
     Connections {
-        target: EyeService
+        target: EyeReminderService
         function onSurfaceRequested(n) {
             surfaceOpener.open("eyeReminder");
         }
