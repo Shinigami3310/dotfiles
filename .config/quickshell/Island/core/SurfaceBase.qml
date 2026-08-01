@@ -17,26 +17,19 @@ FocusScope {
     focus: keyboardActive
     Keys.enabled: keyboardActive
 
-    // optional
-    Keys.onEscapePressed: {
-        if (canGoBack)
-            closeRequested();
-    }
+    Keys.onEscapePressed: if (canGoBack)
+        closeRequested()
 
     MouseArea {
         anchors.fill: parent
         acceptedButtons: Qt.RightButton
-        propagateComposedEvents: true
-        onClicked: {
-            if (canGoBack)
-                backRequested();
-        }
+        onClicked: if (canGoBack)
+            backRequested()
     }
 
     function enter() {
         active = true;
     }
-
     function exit(nextSurfaceName) {
         active = false;
     }

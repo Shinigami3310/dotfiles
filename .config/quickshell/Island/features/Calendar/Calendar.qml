@@ -1,5 +1,4 @@
 import QtQuick
-import Quickshell
 import "../../theme"
 import "../../services"
 
@@ -8,28 +7,20 @@ Item {
 
     property real paddingX: 18
     property real paddingY: 16
-
     property real gridGap: 4
     property real cellSize: 30
+
     property int viewYear: CalendarService.today.getFullYear()
     property int viewMonth: CalendarService.today.getMonth()
     property string selectedDateKey: ""
+    property bool transitioning: false
 
-    readonly property real headerHeight: 28
-    readonly property real weekdayHeight: 16
-    readonly property real gridWidth: 7 * cellSize + 6 * gridGap
-    readonly property real gridHeight: headerHeight + 10 + weekdayHeight + 8 + 6 * cellSize + 5 * gridGap
-
-    implicitWidth: gridWidth + paddingX * 2
-    implicitHeight: gridHeight + paddingY * 2
-
-    readonly property int firstWeekdayOffset: {
-        const dayOfWeek = new Date(viewYear, viewMonth, 1).getDay();
-        return (dayOfWeek + 6) % 7;
-    }
+    readonly property int firstWeekdayOffset: (new Date(viewYear, viewMonth, 1).getDay() + 6) % 7
     readonly property int daysInMonth: new Date(viewYear, viewMonth + 1, 0).getDate()
 
-    property bool transitioning: false
+    // Размеры автоматически считаются от внутреннего контента
+    implicitWidth: contentColumn.implicitWidth + (paddingX * 2)
+    implicitHeight: contentColumn.implicitHeight + (paddingY * 2)
 
     function resetView() {
         viewYear = CalendarService.today.getFullYear();
@@ -53,119 +44,115 @@ Item {
 
     Timer {
         id: transitionTimer
-        interval: 300 // половина длительности анимации opacity
-        repeat: false
+        interval: 300
         property int delta: 0
-
         onTriggered: {
-            if (delta < 0) {
-                if (viewMonth === 0) {
-                    viewMonth = 11;
-                    viewYear--;
-                } else {
-                    viewMonth--;
-                }
+            // Упрощенная логика смены месяца
+            let newMonth = root.viewMonth + delta;
+            if (newMonth < 0) {
+                root.viewMonth = 11;
+                root.viewYear--;
+            } else if (newMonth > 11) {
+                root.viewMonth = 0;
+                root.viewYear++;
             } else {
-                if (viewMonth === 11) {
-                    viewMonth = 0;
-                    viewYear++;
-                } else {
-                    viewMonth++;
+                root.viewMonth = newMonth;
+            }
+            root.selectedDateKey = "";
+            monthFade.opacity = 1;
+            root.transitioning = false;
+        }
+    }
+
+    // Вся верстка календаря автоматически складывается в колонку
+    Column {
+        id: contentColumn
+        anchors.centerIn: parent
+        spacing: 10
+
+        // Заголовок (кнопки и месяц)
+        Row {
+            width: dayGrid.implicitWidth
+            height: 28
+
+            NavButton {
+                text: "‹"
+                onClicked: root.changeMonth(-1)
+            }
+
+            Text {
+                width: parent.width - 44
+                anchors.verticalCenter: parent.verticalCenter
+                horizontalAlignment: Text.AlignHCenter
+                text: CalendarService.monthTitle(root.viewYear, root.viewMonth)
+                font {
+                    family: Theme.font
+                    pixelSize: 13
+                    weight: Font.DemiBold
+                }
+                color: Theme.text
+                elide: Text.ElideRight
+            }
+
+            NavButton {
+                text: "›"
+                onClicked: root.changeMonth(1)
+            }
+        }
+
+        // Дни недели
+        Row {
+            spacing: root.gridGap
+            Repeater {
+                model: ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
+                delegate: Text {
+                    width: root.cellSize
+                    horizontalAlignment: Text.AlignHCenter
+                    text: modelData
+                    font {
+                        family: Theme.font
+                        pixelSize: 9
+                        weight: Font.DemiBold
+                    }
+                    color: Theme.textMuted
                 }
             }
-            selectedDateKey = "";
-            monthFade.opacity = 1;
-            transitioning = false;
-        }
-    }
-
-    Row {
-        id: headerRow
-        anchors.top: parent.top
-        anchors.topMargin: root.paddingY
-        anchors.horizontalCenter: parent.horizontalCenter
-        width: gridWidth
-        height: headerHeight
-
-        NavButton {
-            text: "‹"
-            onClicked: root.changeMonth(-1)
         }
 
-        Text {
-            width: gridWidth - 44
-            anchors.verticalCenter: parent.verticalCenter
-            horizontalAlignment: Text.AlignHCenter
-            text: CalendarService.monthTitle(root.viewYear, root.viewMonth)
-            font.family: Theme.font
-            font.pixelSize: 13
-            font.weight: Font.DemiBold
-            color: Theme.text
-            antialiasing: true
-            elide: Text.ElideRight
-        }
+        // Сетка дней
+        Item {
+            id: monthFade
+            implicitWidth: dayGrid.implicitWidth
+            implicitHeight: dayGrid.implicitHeight
 
-        NavButton {
-            text: "›"
-            onClicked: root.changeMonth(1)
-        }
-    }
-
-    Row {
-        id: weekdayRow
-        anchors.top: headerRow.bottom
-        anchors.topMargin: 10
-        anchors.horizontalCenter: parent.horizontalCenter
-        width: gridWidth
-        height: weekdayHeight
-        spacing: gridGap
-
-        Repeater {
-            model: ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
-            delegate: Text {
-                width: cellSize
-                horizontalAlignment: Text.AlignHCenter
-                text: modelData
-                font.family: Theme.font
-                font.pixelSize: 9
-                font.weight: Font.DemiBold
-                color: Theme.textMuted
-                antialiasing: true
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: 300
+                    easing.type: Motion.easeStandard
+                }
             }
-        }
-    }
-    Item {
-        id: monthFade
-        anchors.top: weekdayRow.bottom
-        anchors.topMargin: 8
-        anchors.horizontalCenter: parent.horizontalCenter
-        width: gridWidth
-        height: 6 * cellSize + 5 * gridGap
-        opacity: 1
 
-        Behavior on opacity {
-            NumberAnimation {
-                duration: 300
-                easing.type: Motion.easeStandard
-            }
-        }
+            Grid {
+                id: dayGrid
+                columns: 7
+                rowSpacing: root.gridGap
+                columnSpacing: root.gridGap
 
-        Grid {
-            id: dayGrid
-            columns: 7
-            rowSpacing: gridGap
-            columnSpacing: gridGap
+                Repeater {
+                    model: 42
+                    delegate: DayCell {
+                        required property int index
 
-            Repeater {
-                model: 42
+                        readonly property int dayNum: index - root.firstWeekdayOffset + 1
 
-                delegate: DayCell {
-                    dayNumber: index - root.firstWeekdayOffset + 1
-                    inMonth: dayNumber >= 1 && dayNumber <= root.daysInMonth
-                    selected: inMonth && root.selectedDateKey === CalendarService.dayKey(root.viewYear, root.viewMonth, dayNumber)
-                    isToday: inMonth && CalendarService.isToday(root.viewYear, root.viewMonth, dayNumber)
-                    isPast: inMonth && CalendarService.isPast(root.viewYear, root.viewMonth, dayNumber)
-                    onClicked: root.selectDay(dayNumber)
+                        dayNumber: dayNum
+                        inMonth: dayNum >= 1 && dayNum <= root.daysInMonth
+                        selected: inMonth && root.selectedDateKey === CalendarService.dayKey(root.viewYear, root.viewMonth, dayNum)
+                        isToday: inMonth && CalendarService.isToday(root.viewYear, root.viewMonth, dayNum)
+                        isPast: inMonth && CalendarService.isPast(root.viewYear, root.viewMonth, dayNum)
+
+                        onClicked: root.selectDay(dayNum)
+                    }
                 }
             }
         }

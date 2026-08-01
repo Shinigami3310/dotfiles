@@ -1,4 +1,3 @@
-pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
@@ -10,7 +9,7 @@ QtObject {
 
     function toggle() {
         Quickshell.execDetached(["qs", "-c", "NotificationCenter", "ipc", "call", "notification-center", "toggleDnd"]);
-        syncTimer.triggered();
+        Qt.callLater(() => getActive());
     }
 
     function getActive() {
@@ -24,14 +23,12 @@ QtObject {
         running: false
 
         stdout: SplitParser {
-            splitMarker: "\n"
             onRead: data => {
-                let line = data.trim().toLowerCase();
-                if (line === "true") {
+                const text = data.trim().toLowerCase();
+                if (text === "true")
                     root.active = true;
-                } else if (line === "false") {
+                else if (text === "false")
                     root.active = false;
-                }
             }
         }
     }

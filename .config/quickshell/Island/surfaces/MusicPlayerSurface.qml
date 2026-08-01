@@ -1,6 +1,13 @@
-import QtQuick
 import "../core"
+import "../features/MusicPlayer"
 
 SurfaceBase {
-    surfaceName: "clock"
+    surfaceName: "musicPlayer"
+    implicitWidth: music.implicitWidth
+    implicitHeight: music.implicitHeight
+    MusicPlayer {
+        id: music
+        anchors.centerIn: parent
+        onCloseRequested: parent.closeRequested()
+    }
 }

@@ -21,23 +21,23 @@ Item {
         Behavior on color {
             ColorAnimation {
                 duration: Motion.fast
-                easing.type: Easing.OutQuad // Используем встроенный Easing вместо undefined
+                easing.type: Easing.OutQuad
             }
         }
 
         Rectangle {
             id: handle
-            width: 18
-            height: 18
-            radius: 9
-            color: Theme.text
+            height: bg.height - 6
+            width: height
+            radius: height / 2
             anchors.verticalCenter: parent.verticalCenter
-            x: root.checked ? parent.width - width - 3 : 3
+            x: root.checked ? bg.width - width - 3 : 3
+            color: Theme.text
 
             Behavior on x {
                 NumberAnimation {
                     duration: Motion.fast
-                    easing.type: Easing.OutBack // Используем встроенный Easing вместо undefined
+                    easing.type: Easing.OutBack
                 }
             }
         }
@@ -45,6 +45,7 @@ Item {
 
     MouseArea {
         anchors.fill: parent
+        cursorShape: Qt.PointingHandCursor
         onClicked: {
             root.checked = !root.checked;
             root.toggled();

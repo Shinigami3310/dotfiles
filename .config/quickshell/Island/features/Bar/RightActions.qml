@@ -1,32 +1,26 @@
 import QtQuick
+import "./RightButtons"
 
-Item {
+Row {
     id: root
-
-    property real spacing: 8
+    spacing: 8
 
     signal surfaceRequested(string newName)
-    signal powerRequested
+    signal closeRequested
 
-    implicitWidth: row.implicitWidth
-    implicitHeight: row.implicitHeight
+    EyeToggle {}
 
-    Row {
-        id: row
-        spacing: root.spacing
+    PomodoroToggle {}
 
-        EyeToggle {}
+    SettingsToggle {
+        onSurfaceRequested: newName => root.surfaceRequested(newName)
+    }
 
-        PomodoroToggle {}
+    BatteryToggle {
+        onSurfaceRequested: newName => root.surfaceRequested(newName)
+    }
 
-        SettingsToggle {
-            onSurfaceRequested: root.surfaceRequested("controlPanel")
-        }
-
-        BatteryToggle {
-            onSurfaceRequested: (newName) => root.surfaceRequested(newName)
-        }
-
-        PowerToggle {}
+    PowerToggle {
+        onCloseRequested: root.closeRequested()
     }
 }

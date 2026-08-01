@@ -4,20 +4,33 @@ import Quickshell
 
 QtObject {
     id: root
-
-    property bool active: true
     property int intervalMs: 10 * 60 * 1000
+    property bool isLoaded: serviceInstance !== null
+    property var serviceInstance: null
 
     signal surfaceRequested(string newName)
 
-    readonly property Timer timer: Timer {
-        interval: intervalMs
-        repeat: true
-        running: active
-        onTriggered: surfaceRequested("eye")
+    property Component serviceLogic: Component {
+        Timer {
+            interval: root.intervalMs
+            repeat: true
+            running: true
+            onTriggered: root.surfaceRequested("eyeReminder")
+        }
     }
 
     function toggle() {
-        active = !active;
+        if (serviceInstance) {
+            serviceInstance.destroy();
+            serviceInstance = null;
+        } else {
+            serviceInstance = serviceLogic.createObject(root);
+        }
+    }
+
+    Component.onCompleted: {
+        if (!serviceInstance) {
+            serviceInstance = serviceLogic.createObject(root);
+        }
     }
 }

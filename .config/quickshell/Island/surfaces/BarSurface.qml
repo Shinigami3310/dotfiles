@@ -1,60 +1,15 @@
-import QtQuick
 import "../core"
 import "../features/Bar"
-import "../theme"
 
 SurfaceBase {
-    id: root
-
     surfaceName: "bar"
-    property real outerPaddingX: 22
-    property real outerPaddingY: 8
-    property real blockSpacing: 14
+    implicitWidth: bar.implicitWidth
+    implicitHeight: bar.implicitHeight
 
-    Item {
-        id: leftBlock
-        anchors.left: parent.left
-        anchors.leftMargin: root.outerPaddingX
-        anchors.verticalCenter: parent.verticalCenter
-
-        implicitWidth: workspaces.implicitWidth
-        implicitHeight: workspaces.implicitHeight
-
-        Workspaces {
-            id: workspaces
-        }
-    }
-
-    Item {
-        id: centerBlock
+    Bar {
+        id: bar
         anchors.centerIn: parent
-
-        implicitWidth: clock.implicitWidth
-        implicitHeight: clock.implicitHeight
-
-        Clock {
-            id: clock
-            onSurfaceRequested: root.surfaceRequested("calendar")
-        }
+        onSurfaceRequested: name => parent.surfaceRequested(name)
+        onCloseRequested: closeRequested()
     }
-
-    Item {
-        id: rightBlock
-        anchors.right: parent.right
-        anchors.rightMargin: root.outerPaddingX
-        anchors.verticalCenter: parent.verticalCenter
-
-        implicitWidth: leftBlock.implicitWidth
-        implicitHeight: rightActions.implicitHeight
-
-        RightActions {
-            id: rightActions
-            onSurfaceRequested: newName => {
-                root.surfaceRequested(newName);
-            }
-        }
-    }
-
-    implicitWidth: leftBlock.implicitWidth + centerBlock.implicitWidth + rightBlock.implicitWidth + blockSpacing * 2 + outerPaddingX * 2
-    implicitHeight: Math.max(leftBlock.implicitHeight, centerBlock.implicitHeight, rightBlock.implicitHeight) + outerPaddingY * 2
 }

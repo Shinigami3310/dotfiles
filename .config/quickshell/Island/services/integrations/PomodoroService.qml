@@ -5,37 +5,40 @@ import Quickshell
 QtObject {
     id: root
 
-    property bool active: false
-    property bool isWorking: true
-    property int currentCycle: 1
-
     readonly property int workDuration: 25 * 60
     readonly property int shortBreakDuration: 5 * 60
 
+    property bool isLoaded: serviceInstance !== null
+    property var serviceInstance: null
+
+    property bool isWorking: true
+    property int currentCycle: 1
     property int remainingTime: workDuration
 
-    property Timer timer: Timer {
-        interval: 1000
-        repeat: true
-        running: root.active
-        onTriggered: {
-            if (root.remainingTime > 1) {
-                root.remainingTime -= 1;
-            } else {
-                root.handleTimerComplete();
+    property Component serviceLogic: Component {
+        Timer {
+            interval: 1000
+            repeat: true
+            running: true
+            onTriggered: {
+                if (root.remainingTime > 1) {
+                    root.remainingTime -= 1;
+                } else {
+                    root.handleTimerComplete();
+                }
             }
         }
     }
 
     function toggle() {
-        if (!active) {
-            active = true;
+        if (isLoaded) {
+            resetToInactive();
+        } else {
             isWorking = true;
             currentCycle = 1;
             remainingTime = workDuration;
+            serviceInstance = serviceLogic.createObject(root);
             sendCliNotification("Timer start", "Time for work! (Cycle 1)");
-        } else {
-            resetToInactive();
         }
     }
 
@@ -63,7 +66,10 @@ QtObject {
     }
 
     function resetToInactive() {
-        active = false;
+        if (serviceInstance) {
+            serviceInstance.destroy();
+            serviceInstance = null;
+        }
         isWorking = true;
         currentCycle = 1;
         remainingTime = workDuration;

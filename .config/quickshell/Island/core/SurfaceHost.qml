@@ -9,7 +9,6 @@ Item {
 
     property string currentName: ""
     property Item currentItem: null
-
     property var history: []
     property bool busy: false
 
@@ -21,11 +20,6 @@ Item {
 
     implicitWidth: currentItem?.implicitWidth ?? 0
     implicitHeight: currentItem?.implicitHeight ?? 0
-
-    Item {
-        id: stage
-        anchors.fill: parent
-    }
 
     Connections {
         target: root.currentItem
@@ -43,14 +37,18 @@ Item {
 
     Timer {
         id: resizeTimer
-        interval: Motion.expand
-        repeat: false
-        onTriggered: root._startFadeIn()
+        interval: Motion.standard
+        onTriggered: {
+            if (root.currentItem)
+                fadeIn.restart();
+            else
+                root.busy = false;
+        }
     }
 
     PropertyAnimation {
         id: fadeOut
-        target: null
+        target: root.outgoingItem
         property: "opacity"
         to: 0
         duration: Motion.fade
@@ -59,7 +57,10 @@ Item {
         onStopped: {
             if (!root.busy || !root.outgoingItem || !root.pendingItem)
                 return;
-            root._releaseOutgoing();
+
+            root.outgoingItem.exit(root.pendingName);
+            root.outgoingItem.destroy();
+            root.outgoingItem = null;
 
             root.currentItem = root.pendingItem;
             root.currentName = root.pendingName;
@@ -68,13 +69,14 @@ Item {
             root.currentItem.visible = true;
             root.currentItem.opacity = 0;
             root.currentItem.enter();
+
             resizeTimer.restart();
         }
     }
 
     PropertyAnimation {
         id: fadeIn
-        target: null
+        target: root.currentItem
         property: "opacity"
         to: 1
         duration: Motion.fade
@@ -86,43 +88,7 @@ Item {
         }
     }
 
-    function _spec(name) {
-        return (surfaces && surfaces[name]) ? surfaces[name] : null;
-    }
-
-    function _createSurface(name) {
-        const spec = _spec(name);
-        if (!spec)
-            return null;
-
-        const component = spec.component !== undefined ? spec.component : spec;
-        return component.createObject(stage, {
-            surfaceName: name,
-            active: false,
-            visible: false,
-            opacity: 0
-        });
-    }
-
-    function _releaseOutgoing() {
-        if (!outgoingItem)
-            return;
-        const item = outgoingItem;
-        item.exit(pendingName);
-        item.destroy();
-        outgoingItem = null;
-    }
-
-    function _startFadeIn() {
-        if (!currentItem) {
-            busy = false;
-            return;
-        }
-        fadeIn.target = currentItem;
-        fadeIn.restart();
-    }
-
-    function open(name, pushHistory) {
+    function open(name, pushHistory = true) {
         if (!name || busy)
             return;
 
@@ -131,23 +97,32 @@ Item {
             return;
         }
 
-        const spec = _spec(name);
+        const spec = root.surfaces?.[name];
         if (!spec)
             return;
 
-        if (pushHistory !== false && currentName !== "" && (history.length === 0 || history[history.length - 1] !== currentName)) {
+        if (pushHistory && currentName && history[history.length - 1] !== currentName) {
             history.push(currentName);
         }
 
         pendingName = name;
-        pendingItem = _createSurface(name);
+        const component = spec.component ?? spec;
+
+        pendingItem = component.createObject(root, {
+            surfaceName: name,
+            active: false,
+            visible: false,
+            opacity: 0
+        });
+
         if (!pendingItem)
             return;
 
         if (!currentItem) {
             currentItem = pendingItem;
-            pendingItem = null;
             currentName = name;
+            pendingItem = null;
+
             currentItem.visible = true;
             currentItem.opacity = 1;
             currentItem.enter();
@@ -158,23 +133,15 @@ Item {
         busy = true;
         outgoingItem = currentItem;
         outgoingItem.exit(name);
-
-        pendingItem.visible = true;
-        pendingItem.opacity = 0;
-
-        fadeOut.target = outgoingItem;
         fadeOut.restart();
     }
 
     function back() {
         if (busy)
             return;
-        if (history.length > 0) {
-            const previous = history.pop();
-            open(previous, false);
-            return;
-        }
-        if (currentName !== initialSurfaceName)
+        if (history.length > 0)
+            open(history.pop(), false);
+        else if (currentName !== initialSurfaceName)
             open(initialSurfaceName, false);
     }
 
@@ -182,12 +149,10 @@ Item {
         if (busy)
             return;
         if (currentName !== initialSurfaceName) {
-            history.length = 0;
+            history = [];
             open(initialSurfaceName, false);
         }
     }
 
-    Component.onCompleted: {
-        open(initialSurfaceName);
-    }
+    Component.onCompleted: open(initialSurfaceName)
 }

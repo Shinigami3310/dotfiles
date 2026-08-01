@@ -1,76 +1,63 @@
 pragma ComponentBehavior: Bound
-
 import QtQuick
 import "../../theme"
 import "../../services"
 
-Item {
+Row {
     id: root
 
-    property int dotCount: 5
-    property real dotSize: 12
-    property real gap: 8
+    spacing: Configs.workspaceGap
 
-    implicitWidth: row.implicitWidth
-    implicitHeight: row.implicitHeight
-
-    WorkspaceHandler {
+    WorkspaceService {
         id: handler
     }
 
-    Row {
-        id: row
-        spacing: root.gap
+    Repeater {
+        model: Configs.workspaceCount
 
-        Repeater {
-            model: root.dotCount
+        delegate: Rectangle {
+            id: dot
+            required property int index
 
-            delegate: Item {
-                required property int index
+            readonly property int workspaceId: index + 1
+            readonly property bool isActive: handler.isActive(workspaceId)
+            readonly property bool isOccupied: handler.isOccupied(workspaceId)
 
-                readonly property int workspaceId: index + 1
-                readonly property bool active: handler.isActive(workspaceId)
-                readonly property bool occupied: handler.isOccupied(workspaceId)
+            width: Configs.workspaceDotSize
+            height: Configs.workspaceDotSize
+            radius: width / 2
 
-                width: root.dotSize
-                height: root.dotSize
-                scale: mouseArea.containsMouse ? 1.5 : 1.0
-                transformOrigin: Item.Center
+            scale: mouseArea.pressed ? 1.2 : (mouseArea.containsMouse ? 1.5 : 1.0)
+            transformOrigin: Item.Center
 
-                Behavior on scale {
-                    NumberAnimation {
-                        duration: Motion.fast
-                        easing.type: Motion.easeStandard
-                    }
+            color: isActive ? Theme.accent : (isOccupied ? Theme.text : "transparent")
+            border.width: 1
+            border.color: isActive ? Theme.accent : (isOccupied ? Theme.text : Theme.separator)
+
+            Behavior on scale {
+                NumberAnimation {
+                    duration: Motion.fast
+                    easing.type: Motion.easeStandard
                 }
-
-                Rectangle {
-                    anchors.fill: parent
-                    radius: width / 2
-                    color: active ? Theme.accent : (occupied ? Theme.text : "transparent")
-                    border.width: 1
-                    border.color: active ? Theme.accent : (occupied ? Theme.text : Theme.separator)
-
-                    Behavior on color {
-                        ColorAnimation {
-                            duration: Motion.fast
-                        }
-                    }
-                    Behavior on border.color {
-                        ColorAnimation {
-                            duration: Motion.fast
-                        }
-                    }
+            }
+            Behavior on color {
+                ColorAnimation {
+                    duration: Motion.fast
                 }
-
-                MouseArea {
-                    id: mouseArea
-                    anchors.fill: parent
-                    acceptedButtons: Qt.LeftButton
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: handler.activateWorkspace(workspaceId)
+            }
+            Behavior on border.color {
+                ColorAnimation {
+                    duration: Motion.fast
                 }
+            }
+
+            MouseArea {
+                id: mouseArea
+                anchors.fill: parent
+                acceptedButtons: Qt.LeftButton
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: handler.activateWorkspace(dot.workspaceId)
             }
         }
     }

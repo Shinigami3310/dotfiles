@@ -1,16 +1,15 @@
 import QtQuick
-import "../../services/"
+import "../../../services/integrations"
 
 ControlButton {
     id: root
-
     signal surfaceRequested(string newName)
-
+    Component.onCompleted: WifiService.retain()
+    Component.onDestruction: WifiService.release()
     icon: "Wifi.png"
-    text: "Wi-Fi"
     active: WifiService.enabled
     enableRightClick: true
 
     onClicked: WifiService.toggle()
-    onRightClicked: root.surfaceRequested("wifi")
+    onRightClicked: root.surfaceRequested("wifiSelector")
 }

@@ -1,17 +1,13 @@
-import QtQuick
-import Quickshell
 import "../core"
+import "../features/Strip/"
 
 SurfaceBase {
     surfaceName: "strip"
     canGoBack: false
-
-    implicitWidth: 60
-    implicitHeight: 12
-
-    MouseArea {
-        anchors.fill: parent
-        acceptedButtons: Qt.LeftButton
-        onClicked: surfaceRequested("clock")
+    implicitWidth: strip.implicitWidth
+    implicitHeight: strip.implicitHeight
+    Strip {
+        id: strip
+        onSurfaceRequested: name => parent.surfaceRequested(name)
     }
 }

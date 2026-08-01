@@ -1,9 +1,7 @@
 import QtQuick
 
 Icon {
-    source: "../../assets/icons/settings.png"
-
+    source: "../../../assets/icons/Settings.png"
     signal surfaceRequested(string newName)
-
     onClicked: surfaceRequested("controlPanel")
 }

@@ -1,15 +1,11 @@
-import QtQuick
-import Quickshell
 import "../core"
 import "../features/Eye"
 
 SurfaceBase {
-    surfaceName: "eye"
+    surfaceName: "eyeReminder"
     canGoBack: false
-
     implicitWidth: eye.implicitWidth
     implicitHeight: eye.implicitHeight
-
     Eye {
         id: eye
         anchors.centerIn: parent

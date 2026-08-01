@@ -1,82 +1,73 @@
 import QtQuick
+import Qt5Compat.GraphicalEffects
 import "../../services"
-
 import "../../theme"
 
 Rectangle {
     id: root
 
-    property string profileId: ""
-    property string label: ""
-    property string iconSymbol: ""
+    required property string profileId
+    required property url iconSource
+    property BatteryService service: null
 
-    // Кнопка напрямую берет и отслеживает активное состояние из сервиса
-    readonly property bool isActive: BatteryService.activeProfile === profileId
+    readonly property bool isActive: service?.activeProfile === profileId
+    readonly property bool hovered: mouseArea.containsMouse
+    readonly property bool pressed: mouseArea.pressed
 
-    implicitWidth: 64
-    implicitHeight: 64
-    radius: width / 2
+    implicitWidth: Configs.batteryProfileBtnSize
+    implicitHeight: Configs.batteryProfileBtnSize
+    radius: Configs.batteryProfileBtnRadius
 
-    // Цвета и границы на основе состояния
-    color: isActive ? Theme.accent : (mouseArea.containsMouse ? Theme.hover : Theme.surface2)
-    border.color: isActive ? Theme.accent : "transparent"
-    border.width: 1
+    color: isActive ? Theme.surface2 : (hovered ? Theme.hover : Theme.surface1)
 
-    // Легкий зум при наведении
-    scale: mouseArea.containsMouse && !isActive ? 1.05 : 1.0
+    border {
+        color: isActive ? Theme.accent : "transparent"
+        width: isActive ? 2 : 0
+    }
 
-    // Анимационные переходы
+    scale: pressed ? 0.95 : (hovered && !isActive ? 1.05 : 1.0)
+
     Behavior on color {
         ColorAnimation {
             duration: Motion.fast
-            easing.type: Motion.easeStandard
         }
     }
     Behavior on border.color {
         ColorAnimation {
             duration: Motion.fast
-            easing.type: Motion.easeStandard
         }
     }
     Behavior on scale {
         NumberAnimation {
             duration: Motion.fast
-            easing.type: Motion.easeStandard
         }
     }
 
-    Column {
+    Item {
         anchors.centerIn: parent
-        spacing: 2
+        width: Configs.batteryProfileIconSize
+        height: Configs.batteryProfileIconSize
 
-        Text {
-            anchors.horizontalCenter: parent.horizontalCenter
-            visible: root.iconSymbol !== ""
-            text: root.iconSymbol
-            font.family: Theme.font
-            font.pixelSize: 14
-            color: root.isActive ? Theme.accentText : Theme.text
-
-            Behavior on color {
-                ColorAnimation {
-                    duration: Motion.fast
-                    easing.type: Motion.easeStandard
-                }
-            }
+        Image {
+            id: iconImage
+            anchors.fill: parent
+            source: root.iconSource
+            visible: false
+            asynchronous: true
+            smooth: true
+            fillMode: Image.PreserveAspectFit
+            sourceSize: Qt.size(width * 2, height * 2)
         }
 
-        Text {
-            anchors.horizontalCenter: parent.horizontalCenter
-            text: root.label
-            font.family: Theme.font
-            font.pixelSize: 11
-            font.weight: root.isActive ? Font.Bold : Font.Normal
-            color: root.isActive ? Theme.accentText : Theme.text
+        ColorOverlay {
+            anchors.fill: iconImage
+            source: iconImage
+            color: (root.isActive || root.pressed) ? Theme.accent : (root.hovered ? Theme.text : Theme.textMuted)
+            antialiasing: true
 
             Behavior on color {
                 ColorAnimation {
                     duration: Motion.fast
-                    easing.type: Motion.easeStandard
                 }
             }
         }
@@ -86,9 +77,10 @@ Rectangle {
         id: mouseArea
         anchors.fill: parent
         hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor
         onClicked: {
-            if (root.profileId !== "") {
-                BatteryService.setProfile(root.profileId);
+            if (root.service) {
+                root.service.setProfile(root.profileId);
             }
         }
     }

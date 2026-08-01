@@ -9,15 +9,16 @@ Item {
     property bool selected: false
     property bool isToday: false
     property bool isPast: false
+
     signal clicked
 
     readonly property bool hovered: mouseArea.containsMouse
-    readonly property bool isHovered: hovered && inMonth
 
     width: 30
     height: 30
     transformOrigin: Item.Center
-    scale: isHovered ? 1.1 : 1.0
+
+    scale: hovered ? 1.1 : 1.0
     opacity: isPast ? 0.5 : 1.0
 
     Behavior on scale {
@@ -30,28 +31,28 @@ Item {
     Rectangle {
         anchors.fill: parent
         radius: 8
-        color: selected ? Theme.accent : (isHovered ? Theme.hover : "transparent")
-        border.width: (selected || isToday || isHovered) ? 1 : 0
-        border.color: selected || isToday ? Theme.accent : Theme.separator
+        color: root.selected ? Theme.accent : (root.hovered ? Theme.hover : "transparent")
+        border.width: (root.selected || root.isToday || root.hovered) ? 1 : 0
+        border.color: (root.selected || root.isToday) ? Theme.accent : Theme.separator
     }
 
     Text {
         anchors.centerIn: parent
-        text: inMonth ? dayNumber : ""
-        font.family: Theme.font
-        font.pixelSize: 12
-        font.weight: selected ? Font.DemiBold : Font.Medium
-        color: selected ? Theme.accentText : (isToday ? Theme.text : Theme.textMuted)
-        antialiasing: true
+        text: root.inMonth ? root.dayNumber : ""
+        font {
+            family: Theme.font
+            pixelSize: 12
+            weight: root.selected ? Font.DemiBold : Font.Medium
+        }
+        color: root.selected ? Theme.accentText : (root.isToday ? Theme.text : Theme.textMuted)
     }
 
     MouseArea {
         id: mouseArea
         anchors.fill: parent
-        enabled: inMonth
-        acceptedButtons: Qt.LeftButton
+        enabled: root.inMonth
         hoverEnabled: true
-        cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+        cursorShape: Qt.PointingHandCursor
         onClicked: root.clicked()
     }
 }

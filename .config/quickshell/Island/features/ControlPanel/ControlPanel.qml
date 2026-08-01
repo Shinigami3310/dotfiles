@@ -1,6 +1,8 @@
 import QtQuick
-import Quickshell
 import "../../theme"
+import "./BottomPanel/"
+import "./CenterPanel/"
+import "./TopPanel/"
 
 Item {
     id: root
@@ -20,13 +22,12 @@ Item {
 
     Column {
         id: mainColumn
-
         anchors.centerIn: parent
         spacing: 12
 
         // Строка 1: Переключатели
         Row {
-            spacing: 6.5
+            spacing: (width - (4 * 64)) / 3
             width: 300
 
             WifiButton {

@@ -13,19 +13,18 @@ Item {
     Text {
         id: label
         anchors.centerIn: parent
-        font.family: Theme.font
-        font.pixelSize: 18
-        font.weight: Font.DemiBold
+        font {
+            family: Theme.font
+            pixelSize: 18
+            weight: Font.DemiBold
+        }
         color: Theme.textMuted
-        antialiasing: true
     }
 
     MouseArea {
-        id: mouseArea
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        acceptedButtons: Qt.LeftButton
         onClicked: root.clicked()
     }
 }

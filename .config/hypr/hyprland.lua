@@ -26,7 +26,7 @@ hl.bind(mainMod .. " + T", hl.dsp.exec_cmd(terminal))
 hl.bind(mainMod .. " + Q", hl.dsp.window.close())
 hl.bind(mainMod .. " + SHIFT + Q", hl.dsp.window.kill())
 hl.bind(
-	mainMod .. " + M",
+	mainMod .. " + J",
 	hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'")
 )
 hl.bind(mainMod .. " + B", hl.dsp.exec_cmd(browser))
@@ -37,6 +37,7 @@ hl.bind(
 	hl.dsp.exec_cmd("qs ipc -c ~/.config/quickshell/NotificationCenter call notification-center toggle")
 )
 hl.bind(mainMod .. " + P", hl.dsp.exec_cmd("~/.local/bin/toggle-powermenu"))
+hl.bind(mainMod .. "+ M", hl.dsp.exec_cmd("qs ipc -c Island call island openSurface musicPlayer"))
 -- Move focus with mainMod + arrow keys
 hl.bind(mainMod .. " + left", hl.dsp.focus({ direction = "left" }))
 hl.bind(mainMod .. " + right", hl.dsp.focus({ direction = "right" }))
@@ -49,7 +50,7 @@ hl.bind(mainMod .. " + SHIFT + down", hl.dsp.window.move({ direction = "down" })
 
 hl.bind(mainMod .. " + SHIFT + F", hl.dsp.window.fullscreen({ mode = "maximized" }))
 
-hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("qs ipc -c Island call island openLauncher"))
+hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("qs ipc -c Island call island openSurface appLauncher"))
 -- Switch workspaces with mainMod + [0-9]
 -- Move active window to a workspace with mainMod + SHIFT + [0 - 9]
 for i = 1, 6 do
@@ -61,17 +62,23 @@ end
 -- Laptop multimedia keys for volume and LCD brightness
 hl.bind(
 	"XF86AudioRaiseVolume",
-	hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+ && qs ipc -c Island call island openVolume"),
+	hl.dsp.exec_cmd(
+		"wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+ && qs ipc -c Island call island openSurface volumeSlider"
+	),
 	{ locked = true, repeating = true }
 )
 hl.bind(
 	"XF86AudioLowerVolume",
-	hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%- && qs ipc -c Island call island openVolume"),
+	hl.dsp.exec_cmd(
+		"wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%- && qs ipc -c Island call island openSurface volumeSlider"
+	),
 	{ locked = true, repeating = true }
 )
 hl.bind(
 	"XF86AudioMute",
-	hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle && qs ipc -c Island call island openVolume"),
+	hl.dsp.exec_cmd(
+		"wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle && qs ipc -c Island call island openSurface volumeSlider"
+	),
 	{ locked = true, repeating = true }
 )
 hl.bind(
@@ -81,12 +88,12 @@ hl.bind(
 )
 hl.bind(
 	"XF86MonBrightnessUp",
-	hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%+ && qs ipc -c Island call island openBrightness"),
+	hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%+ && qs ipc -c Island call island openSurface brightnessSlider"),
 	{ locked = true, repeating = true }
 )
 hl.bind(
 	"XF86MonBrightnessDown",
-	hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%- && qs ipc -c Island call island openBrightness"),
+	hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%- && qs ipc -c Island call island openSurface brightnessSlider"),
 	{ locked = true, repeating = true }
 )
 

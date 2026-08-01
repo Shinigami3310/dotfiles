@@ -1,5 +1,5 @@
 import QtQuick
-import "../../theme"
+import "../../../theme"
 
 Item {
     id: root
@@ -35,7 +35,7 @@ Item {
                 anchors.centerIn: parent
                 width: 18
                 height: 18
-                source: Qt.resolvedUrl("../../assets/icons/" + (root.muted ? root.mutedIcon : root.icon))
+                source: Qt.resolvedUrl("../../../assets/icons/" + (root.muted ? root.mutedIcon : root.icon))
                 fillMode: Image.PreserveAspectFit
                 smooth: true
                 opacity: root.muted ? 0.4 : 1.0

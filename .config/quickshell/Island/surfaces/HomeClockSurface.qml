@@ -1,17 +1,15 @@
-import QtQuick
-import Quickshell
 import "../core"
 import "../features/HomeClock"
 
 SurfaceBase {
-    surfaceName: "clock"
-
+    id: root
+    surfaceName: "homeClock"
     implicitWidth: clock.implicitWidth
     implicitHeight: clock.implicitHeight
-
+    onBackRequested: root.surfaceRequested("strip")
     HomeClock {
         id: clock
         anchors.centerIn: parent
-        onSurfaceRequested: parent.surfaceRequested("bar")
+        onSurfaceRequested: name => parent.surfaceRequested(name)
     }
 }

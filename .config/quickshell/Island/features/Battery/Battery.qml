@@ -8,115 +8,113 @@ Item {
     implicitWidth: layout.implicitWidth + 32
     implicitHeight: layout.implicitHeight + 32
 
+    BatteryService {
+        id: batteryService
+    }
+
+    property real chargeAnimVal: 0
+    readonly property real displayPercent: batteryService.isCharging ? chargeAnimVal : batteryService.percent
+
+    NumberAnimation on chargeAnimVal {
+        from: 0
+        to: 100
+        duration: Configs.batteryChargeAnimDuration
+        loops: Animation.Infinite
+        running: batteryService.isCharging
+    }
+
     Column {
         id: layout
         anchors.centerIn: parent
         spacing: 20
 
-        // --- Строка 1: Индикатор и процент батареи ---
         Row {
             anchors.horizontalCenter: parent.horizontalCenter
             spacing: 16
 
-            // Иконка батареи
             Item {
                 anchors.verticalCenter: parent.verticalCenter
-                width: 42
-                height: 22
+                width: Configs.batteryFrameWidth
+                height: Configs.batteryFrameHeight
 
+                // Внешний контур батареи
                 Rectangle {
-                    anchors.fill: parent
-                    anchors.rightMargin: 4
-                    radius: 4
+                    id: batteryFrame
+                    anchors {
+                        fill: parent
+                        rightMargin: 5
+                    }
+                    radius: 6
                     color: "transparent"
-                    border.color: Theme.text
-                    border.width: 2
+                    border {
+                        color: Theme.text
+                        width: 2.5
+                    }
 
+                    // Индикатор заряда
                     Rectangle {
-                        anchors.left: parent.left
-                        anchors.top: parent.top
-                        anchors.bottom: parent.bottom
-                        anchors.margins: 4
-                        width: Math.max(0, (parent.width - 8) * (BatteryService.percent / 100))
-                        radius: 2
-                        color: BatteryService.isCharging ? Theme.accent : Theme.text
-
-                        Behavior on width {
-                            NumberAnimation {
-                                duration: Motion.standard
-                                easing.type: Motion.easeStandard
-                            }
+                        anchors {
+                            left: parent.left
+                            top: parent.top
+                            bottom: parent.bottom
+                            margins: 3.5
                         }
+                        // Вычисляем ширину в зависимости от процентов
+                        width: Math.max(0, (parent.width - 7) * (root.displayPercent / 100))
+                        radius: 3
+                        color: batteryService.isCharging ? Theme.accent : Theme.text
+
                         Behavior on color {
                             ColorAnimation {
                                 duration: Motion.fast
-                                easing.type: Motion.easeStandard
                             }
                         }
                     }
                 }
 
+                // "Клемма" батареи
                 Rectangle {
-                    anchors.right: parent.right
-                    anchors.verticalCenter: parent.verticalCenter
+                    anchors {
+                        right: parent.right
+                        verticalCenter: parent.verticalCenter
+                    }
                     width: 4
-                    height: 10
+                    height: 12
                     radius: 2
                     color: Theme.text
                 }
             }
 
-            // Текст: Процент и статус (Заряжается / Питание от батареи)
-            Column {
+            Text {
                 anchors.verticalCenter: parent.verticalCenter
-                spacing: 2
-
-                Text {
-                    text: BatteryService.percent + "%"
-                    font.family: Theme.font
-                    font.pixelSize: 26
-                    font.weight: Font.Bold
-                    color: Theme.text
+                text: `${batteryService.percent}%`
+                font {
+                    family: Theme.font
+                    pixelSize: Configs.batteryTextSize
+                    weight: Font.Bold
                 }
-
-                Text {
-                    text: BatteryService.isCharging ? "Заряжается" : "От батареи"
-                    font.family: Theme.font
-                    font.pixelSize: 12
-                    color: Theme.textMuted
-                }
+                color: Theme.text
             }
         }
 
-        // --- Разделительная линия ---
-        Rectangle {
-            anchors.horizontalCenter: parent.horizontalCenter
-            width: layout.implicitWidth
-            height: 1
-            color: Theme.separator
-        }
-
-        // --- Строка 2: Кнопки профилей ---
         Row {
             anchors.horizontalCenter: parent.horizontalCenter
-            spacing: 16
+            spacing: 12
 
             ProfileButton {
                 profileId: "power-saver"
-                label: "Eco"
-                iconSymbol: "🌱"
+                iconSource: "../../assets/icons/Eco.png"
+                service: batteryService
             }
-
             ProfileButton {
                 profileId: "balanced"
-                label: "Balance"
-                iconSymbol: "⚖️"
+                iconSource: "../../assets/icons/Balance.png"
+                service: batteryService
             }
-
             ProfileButton {
                 profileId: "performance"
-                label: "Turbo"
-                iconSymbol: "⚡"
+                iconSource: "../../assets/icons/Turbo.png"
+                service: batteryService
             }
         }
     }

@@ -5,20 +5,20 @@ Rectangle {
     id: root
 
     property string name: "Unknown"
-    property string security: "" // Если пусто или "--", сеть без пароля
+    property string security: ""
     property bool isConnected: false
     property bool isConnecting: false
 
-    // Внутреннее состояние: вводим ли мы пароль прямо сейчас
     property bool isInputting: false
-
     signal connectRequested(string password)
 
-    width: parent?.width ?? 0    // Карточка увеличивается, если нужно ввести пароль
+    width: ListView.view ? ListView.view.width : 300
     height: isInputting ? 88 : 48
+    implicitHeight: height
     radius: 12
+
     color: isConnected ? Theme.accent : Theme.surface1
-    border.color: mouseArea.containsMouse && !isConnected ? Theme.accentSoft : "transparent"
+    border.color: (mouseArea.containsMouse && !isConnected) ? Theme.accentSoft : "transparent"
     border.width: 1
     clip: true
 
@@ -36,10 +36,9 @@ Rectangle {
 
     Column {
         anchors.centerIn: parent
-        spacing: 8
         width: parent.width - 24
+        spacing: 8
 
-        // Название сети / статус
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
             text: root.isConnecting ? "Подключение..." : root.name
@@ -60,32 +59,45 @@ Rectangle {
             }
         }
 
-        // Поле ввода пароля (появляется только если isInputting = true)
         Rectangle {
+            id: inputContainer
             anchors.horizontalCenter: parent.horizontalCenter
             width: parent.width
             height: 28
             radius: 6
             color: Theme.surface2
             visible: root.isInputting
+            opacity: root.isInputting ? 1 : 0
             border.color: pwdInput.activeFocus ? Theme.accent : "transparent"
+
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: Motion.fast
+                }
+            }
 
             TextInput {
                 id: pwdInput
                 anchors.fill: parent
-                anchors.leftMargin: 8
-                anchors.rightMargin: 8
+                anchors.margins: 8
                 verticalAlignment: TextInput.AlignVCenter
                 color: Theme.text
                 font.pixelSize: 13
                 echoMode: TextInput.Password
                 passwordCharacter: "•"
 
-                // При нажатии Enter отправляем пароль
+                onActiveFocusChanged: {
+                    if (!activeFocus && root.isInputting && text === "") {
+                        root.isInputting = false;
+                    }
+                }
+
                 onAccepted: {
-                    root.isInputting = false;
-                    root.connectRequested(pwdInput.text);
-                    pwdInput.text = ""; // очищаем после отправки
+                    if (text.trim() !== "") {
+                        root.isInputting = false;
+                        root.connectRequested(text);
+                        text = "";
+                    }
                 }
             }
         }
@@ -99,12 +111,12 @@ Rectangle {
             if (root.isConnected || root.isConnecting)
                 return;
 
-            // Если пароль нужен и мы еще его не вводим - открываем поле
-            if (root.security !== "" && root.security !== "--" && !root.isInputting) {
+            let requiresPassword = root.security !== "" && root.security !== "--";
+
+            if (requiresPassword && !root.isInputting) {
                 root.isInputting = true;
                 pwdInput.forceActiveFocus();
             } else if (!root.isInputting) {
-                // Если сеть открытая - подключаемся без пароля
                 root.connectRequested("");
             }
         }

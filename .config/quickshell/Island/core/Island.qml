@@ -1,20 +1,21 @@
 import QtQuick
 import "../theme"
 
-Item {
+Rectangle {
     id: root
-    property int radius: 24
-    property int borderWidth: 2
 
-    property color backgroundColor: Theme.panelBg
-    property color borderColor: Theme.panelBorder
+    anchors.top: parent.top
+    anchors.topMargin: isFullscreen ? 0 : 8
+    anchors.horizontalCenter: parent.horizontalCenter
 
-    default property alias contentData: content.data
+    color: Theme.panelBg
+    radius: 24
+    border.width: 2
+    border.color: Theme.panelBorder
+    antialiasing: true
 
-    clip: true
-
-    implicitWidth: content.implicitWidth
-    implicitHeight: content.implicitHeight
+    implicitWidth: childrenRect.width
+    implicitHeight: childrenRect.height
 
     Behavior on implicitWidth {
         NumberAnimation {
@@ -28,22 +29,5 @@ Item {
             duration: Motion.standard
             easing.type: Easing.InOutQuad
         }
-    }
-
-    Rectangle {
-        anchors.fill: parent
-        radius: root.radius
-        color: root.backgroundColor
-        border.width: root.borderWidth
-        border.color: root.borderColor
-        antialiasing: true
-    }
-
-    Item {
-        id: content
-        anchors.top: parent.top
-        anchors.horizontalCenter: parent.horizontalCenter
-        implicitWidth: childrenRect.width
-        implicitHeight: childrenRect.height
     }
 }

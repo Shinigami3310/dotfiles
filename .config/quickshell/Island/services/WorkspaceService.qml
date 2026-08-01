@@ -19,7 +19,7 @@ QtObject {
     }
 
     function activateWorkspace(id) {
-        Quickshell.execDetached(["hyprctl", "eval", "hl.dispatch(hl.dsp.focus({ workspace = " + id + " }))"]);
+        Hyprland.dispatch("hl.dsp.focus({ workspace = " + id + " })");
     }
 
     Component.onCompleted: {

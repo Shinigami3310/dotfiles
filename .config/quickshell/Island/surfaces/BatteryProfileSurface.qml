@@ -1,16 +1,12 @@
-import QtQuick
 import "../core"
 import "../features/Battery"
 
 SurfaceBase {
-    id: root
     surfaceName: "batteryProfile"
-
-    implicitWidth: batteryProfile.implicitWidth
-    implicitHeight: batteryProfile.implicitHeight
-
+    implicitWidth: battery.implicitWidth
+    implicitHeight: battery.implicitHeight
     Battery {
-        id: batteryProfile
+        id: battery
         anchors.centerIn: parent
     }
 }
