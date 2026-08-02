@@ -8,8 +8,8 @@ Item {
     property string valueText: ""
     property real progress: 0.0
 
-    implicitWidth: 54
-    implicitHeight: 48
+    implicitWidth: Configs.resourceBadgeWidth
+    implicitHeight: Configs.resourceRowHeight
 
     Rectangle {
         anchors.fill: parent

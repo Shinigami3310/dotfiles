@@ -12,7 +12,7 @@ Item {
 
     signal clicked
 
-    readonly property bool hovered: mouseArea.containsMouse
+    readonly property bool hovered: hoverHandler.hovered
 
     width: Configs.calCellSize
     height: Configs.calCellSize
@@ -37,6 +37,7 @@ Item {
             width: (root.selected || root.isToday || root.hovered) ? 1 : 0
             color: (root.selected || root.isToday) ? Theme.accent : Theme.separator
         }
+
         Behavior on color {
             ColorAnimation {
                 duration: Motion.fast
@@ -55,12 +56,14 @@ Item {
         color: root.selected ? Theme.accentText : (root.isToday ? Theme.text : Theme.textMuted)
     }
 
-    MouseArea {
-        id: mouseArea
-        anchors.fill: parent
+    HoverHandler {
+        id: hoverHandler
         enabled: root.inMonth
-        hoverEnabled: true
-        cursorShape: inMonth ? Qt.PointingHandCursor : Qt.ArrowCursor
-        onClicked: root.clicked()
+        cursorShape: Qt.PointingHandCursor
+    }
+
+    TapHandler {
+        enabled: root.inMonth
+        onTapped: root.clicked()
     }
 }

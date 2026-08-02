@@ -7,6 +7,7 @@ Item {
 
     property url source: ""
     property bool active: false
+
     signal clicked
 
     implicitWidth: Configs.iconSize
@@ -15,7 +16,8 @@ Item {
     readonly property bool hovered: mouseArea.containsMouse
     readonly property bool pressed: mouseArea.pressed
 
-    scale: pressed ? 0.9 : (hovered ? 1.1 : 1.0)
+    scale: pressed ? Configs.scalePressed : (hovered ? Configs.scaleHoverIcon : 1.0)
+
     Behavior on scale {
         NumberAnimation {
             duration: Motion.fast

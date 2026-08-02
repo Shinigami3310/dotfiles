@@ -7,8 +7,17 @@ Item {
     property bool checked: false
     signal toggled
 
-    implicitWidth: 44
-    implicitHeight: 24
+    implicitWidth: Configs.switchWidth
+    implicitHeight: Configs.switchHeight
+
+    scale: mouseArea.pressed ? Configs.clickScale : (mouseArea.containsMouse ? Configs.hoverScale : 1.0)
+
+    Behavior on scale {
+        NumberAnimation {
+            duration: Motion.fast
+            easing.type: Easing.OutBack
+        }
+    }
 
     Rectangle {
         id: bg
@@ -44,7 +53,9 @@ Item {
     }
 
     MouseArea {
+        id: mouseArea
         anchors.fill: parent
+        hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
         onClicked: {
             root.checked = !root.checked;

@@ -1,5 +1,5 @@
-import Quickshell
 import QtQuick
+import Quickshell
 import "../../theme"
 
 Item {
@@ -33,6 +33,7 @@ Item {
             rightMargin: Configs.barPaddingX
             verticalCenter: parent.verticalCenter
         }
+
         onSurfaceRequested: name => root.surfaceRequested(name)
         onCloseRequested: root.closeRequested()
     }

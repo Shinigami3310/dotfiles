@@ -1,13 +1,13 @@
 import QtQuick
 import "../../../services/"
+import "../../../theme/"
 
 Item {
     id: root
     SystemStatsService {
         id: systemStatsService
     }
-    implicitWidth: 300
-    implicitHeight: 48
+    implicitHeight: Configs.resourceRowHeight
 
     Row {
         anchors.fill: parent

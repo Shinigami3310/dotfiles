@@ -6,7 +6,6 @@ BaseSelector {
 
     title: "Wi-Fi"
     iconSource: Qt.resolvedUrl("../../assets/icons/Wifi.png")
-
     isServiceEnabled: WifiService.enabled
     listModel: WifiService.networkModel
 

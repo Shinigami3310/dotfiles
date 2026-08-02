@@ -4,7 +4,6 @@ import QtQuick
 QtObject {
     readonly property string font: "Inter"
 
-    // Fallback-значения — те же, что в JsonAdapter
     readonly property color panelBg: Qt.alpha(Palette.surfaceContainer || "#342b25", 0.96)
     readonly property color panelBorder: Qt.alpha(Palette.outline || "#78675c", 0.40)
     readonly property color panelInner: Palette.surfaceContainerHigh || "#40352f"

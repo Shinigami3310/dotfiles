@@ -5,49 +5,62 @@ import "../../theme"
 FocusScope {
     id: root
 
-    // Динамический размер окна: передается Wayland-поверхности в Quickshell
-    implicitWidth: Configs.appLauncherWidth + (Configs.appLauncherPadding * 2)
-    implicitHeight: layout.implicitHeight + (Configs.appLauncherPadding * 2)
-
     AppService {
         id: appService
     }
+
     signal closeRequested
 
-    function focusSearch() {
-        searchBar.forceFocus();
+    implicitWidth: Configs.appLauncherWidth + (Configs.appLauncherPadding * 2)
+
+    readonly property int targetSurfaceHeight: layout.implicitHeight + (Configs.appLauncherPadding * 2)
+
+    onTargetSurfaceHeightChanged: {
+        if (targetSurfaceHeight > implicitHeight) {
+            resizeDebounce.stop();
+            implicitHeight = targetSurfaceHeight;
+        } else {
+            resizeDebounce.restart();
+        }
+    }
+
+    Component.onCompleted: implicitHeight = targetSurfaceHeight
+
+    Timer {
+        id: resizeDebounce
+        interval: Configs.appLauncherDebounceDelay
+        onTriggered: root.implicitHeight = root.targetSurfaceHeight
     }
 
     onVisibleChanged: {
         if (visible)
-            focusSearch();
+            searchBar.forceFocus();
     }
 
-    // Фон поверхности
     Rectangle {
         anchors.fill: parent
         color: Theme.panelBg
         radius: 12
-        border.color: Theme.separator
-        border.width: 1
+        border {
+            color: Theme.separator
+            width: 1
+        }
     }
 
-    // Контент привязан к ВЕРХУ окна
     Column {
         id: layout
-        anchors.top: parent.top
-        anchors.topMargin: Configs.appLauncherPadding
-        anchors.left: parent.left
-        anchors.leftMargin: Configs.appLauncherPadding
-        anchors.right: parent.right
-        anchors.rightMargin: Configs.appLauncherPadding
+        anchors {
+            top: parent.top
+            left: parent.left
+            right: parent.right
+            margins: Configs.appLauncherPadding
+        }
         spacing: Configs.appLauncherSpacing
 
         SearchBar {
             id: searchBar
             width: parent.width
             height: Configs.appSearchHeight
-            focus: true
 
             onTextChanged: appService.filter(text)
             onDownPressed: appList.moveDown()
@@ -62,8 +75,8 @@ FocusScope {
             maxHeight: Configs.appListMaxHeight
             model: appService.filteredApps
 
-            onLaunchRequested: execCommand => {
-                appService.launchApp(execCommand);
+            onLaunchRequested: app => {
+                appService.launchApp(app);
                 root.closeRequested();
             }
         }

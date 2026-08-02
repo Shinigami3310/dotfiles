@@ -23,23 +23,23 @@ Item {
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
             text: Qt.formatDateTime(clock.date, "hh:mm")
+            color: Theme.text
             font {
                 family: Theme.font
                 pixelSize: Configs.barClockTimeSize
                 weight: Font.Medium
             }
-            color: Theme.text
         }
 
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
             text: Qt.formatDateTime(clock.date, "ddd dd MMM").toUpperCase()
+            color: Theme.textMuted
             font {
                 family: Theme.font
                 pixelSize: Configs.barClockDateSize
                 weight: Font.Medium
             }
-            color: Theme.textMuted
         }
     }
 

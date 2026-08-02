@@ -4,7 +4,6 @@ import "../../theme"
 FocusScope {
     id: root
 
-    implicitWidth: Configs.appLauncherWidth
     implicitHeight: Configs.appSearchHeight
     focus: true
 
@@ -23,7 +22,6 @@ FocusScope {
         anchors.fill: parent
         radius: Configs.appSearchRadius
         color: Theme.surface2
-
         border {
             color: input.activeFocus ? Theme.accent : "transparent"
             width: 1
@@ -37,10 +35,12 @@ FocusScope {
         }
 
         Row {
-            anchors.fill: parent
-            anchors.leftMargin: 16
-            anchors.rightMargin: 16
-            spacing: 12
+            anchors {
+                fill: parent
+                leftMargin: Configs.appSearchIconMargin
+                rightMargin: Configs.appSearchIconMargin
+            }
+            spacing: Configs.appSearchSpacing
 
             Text {
                 anchors.verticalCenter: parent.verticalCenter
@@ -52,8 +52,9 @@ FocusScope {
             TextInput {
                 id: input
                 anchors.verticalCenter: parent.verticalCenter
-                width: parent.width - 28 // Учет иконки и spacing
+                width: parent.width - Configs.appSearchIconSize - Configs.appSearchSpacing
                 focus: true
+                clip: true
 
                 font {
                     family: Theme.font
@@ -62,30 +63,15 @@ FocusScope {
                 color: Theme.text
                 selectionColor: Theme.accent
                 selectedTextColor: Theme.accentText
-                clip: true
-
-                // Placeholder текст
-                Text {
-                    anchors.left: parent.left
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: "Search apps..."
-                    font {
-                        family: Theme.font
-                        pixelSize: Configs.appSearchTextSize
-                    }
-                    color: Theme.textMuted
-                    visible: input.text === "" && !input.activeFocus
-                }
 
                 Keys.onUpPressed: root.upPressed()
                 Keys.onDownPressed: root.downPressed()
                 Keys.onReturnPressed: root.enterPressed()
                 Keys.onEscapePressed: {
-                    if (input.text !== "") {
+                    if (input.text !== "")
                         input.text = "";
-                    } else {
+                    else
                         root.escapePressed();
-                    }
                 }
             }
         }

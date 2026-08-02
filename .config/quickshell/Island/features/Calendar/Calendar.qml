@@ -5,54 +5,60 @@ import "../../services"
 Item {
     id: root
 
-    property int viewYear: CalendarService.today.getFullYear()
-    property int viewMonth: CalendarService.today.getMonth()
-    property string selectedDateKey: ""
-    property bool transitioning: false
-
-    readonly property int firstWeekdayOffset: (new Date(viewYear, viewMonth, 1).getDay() + 6) % 7
-    readonly property int daysInMonth: new Date(viewYear, viewMonth + 1, 0).getDate()
-
     implicitWidth: contentColumn.implicitWidth + (Configs.calPaddingX * 2)
     implicitHeight: contentColumn.implicitHeight + (Configs.calPaddingY * 2)
 
-    function resetView() {
-        viewYear = CalendarService.today.getFullYear();
-        viewMonth = CalendarService.today.getMonth();
-        selectedDateKey = "";
+    CalendarService {
+        id: calendarService
     }
 
-    function selectDay(day) {
-        if (day >= 1 && day <= daysInMonth) {
-            selectedDateKey = CalendarService.dayKey(viewYear, viewMonth, day);
+    SequentialAnimation {
+        id: monthTransitionAnim
+        property int delta: 0
+
+        ParallelAnimation {
+            NumberAnimation {
+                target: monthFade
+                property: "opacity"
+                to: 0
+                duration: Configs.calTransitionDuration / 2
+                easing.type: Easing.InOutQuad
+            }
+            NumberAnimation {
+                target: monthTitleText
+                property: "opacity"
+                to: 0
+                duration: Configs.calTransitionDuration / 2
+                easing.type: Easing.InOutQuad
+            }
+        }
+
+        ScriptAction {
+            script: calendarService.changeMonth(monthTransitionAnim.delta)
+        }
+
+        ParallelAnimation {
+            NumberAnimation {
+                target: monthFade
+                property: "opacity"
+                to: 1
+                duration: Configs.calTransitionDuration / 2
+                easing.type: Easing.InOutQuad
+            }
+            NumberAnimation {
+                target: monthTitleText
+                property: "opacity"
+                to: 1
+                duration: Configs.calTransitionDuration / 2
+                easing.type: Easing.InOutQuad
+            }
         }
     }
 
-    function changeMonth(delta) {
-        if (transitioning)
-            return;
-        transitioning = true;
-        transitionTimer.delta = delta;
-        transitionTimer.start();
-    }
-
-    Timer {
-        id: transitionTimer
-        interval: Configs.calTransitionDuration
-        property int delta: 0
-        onTriggered: {
-            let newMonth = root.viewMonth + delta;
-            if (newMonth < 0) {
-                root.viewMonth = 11;
-                root.viewYear--;
-            } else if (newMonth > 11) {
-                root.viewMonth = 0;
-                root.viewYear++;
-            } else {
-                root.viewMonth = newMonth;
-            }
-            root.selectedDateKey = "";
-            root.transitioning = false;
+    function requestMonthChange(delta) {
+        if (!monthTransitionAnim.running) {
+            monthTransitionAnim.delta = delta;
+            monthTransitionAnim.start();
         }
     }
 
@@ -61,21 +67,21 @@ Item {
         anchors.centerIn: parent
         spacing: 10
 
-        // Заголовок (кнопки и месяц)
         Row {
             width: dayGrid.implicitWidth
             height: Configs.calHeaderHeight
 
             NavButton {
                 text: "‹"
-                onClicked: root.changeMonth(-1)
+                onClicked: root.requestMonthChange(-1)
             }
 
             Text {
-                width: parent.width - 44
+                id: monthTitleText
+                width: parent.width - (Configs.calNavButtonSize * 2)
                 anchors.verticalCenter: parent.verticalCenter
                 horizontalAlignment: Text.AlignHCenter
-                text: CalendarService.monthTitle(root.viewYear, root.viewMonth)
+                text: calendarService.monthTitle(calendarService.viewYear, calendarService.viewMonth)
                 font {
                     family: Theme.font
                     pixelSize: Configs.calTitleSize
@@ -87,15 +93,14 @@ Item {
 
             NavButton {
                 text: "›"
-                onClicked: root.changeMonth(1)
+                onClicked: root.requestMonthChange(1)
             }
         }
 
-        // Дни недели
         Row {
             spacing: Configs.calGridGap
             Repeater {
-                model: ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
+                model: Configs.calWeekdays
                 delegate: Text {
                     width: Configs.calCellSize
                     horizontalAlignment: Text.AlignHCenter
@@ -110,20 +115,10 @@ Item {
             }
         }
 
-        // Сетка дней
         Item {
             id: monthFade
             implicitWidth: dayGrid.implicitWidth
             implicitHeight: dayGrid.implicitHeight
-
-            // Декларативная привязка анимации исчезновения
-            opacity: root.transitioning ? 0 : 1
-            Behavior on opacity {
-                NumberAnimation {
-                    duration: Configs.calTransitionDuration
-                    easing.type: Motion.easeStandard
-                }
-            }
 
             Grid {
                 id: dayGrid
@@ -136,15 +131,16 @@ Item {
                     delegate: DayCell {
                         required property int index
 
-                        readonly property int dayNum: index - root.firstWeekdayOffset + 1
+                        readonly property int dayNum: index - calendarService.firstWeekdayOffset + 1
+                        readonly property bool validDay: dayNum >= 1 && dayNum <= calendarService.daysInMonth
 
                         dayNumber: dayNum
-                        inMonth: dayNum >= 1 && dayNum <= root.daysInMonth
-                        selected: inMonth && root.selectedDateKey === CalendarService.dayKey(root.viewYear, root.viewMonth, dayNum)
-                        isToday: inMonth && CalendarService.isToday(root.viewYear, root.viewMonth, dayNum)
-                        isPast: inMonth && CalendarService.isPast(root.viewYear, root.viewMonth, dayNum)
+                        inMonth: validDay
+                        selected: validDay && calendarService.selectedDateKey === calendarService.dayKey(calendarService.viewYear, calendarService.viewMonth, dayNum)
+                        isToday: validDay && calendarService.isToday(calendarService.viewYear, calendarService.viewMonth, dayNum)
+                        isPast: validDay && calendarService.isPast(calendarService.viewYear, calendarService.viewMonth, dayNum)
 
-                        onClicked: root.selectDay(dayNum)
+                        onClicked: calendarService.selectDay(dayNum)
                     }
                 }
             }

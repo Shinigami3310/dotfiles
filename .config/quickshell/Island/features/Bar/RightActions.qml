@@ -1,11 +1,10 @@
 import QtQuick
 import "../../services"
-import "../../services/integrations/"
+import "../../services/integrations"
 import "../../theme"
 
 Row {
     id: root
-
     spacing: Configs.barActionsSpacing
 
     signal surfaceRequested(string newName)
@@ -34,10 +33,13 @@ Row {
     }
 
     Icon {
+        id: powerIcon
         source: "../../assets/icons/Power.png"
+
         PowerService {
             id: powerService
         }
+
         onClicked: {
             powerService.openMenu();
             root.closeRequested();

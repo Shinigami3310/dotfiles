@@ -13,12 +13,12 @@ Item {
 
     signal toggleRequested
 
-    implicitWidth: 320
-    implicitHeight: layout.implicitHeight + 32
+    implicitWidth: Configs.selectorWidth
+    implicitHeight: layout.implicitHeight + (Configs.selectorPadding * 2)
 
     Rectangle {
         anchors.fill: parent
-        radius: 16
+        radius: Configs.panelRadius
         color: Theme.panelBg
         border.color: Theme.panelBorder
         border.width: 1
@@ -27,8 +27,8 @@ Item {
     Column {
         id: layout
         anchors.fill: parent
-        anchors.margins: 16
-        spacing: 16
+        anchors.margins: Configs.selectorPadding
+        spacing: Configs.selectorSpacing
 
         RowLayout {
             width: parent.width
@@ -36,12 +36,18 @@ Item {
 
             Image {
                 source: root.iconSource
-                Layout.preferredWidth: 24
-                Layout.preferredHeight: 24
+                Layout.preferredWidth: Configs.selectorIconSize
+                Layout.preferredHeight: Configs.selectorIconSize
                 Layout.alignment: Qt.AlignVCenter
                 fillMode: Image.PreserveAspectFit
                 smooth: true
                 opacity: root.isServiceEnabled ? 1.0 : 0.5
+
+                Behavior on opacity {
+                    NumberAnimation {
+                        duration: Motion.fast
+                    }
+                }
             }
 
             Text {
@@ -64,14 +70,15 @@ Item {
         Item {
             id: listContainer
             width: parent.width
-            height: root.isServiceEnabled ? Math.max(Math.min(listView.contentHeight, 300), 48) : 0
+            height: root.isServiceEnabled ? Math.max(Math.min(listView.contentHeight, Configs.selectorMaxListHeight), Configs.selectorMinListHeight) : 0
             opacity: root.isServiceEnabled ? 1.0 : 0.0
+            visible: opacity > 0
             clip: true
 
             Behavior on height {
                 NumberAnimation {
                     duration: Motion.fast
-                    easing.type: Easing.OutQuad
+                    easing.type: Easing.OutCubic
                 }
             }
             Behavior on opacity {
@@ -86,7 +93,7 @@ Item {
                 anchors.fill: parent
                 model: root.listModel
                 delegate: root.delegate
-                spacing: 8
+                spacing: Configs.cardSpacing
                 boundsBehavior: Flickable.StopAtBounds
 
                 move: Transition {

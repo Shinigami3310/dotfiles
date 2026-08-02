@@ -43,6 +43,8 @@ QtObject {
     readonly property int batteryChargeAnimDuration: 2700
 
     // --- Calendar ---
+    property int calNavButtonSize: 22
+    property var calWeekdays: ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
     readonly property int calPaddingX: 18
     readonly property int calPaddingY: 16
     readonly property int calGridGap: 4
@@ -54,10 +56,13 @@ QtObject {
     readonly property int calDayTextSize: 12
     readonly property int calNavIconSize: 18
 
-    readonly property int calTransitionDuration: 300
+    readonly property int calTransitionDuration: 450
 
     // --- Bar / Icons ---
     readonly property int iconSize: 22
+    property real scaleHoverIcon: 1.1
+    property real scaleHoverWorkspace: 1.2
+    property real scalePressed: 0.9
 
     // --- Services ---
     readonly property int eyeReminderInterval: 10 * 60 * 1000
@@ -108,16 +113,45 @@ QtObject {
     readonly property int appListIconSize: 24
     readonly property int appListTitleSize: 14
 
-    // --- OSD Panels (Audio / Brightness) ---
-    readonly property int osdIdleTimeout: 3000
-    readonly property int osdPaddingX: 32
-    readonly property int osdPaddingY: 24
-
     // --- Slider Component ---
-    readonly property int sliderTextWidth: 30
-    readonly property int sliderTrackWidth: 180
-    readonly property int sliderTrackHeight: 10
+    readonly property int osdPaddingX: 24
+    readonly property int osdPaddingY: 24
+    readonly property int osdIdleTimeout: 2500
+
     readonly property int sliderIconBoxSize: 32
     readonly property int sliderIconSize: 18
-    readonly property int sliderTextSize: 14
+    readonly property int sliderTrackHeight: 10
+    readonly property int sliderTrackDefaultWidth: 200
+    readonly property int sliderTextWidth: 32
+
+    // --- Selectors & Cards ---
+    readonly property real selectorWidth: 320
+    readonly property real selectorMaxListHeight: 300
+    readonly property real selectorMinListHeight: 48
+    readonly property real selectorPadding: 16
+    readonly property real selectorSpacing: 16
+    readonly property real panelRadius: 16
+
+    readonly property real cardBaseHeight: 48
+    readonly property real cardBaseWidth: 250
+    readonly property real cardInputHeight: 88
+    readonly property real cardRadius: 12
+    readonly property real cardSpacing: 6
+
+    readonly property real switchWidth: 44
+    readonly property real switchHeight: 24
+    readonly property real selectorIconSize: 24
+
+    // Micro-interactions
+    readonly property real hoverScale: 1.0
+    readonly property real clickScale: 0.9
+
+    // Control Panel
+    readonly property real controlPanelWidth: 300
+    readonly property real controlPanelPadding: 16
+    readonly property real controlButtonSize: 64
+    readonly property real controlImageSize: 28
+    readonly property real controlSliderHeight: 24
+    readonly property real resourceRowHeight: 48
+    readonly property real resourceBadgeWidth: 54
 }

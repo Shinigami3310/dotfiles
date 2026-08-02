@@ -4,3 +4,4 @@ singleton WifiService WifiService.qml
 singleton BluetoothService BluetoothService.qml
 singleton BrightnessService BrightnessService.qml
 singleton AudioService AudioService.qml
+singleton MusicPlayerService MusicPlayerService.qml

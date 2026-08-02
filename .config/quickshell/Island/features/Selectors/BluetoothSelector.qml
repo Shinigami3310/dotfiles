@@ -9,7 +9,6 @@ BaseSelector {
     isServiceEnabled: BluetoothService.enabled
     listModel: BluetoothService.deviceModel
 
-    // Управление активностью фонового сервиса!
     Component.onCompleted: BluetoothService.retain()
     Component.onDestruction: BluetoothService.release()
 

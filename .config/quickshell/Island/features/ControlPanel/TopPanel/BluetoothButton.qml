@@ -7,7 +7,7 @@ ControlButton {
     Component.onCompleted: BluetoothService.retain()
     Component.onDestruction: BluetoothService.release()
     icon: "Bluetooth.png"
-    active: BluetoothService.enabled // С маленькой буквы
+    active: BluetoothService.enabled
     enableRightClick: true
 
     onClicked: BluetoothService.toggle()

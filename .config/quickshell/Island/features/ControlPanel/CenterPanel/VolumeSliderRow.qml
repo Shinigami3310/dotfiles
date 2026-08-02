@@ -1,5 +1,5 @@
 import QtQuick
-import "../../../services/integrations"
+import "../../../services/integrations/"
 
 ControlSlider {
     icon: "Volume.png"

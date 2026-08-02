@@ -36,6 +36,7 @@ hl.bind(
 	mainMod .. " + N",
 	hl.dsp.exec_cmd("qs ipc -c ~/.config/quickshell/NotificationCenter call notification-center toggle")
 )
+hl.bind(mainMod .. " + O", hl.dsp.exec_cmd("qs ipc -c Island call island openSurface batteryProfile"))
 hl.bind(mainMod .. " + P", hl.dsp.exec_cmd("~/.local/bin/toggle-powermenu"))
 hl.bind(mainMod .. "+ M", hl.dsp.exec_cmd("qs ipc -c Island call island openSurface musicPlayer"))
 -- Move focus with mainMod + arrow keys

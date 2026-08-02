@@ -1,38 +1,12 @@
 import QtQuick
-import QtQuick.Layouts
+import "../../services/integrations"
 import "../../theme"
-import "../../services/integrations" // Укажите актуальный путь к папке синглтонов
 
-Item {
+OsdSliderPanel {
     id: root
-
-    property bool active: true
-    signal closeRequested
-
-    implicitWidth: slider.implicitWidth + Configs.osdPaddingX
-    implicitHeight: slider.implicitHeight + Configs.osdPaddingY
-
-    Timer {
-        id: idleTimer
-        interval: Configs.osdIdleTimeout
-        running: root.active
-        repeat: false
-        onTriggered: root.closeRequested()
-    }
-
-    function bumpIdle() {
-        if (root.active)
-            idleTimer.restart();
-    }
-
-    onActiveChanged: {
-        if (root.active)
-            bumpIdle();
-    }
 
     Connections {
         target: AudioService
-
         function onVolumeChanged() {
             root.bumpIdle();
         }
@@ -41,25 +15,15 @@ Item {
         }
     }
 
-    Slider {
-        id: slider
-        anchors.centerIn: parent
+    slider.value: AudioService.muted ? 0.0 : AudioService.volume
+    slider.fillColor: AudioService.muted ? Theme.surface2 : Theme.accent
+    slider.iconSource: Qt.resolvedUrl("../../assets/icons/" + (AudioService.muted ? "VolumeMute.png" : "Volume.png"))
+    slider.iconOpacity: AudioService.muted ? 0.4 : 1.0
+    slider.interactiveIcon: true
 
-        value: AudioService.muted ? 0.0 : AudioService.volume
-        fillColor: AudioService.muted ? Theme.surface2 : Theme.accent
-        iconSource: Qt.resolvedUrl("../../assets/icons/" + (AudioService.muted ? "VolumeMute.png" : "Volume.png"))
-        iconOpacity: AudioService.muted ? 0.4 : 1.0
-        interactiveIcon: true
-
-        onRequestValueChange: function (requestedValue) {
-            AudioService.setVolume(requestedValue);
-        }
-
-        onIconClicked: {
-            AudioService.toggleMute();
-            root.bumpIdle();
-        }
-
-        onInteracted: root.bumpIdle()
+    slider.onRequestValueChange: requestedValue => AudioService.setVolume(requestedValue)
+    slider.onIconClicked: {
+        AudioService.toggleMute();
+        root.bumpIdle();
     }
 }

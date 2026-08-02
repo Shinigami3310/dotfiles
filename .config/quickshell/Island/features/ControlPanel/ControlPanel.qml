@@ -9,53 +9,33 @@ Item {
 
     signal surfaceRequested(string newName)
 
-    implicitWidth: mainColumn.implicitWidth + 32
-    implicitHeight: mainColumn.implicitHeight + 32
-
-    Rectangle {
-        anchors.fill: parent
-        radius: 16
-        color: Theme.panelBg
-        border.color: Theme.panelBorder
-        border.width: 1
-    }
+    implicitWidth: Configs.controlPanelWidth + Configs.controlPanelPadding * 2
+    implicitHeight: mainColumn.implicitHeight + Configs.controlPanelPadding * 2
 
     Column {
         id: mainColumn
         anchors.centerIn: parent
         spacing: 12
-
-        // Строка 1: Переключатели
         Row {
-            spacing: (width - (4 * 64)) / 3
-            width: 300
-
+            spacing: (width - (4 * Configs.controlButtonSize)) / 3
+            width: Configs.controlPanelWidth
             WifiButton {
                 onSurfaceRequested: newName => root.surfaceRequested(newName)
             }
-
             BluetoothButton {
                 onSurfaceRequested: newName => root.surfaceRequested(newName)
             }
-
             DndButton {}
-
             NightModeButton {}
         }
-
-        // Строка 2: Громкость
         VolumeSliderRow {
-            width: 300
+            width: Configs.controlPanelWidth
         }
-
-        // Строка 3: Яркость
         BrightnessSliderRow {
-            width: 300
+            width: Configs.controlPanelWidth
         }
-
-        // Строка 4: Системные ресурсы
         ResourceRow {
-            width: 300
+            width: Configs.controlPanelWidth
         }
     }
 }

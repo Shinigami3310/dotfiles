@@ -4,11 +4,11 @@ import "../../../theme"
 Item {
     id: root
 
-    property string icon: ""        // Имя файла иконки (например, "volume.svg")
-    property string mutedIcon: icon // Имя файла для выключенного состояния
-    property real value: 0.0        // Значение от 0.0 до 1.0
+    property string icon: ""
+    property string mutedIcon: icon
+    property real value: 0.0
     property bool muted: false
-    property real step: 0.05        // Шаг изменения при прокрутке колесом (5%)
+    property real step: 0.05
 
     signal sliderMoved(real newValue)
     signal iconClicked
@@ -20,7 +20,6 @@ Item {
         anchors.fill: parent
         spacing: 12
 
-        // Кнопка иконки
         Rectangle {
             id: iconBtn
 
@@ -49,11 +48,10 @@ Item {
             }
         }
 
-        // Полоса слайдера
         Rectangle {
             id: track
-
-            height: 36
+            anchors.verticalCenter: parent.verticalCenter
+            height: Configs.controlSliderHeight
             width: parent.width - iconBtn.width - parent.spacing
             radius: 10
             color: Theme.surface1
@@ -79,7 +77,7 @@ Item {
             }
 
             Text {
-                anchors.right: parent.right
+                anchors.centerIn: parent
                 anchors.rightMargin: 12
                 anchors.verticalCenter: parent.verticalCenter
                 text: Math.round((root.muted ? 0 : root.value) * 100) + "%"
@@ -100,14 +98,12 @@ Item {
                     root.sliderMoved(val);
                 }
 
-                // Клик и перетаскивание
                 onPressed: mouse => updatePos(mouse.x)
                 onPositionChanged: mouse => {
                     if (pressed)
                         updatePos(mouse.x);
                 }
 
-                // Вращение колеса мыши при наведении
                 onWheel: wheel => {
                     let delta = wheel.angleDelta.y > 0 ? root.step : -root.step;
                     let newVal = Math.max(0.0, Math.min(1.0, root.value + delta));

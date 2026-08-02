@@ -8,19 +8,28 @@ Rectangle {
     property string security: ""
     property bool isConnected: false
     property bool isConnecting: false
-
     property bool isInputting: false
+
     signal connectRequested(string password)
 
-    width: ListView.view ? ListView.view.width : 300
-    height: isInputting ? 88 : 48
+    width: ListView.view ? ListView.view.width : Configs.selectorWidth
+    height: isInputting ? Configs.cardInputHeight : Configs.cardBaseHeight
     implicitHeight: height
-    radius: 12
+    radius: Configs.cardRadius
 
     color: isConnected ? Theme.accent : Theme.surface1
     border.color: (mouseArea.containsMouse && !isConnected) ? Theme.accentSoft : "transparent"
     border.width: 1
     clip: true
+
+    scale: mouseArea.pressed ? Configs.clickScale : (mouseArea.containsMouse ? Configs.hoverScale : 0.95)
+
+    Behavior on scale {
+        NumberAnimation {
+            duration: Motion.fast
+            easing.type: Easing.OutBack
+        }
+    }
 
     Behavior on height {
         NumberAnimation {
@@ -28,6 +37,7 @@ Rectangle {
             easing.type: Easing.OutQuart
         }
     }
+
     Behavior on color {
         ColorAnimation {
             duration: Motion.fast
@@ -41,7 +51,7 @@ Rectangle {
 
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
-            text: root.isConnecting ? "Подключение..." : root.name
+            text: root.isConnecting ? "Connecting" : root.name
             font.family: Theme.font
             font.pixelSize: 13
             color: root.isConnected ? Theme.accentText : Theme.text
@@ -107,11 +117,13 @@ Rectangle {
         id: mouseArea
         anchors.fill: parent
         hoverEnabled: true
+        cursorShape: (root.isConnected || root.isConnecting) ? Qt.ArrowCursor : Qt.PointingHandCursor
+
         onClicked: {
             if (root.isConnected || root.isConnecting)
                 return;
 
-            let requiresPassword = root.security !== "" && root.security !== "--";
+            const requiresPassword = root.security !== "" && root.security !== "--";
 
             if (requiresPassword && !root.isInputting) {
                 root.isInputting = true;

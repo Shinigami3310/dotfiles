@@ -13,30 +13,21 @@ RowLayout {
     property color fillColor: Theme.accent
 
     readonly property real clampedValue: Math.max(0.0, Math.min(1.0, root.value))
-
-    // Декларативная привязка (значение всегда актуально)
     property real visualValue: clampedValue
 
     signal requestValueChange(real requestedValue)
     signal iconClicked
     signal interacted
 
-    spacing: 10
+    implicitWidth: Configs.sliderTrackDefaultWidth + Configs.sliderIconBoxSize + Configs.sliderTextWidth + (spacing * 2)
+    spacing: 12
 
-    // Анимация визуальной части
     Behavior on visualValue {
-        // Ключевой момент: отключаем анимацию при ручном перетаскивании (убираем "лаг" за мышью).
-        // Анимация работает только при изменении извне.
         enabled: !sliderMouse.pressed
-
         NumberAnimation {
             duration: Motion.fast
             easing.type: Motion.easeStandard
         }
-    }
-
-    function clamp(val, minValue, maxValue) {
-        return Math.max(minValue, Math.min(maxValue, val));
     }
 
     Rectangle {
@@ -78,7 +69,7 @@ RowLayout {
 
     Rectangle {
         id: track
-        Layout.preferredWidth: Configs.sliderTrackWidth
+        width: Configs.sliderTrackDefaultWidth
         Layout.preferredHeight: Configs.sliderTrackHeight
         Layout.alignment: Qt.AlignVCenter
         radius: height / 2
@@ -104,23 +95,19 @@ RowLayout {
             preventStealing: true
 
             function updatePos(mouseX) {
-                const nextValue = root.clamp(mouseX / width, 0.0, 1.0);
+                const nextValue = Math.max(0.0, Math.min(1.0, mouseX / width));
                 root.requestValueChange(nextValue);
                 root.interacted();
             }
 
-            onPressed: function (mouse) {
-                updatePos(mouse.x);
-            }
-
-            onPositionChanged: function (mouse) {
+            onPressed: mouse => updatePos(mouse.x)
+            onPositionChanged: mouse => {
                 if (pressed)
                     updatePos(mouse.x);
             }
-
-            onWheel: function (wheel) {
+            onWheel: wheel => {
                 const delta = wheel.angleDelta.y > 0 ? root.step : -root.step;
-                const nextValue = root.clamp(root.value + delta, 0.0, 1.0);
+                const nextValue = Math.max(0.0, Math.min(1.0, root.value + delta));
                 root.requestValueChange(nextValue);
                 root.interacted();
             }
@@ -135,7 +122,7 @@ RowLayout {
         color: Theme.text
         font {
             family: Theme.font
-            pixelSize: 14
+            pixelSize: 13
         }
     }
 }

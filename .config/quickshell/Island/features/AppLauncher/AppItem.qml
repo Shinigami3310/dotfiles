@@ -25,28 +25,27 @@ Rectangle {
     }
 
     Row {
-        anchors.fill: parent
-        anchors.leftMargin: 12
-        anchors.rightMargin: 12
-        spacing: 12
+        anchors {
+            fill: parent
+            leftMargin: Configs.appListItemMargin
+            rightMargin: Configs.appListItemMargin
+        }
+        spacing: Configs.appListItemSpacing
 
         Image {
             id: iconImg
             anchors.verticalCenter: parent.verticalCenter
             width: Configs.appListIconSize
             height: Configs.appListIconSize
+            sourceSize: Qt.size(width, height)
+            fillMode: Image.PreserveAspectFit
 
-            // Обработка путей иконок (абсолютные или из темы иконок)
             source: {
                 if (!root.appIcon)
                     return "";
                 return root.appIcon.startsWith("/") ? ("file://" + root.appIcon) : ("image://icon/" + root.appIcon);
             }
 
-            sourceSize: Qt.size(width, height)
-            fillMode: Image.PreserveAspectFit
-
-            // Заглушка, если иконка не найдена
             Rectangle {
                 anchors.fill: parent
                 radius: 4
@@ -68,14 +67,14 @@ Rectangle {
 
         Text {
             anchors.verticalCenter: parent.verticalCenter
-            width: parent.width - iconImg.width - parent.spacing
+            width: parent.width - iconImg.width - Configs.appListItemSpacing
             text: root.appName
+            color: root.isCurrent ? Theme.accentText : Theme.text
+            elide: Text.ElideRight
             font {
                 family: Theme.font
                 pixelSize: Configs.appListTitleSize
             }
-            color: root.isCurrent ? Theme.accentText : Theme.text
-            elide: Text.ElideRight
 
             Behavior on color {
                 ColorAnimation {

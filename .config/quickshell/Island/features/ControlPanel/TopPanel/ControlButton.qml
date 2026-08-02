@@ -12,71 +12,63 @@ Item {
     signal clicked
     signal rightClicked
 
-    // Делаем кнопку квадратной, так как текст убран
-    implicitWidth: 64
-    implicitHeight: 64
+    implicitWidth: Configs.controlButtonSize
+    implicitHeight: Configs.controlButtonSize
 
     Rectangle {
         id: bg
-        // Центрируем Rectangle внутри Item, чтобы scale работал ровно от центра
         anchors.centerIn: parent
         width: parent.width
         height: parent.height
         radius: 12
 
-        // Граница видна по умолчанию
         border.color: Theme.panelBorder
         border.width: 1
 
-        // Светлый фон при наведении (при нажатии остается таким же)
-        color: mouseArea.containsMouse ? Theme.surface2 : Theme.surface1
+        color: Theme.surface1
 
-        // Увеличение 1.05 при наведении
-        scale: mouseArea.containsMouse ? 1.05 : 1.0
+        scale: mouseArea.pressed ? 0.95 : (mouseArea.containsMouse ? 1.05 : 1.0)
 
         Behavior on color {
             ColorAnimation {
-                duration: 150
+                duration: Motion.standard
                 easing.type: Easing.OutCubic
             }
         }
 
         Behavior on scale {
             NumberAnimation {
-                duration: 150
-                easing.type: Easing.OutBack // OutBack дает приятный эффект легкой отдачи
+                duration: Motion.standard
+                easing.type: Easing.OutBack
             }
         }
 
         Image {
             id: iconImage
             anchors.centerIn: parent
-            width: 24
-            height: 24
-            sourceSize: Qt.size(width * 2, height * 2) // Для четкости на HighDPI
+            width: Configs.controlImageSize
+            height: Configs.controlImageSize
+            sourceSize: Qt.size(width * 2, height * 2)
             source: root.icon !== "" ? Qt.resolvedUrl("../../../assets/icons/" + root.icon) : ""
             fillMode: Image.PreserveAspectFit
             smooth: true
-            visible: false // Скрываем оригинальное изображение, так как работает ColorOverlay
+            visible: false
         }
 
         ColorOverlay {
             anchors.fill: iconImage
             source: iconImage
-            // Цвет иконки меняется при нажатии (pressed) или при активности (active)
             color: (mouseArea.pressed || root.active) ? Theme.accent : Theme.textMuted
             antialiasing: true
 
             Behavior on color {
                 ColorAnimation {
-                    duration: 150
+                    duration: Motion.standard
                 }
             }
         }
     }
 
-    // MouseArea вынесена за пределы Rectangle, чтобы зона клика
-    // оставалась статической (64x64) и не "убегала" при увеличении scale
     MouseArea {
         id: mouseArea
         anchors.fill: parent
