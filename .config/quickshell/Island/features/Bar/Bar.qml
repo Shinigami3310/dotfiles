@@ -8,18 +8,14 @@ Item {
     signal surfaceRequested(string name)
     signal closeRequested
 
-    property real outerPaddingX: 22
-    property real outerPaddingY: 8
-    property real blockSpacing: 32
-
-    implicitWidth: workspaces.implicitWidth + clock.implicitWidth + rightActions.implicitWidth + (blockSpacing * 2) + (outerPaddingX * 2)
-    implicitHeight: Math.max(workspaces.implicitHeight, clock.implicitHeight, rightActions.implicitHeight) + (outerPaddingY * 2)
+    implicitWidth: workspaces.implicitWidth + clock.implicitWidth + rightActions.implicitWidth + (Configs.barBlockSpacing * 2) + (Configs.barPaddingX * 2)
+    implicitHeight: Math.max(workspaces.implicitHeight, clock.implicitHeight, rightActions.implicitHeight) + (Configs.barPaddingY * 2)
 
     Workspaces {
         id: workspaces
         anchors {
             left: parent.left
-            leftMargin: root.outerPaddingX
+            leftMargin: Configs.barPaddingX
             verticalCenter: parent.verticalCenter
         }
     }
@@ -27,17 +23,17 @@ Item {
     Clock {
         id: clock
         anchors.centerIn: parent
-        onSurfaceRequested: root.surfaceRequested("calendar")
+        onSurfaceRequested: name => root.surfaceRequested(name)
     }
 
     RightActions {
         id: rightActions
         anchors {
             right: parent.right
-            rightMargin: root.outerPaddingX
+            rightMargin: Configs.barPaddingX
             verticalCenter: parent.verticalCenter
         }
-        onSurfaceRequested: newName => root.surfaceRequested(newName)
+        onSurfaceRequested: name => root.surfaceRequested(name)
         onCloseRequested: root.closeRequested()
     }
 }

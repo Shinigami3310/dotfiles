@@ -7,13 +7,8 @@ Item {
 
     signal surfaceRequested(string name)
 
-    property real paddingX: 10
-    property real paddingY: 5
-    property int timePixelSize: 18
-    property int datePixelSize: 10
-
-    implicitWidth: contentColumn.implicitWidth + (paddingX * 2)
-    implicitHeight: contentColumn.implicitHeight + (paddingY * 2)
+    implicitWidth: contentColumn.implicitWidth + (Configs.barClockPaddingX * 2)
+    implicitHeight: contentColumn.implicitHeight + (Configs.barClockPaddingY * 2)
 
     SystemClock {
         id: clock
@@ -23,14 +18,14 @@ Item {
     Column {
         id: contentColumn
         anchors.centerIn: parent
-        spacing: 2
+        spacing: Configs.barClockSpacing
 
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
             text: Qt.formatDateTime(clock.date, "hh:mm")
             font {
                 family: Theme.font
-                pixelSize: root.timePixelSize
+                pixelSize: Configs.barClockTimeSize
                 weight: Font.Medium
             }
             color: Theme.text
@@ -41,7 +36,7 @@ Item {
             text: Qt.formatDateTime(clock.date, "ddd dd MMM").toUpperCase()
             font {
                 family: Theme.font
-                pixelSize: root.datePixelSize
+                pixelSize: Configs.barClockDateSize
                 weight: Font.Medium
             }
             color: Theme.textMuted

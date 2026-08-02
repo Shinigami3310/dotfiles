@@ -1,15 +1,12 @@
 import QtQuick
-import "../../../services"
+import "../../../services/integrations"
 
 ControlSlider {
-    AudioService {
-        id: audioService
-    }
     icon: "Volume.png"
     mutedIcon: "VolumeMute.png"
-    value: audioService.volume
-    muted: audioService.muted
+    value: AudioService.volume
+    muted: AudioService.muted
 
-    onSliderMoved: newVal => audioService.setVolume(newVal)
-    onIconClicked: audioService.toggleMute()
+    onSliderMoved: newVal => AudioService.setVolume(newVal)
+    onIconClicked: AudioService.toggleMute()
 }

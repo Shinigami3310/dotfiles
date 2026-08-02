@@ -1,5 +1,5 @@
 import QtQuick
-import Qt5Compat.GraphicalEffects
+import QtQuick.Effects
 import "../../services"
 import "../../theme"
 
@@ -18,14 +18,14 @@ Rectangle {
     implicitHeight: Configs.batteryProfileBtnSize
     radius: Configs.batteryProfileBtnRadius
 
-    color: isActive ? Theme.surface2 : (hovered ? Theme.hover : Theme.surface1)
+    color: isActive ? Theme.surface2 : Theme.surface1
 
     border {
-        color: isActive ? Theme.accent : "transparent"
+        color: isActive || hovered ? Theme.accent : "transparent"
         width: isActive ? 2 : 0
     }
 
-    scale: pressed ? 0.95 : (hovered && !isActive ? 1.05 : 1.0)
+    scale: pressed ? 0.9 : (hovered ? 1.1 : 1.0)
 
     Behavior on color {
         ColorAnimation {
@@ -59,13 +59,13 @@ Rectangle {
             sourceSize: Qt.size(width * 2, height * 2)
         }
 
-        ColorOverlay {
+        MultiEffect {
             anchors.fill: iconImage
             source: iconImage
-            color: (root.isActive || root.pressed) ? Theme.accent : (root.hovered ? Theme.text : Theme.textMuted)
-            antialiasing: true
+            colorization: 1.0
+            colorizationColor: (root.isActive || root.pressed) ? Theme.accent : (root.hovered ? Theme.text : Theme.textMuted)
 
-            Behavior on color {
+            Behavior on colorizationColor {
                 ColorAnimation {
                     duration: Motion.fast
                 }
@@ -78,10 +78,6 @@ Rectangle {
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onClicked: {
-            if (root.service) {
-                root.service.setProfile(root.profileId);
-            }
-        }
+        onClicked: root.service?.setProfile(root.profileId)
     }
 }

@@ -1,26 +1,46 @@
 import QtQuick
-import "./RightButtons"
+import "../../services"
+import "../../services/integrations/"
+import "../../theme"
 
 Row {
     id: root
-    spacing: 8
+
+    spacing: Configs.barActionsSpacing
 
     signal surfaceRequested(string newName)
     signal closeRequested
 
-    EyeToggle {}
-
-    PomodoroToggle {}
-
-    SettingsToggle {
-        onSurfaceRequested: newName => root.surfaceRequested(newName)
+    Icon {
+        source: "../../assets/icons/Eye.png"
+        active: EyeReminderService.active
+        onClicked: EyeReminderService.toggle()
     }
 
-    BatteryToggle {
-        onSurfaceRequested: newName => root.surfaceRequested(newName)
+    Icon {
+        source: "../../assets/icons/Pomodoro.png"
+        active: PomodoroService.active
+        onClicked: PomodoroService.toggle()
     }
 
-    PowerToggle {
-        onCloseRequested: root.closeRequested()
+    Icon {
+        source: "../../assets/icons/Settings.png"
+        onClicked: root.surfaceRequested("controlPanel")
+    }
+
+    Icon {
+        source: "../../assets/icons/Battery.png"
+        onClicked: root.surfaceRequested("batteryProfile")
+    }
+
+    Icon {
+        source: "../../assets/icons/Power.png"
+        PowerService {
+            id: powerService
+        }
+        onClicked: {
+            powerService.openMenu();
+            root.closeRequested();
+        }
     }
 }

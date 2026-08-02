@@ -5,15 +5,13 @@ import "../../theme"
 FocusScope {
     id: root
 
-    readonly property int padding: 16
-    readonly property int searchBarHeight: 48
-    readonly property int maxListHeight: 360
-    readonly property int spacing: 8
+    // Динамический размер окна: передается Wayland-поверхности в Quickshell
+    implicitWidth: Configs.appLauncherWidth + (Configs.appLauncherPadding * 2)
+    implicitHeight: layout.implicitHeight + (Configs.appLauncherPadding * 2)
 
-    // 1. Динамический размер окна: передается Wayland-поверхности в Quickshell
-    implicitWidth: 360 + (padding * 2)
-    implicitHeight: layout.implicitHeight + (padding * 2)
-
+    AppService {
+        id: appService
+    }
     signal closeRequested
 
     function focusSearch() {
@@ -25,7 +23,7 @@ FocusScope {
             focusSearch();
     }
 
-    // 2. Фон всегда точно соответствует размеру Surface
+    // Фон поверхности
     Rectangle {
         anchors.fill: parent
         color: Theme.panelBg
@@ -34,25 +32,24 @@ FocusScope {
         border.width: 1
     }
 
-    // 3. Контент жестко привязан к ВЕРХУ окна.
-    // SearchBar остается на месте, а расширение/сжатие идет вниз.
+    // Контент привязан к ВЕРХУ окна
     Column {
         id: layout
         anchors.top: parent.top
-        anchors.topMargin: root.padding
+        anchors.topMargin: Configs.appLauncherPadding
         anchors.left: parent.left
-        anchors.leftMargin: root.padding
+        anchors.leftMargin: Configs.appLauncherPadding
         anchors.right: parent.right
-        anchors.rightMargin: root.padding
-        spacing: root.spacing
+        anchors.rightMargin: Configs.appLauncherPadding
+        spacing: Configs.appLauncherSpacing
 
         SearchBar {
             id: searchBar
             width: parent.width
-            height: root.searchBarHeight
+            height: Configs.appSearchHeight
             focus: true
 
-            onTextChanged: AppService.filter(text)
+            onTextChanged: appService.filter(text)
             onDownPressed: appList.moveDown()
             onUpPressed: appList.moveUp()
             onEnterPressed: appList.launchCurrent()
@@ -62,11 +59,11 @@ FocusScope {
         AppList {
             id: appList
             width: parent.width
-            maxHeight: root.maxListHeight
-            model: AppService.filteredApps
+            maxHeight: Configs.appListMaxHeight
+            model: appService.filteredApps
 
             onLaunchRequested: execCommand => {
-                AppService.launchApp(execCommand);
+                appService.launchApp(execCommand);
                 root.closeRequested();
             }
         }

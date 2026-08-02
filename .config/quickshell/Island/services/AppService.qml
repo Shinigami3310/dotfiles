@@ -1,4 +1,3 @@
-pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
@@ -7,63 +6,57 @@ QtObject {
     id: root
 
     property var allApps: []
-    // Теперь это ListModel для правильной работы анимаций в QML
     readonly property ListModel filteredApps: ListModel {}
 
+    property var _rawAppsBuffer: []
+
     property Process appFetcher: Process {
-        // Скрипт собран в единую строку для читаемости
-        command: ["sh", "-c", "for dir in /usr/share/applications \"$HOME/.local/share/applications\"; do if [ -d \"$dir\" ]; then for f in \"$dir\"/*.desktop; do if [ -f \"$f\" ]; then name=$(grep -m 1 \"^Name=\" \"$f\" | cut -d '=' -f 2-); icon=$(grep -m 1 \"^Icon=\" \"$f\" | cut -d '=' -f 2-); exec=$(grep -m 1 \"^Exec=\" \"$f\" | cut -d '=' -f 2- | sed 's/ %[a-zA-Z]//g'); nodisplay=$(grep -m 1 \"^NoDisplay=\" \"$f\" | cut -d '=' -f 2-); if [ \"$nodisplay\" != \"true\" ] && [ -n \"$name\" ] && [ -n \"$exec\" ]; then echo \"$name|$icon|$exec\"; fi; fi; done; fi; done"]
+        command: ["sh", "-c", "find \"$HOME/.local/share/applications\" /usr/share/applications -type f -name \"*.desktop\" -print0 2>/dev/null | xargs -0 gawk 'function getval() { val = substr($0, index($0, \"=\") + 1); sub(/^[ \\t]+/, \"\", val); sub(/[ \\t\\r]+$/, \"\", val); return val; } BEGIN { FS = \"=\" } BEGINFILE { n = split(FILENAME, a, \"/\"); id = a[n]; } /^\\[Desktop Entry\\]/ { in_entry = 1; next } /^\\[/ { in_entry = 0; next } in_entry { if (/^Name=/) { if (!name_general) name_general = getval() } else if (/^Name\\[/) { if (!name_localized) name_localized = getval() } else if (/^Icon=/) { if (!icon) icon = getval() } else if (/^Exec=/) { if (!exec) exec = getval() } else if (/^NoDisplay=/) { nodisplay = tolower(getval()) } else if (/^Hidden=/) { hidden = tolower(getval()) } else if (/^Type=/) { type = tolower(getval()) } } ENDFILE { name = (name_general ? name_general : name_localized); if (id && name && exec && nodisplay != \"true\" && hidden != \"true\" && !seen[id] && (!type || type == \"application\")) { gsub(/ %[a-zA-Z]+/, \"\", exec); sub(/^%[a-zA-Z]+ /, \"\", exec); sub(/ +$/, \"\", exec); printf \"%s\\037%s\\037%s\\037%s\\n\", id, name, icon, exec; seen[id] = 1; } name_general = name_localized = icon = exec = nodisplay = hidden = type = \"\"; }'"]
         running: true
 
         stdout: SplitParser {
-            onRead: data => {
-                let line = data.trim();
-                if (line === "")
-                    return;
-
-                let parts = line.split("|");
-                if (parts.length >= 3) {
-                    let app = {
-                        name: parts[0],
-                        icon: parts[1],
-                        exec: parts[2]
-                    };
-
-                    let tempAll = root.allApps.slice();
-                    tempAll.push(app);
-                    root.allApps = tempAll;
-
-                    // Добавляем в модель сразу
-                    root.filteredApps.append(app);
+            onRead: function (data) {
+                let parts = data.trim().split("\x1F");
+                if (parts.length >= 4) {
+                    root._rawAppsBuffer.push({
+                        id: parts[0],
+                        name: parts[1],
+                        icon: parts[2],
+                        exec: parts[3]
+                    });
                 }
             }
+        }
+
+        onExited: {
+            root._rawAppsBuffer.sort((a, b) => a.name.localeCompare(b.name));
+            root.allApps = root._rawAppsBuffer;
+            root.filter("");
+            root._rawAppsBuffer = [];
         }
     }
 
     function filter(query) {
         let q = (query || "").toLowerCase();
-        let targetApps = root.allApps;
+        let targetApps = q === "" ? root.allApps : root.allApps.filter(function (app) {
+            return app.name.toLowerCase().includes(q);
+        });
 
-        if (q !== "") {
-            targetApps = root.allApps.filter(app => app.name.toLowerCase().indexOf(q) !== -1);
-        }
-
-        // Шаг 1: Удаляем из ListModel то, чего нет в отфильтрованном списке
+        let targetIds = new Set(targetApps.map(function (app) {
+            return app.id;
+        }));
         for (let i = root.filteredApps.count - 1; i >= 0; i--) {
-            let currentName = root.filteredApps.get(i).name;
-            let shouldKeep = targetApps.some(app => app.name === currentName);
-            if (!shouldKeep) {
+            if (!targetIds.has(root.filteredApps.get(i).id)) {
                 root.filteredApps.remove(i);
             }
         }
 
-        // Шаг 2: Вставляем или двигаем элементы на их правильные позиции
         for (let i = 0; i < targetApps.length; i++) {
             let targetApp = targetApps[i];
             let foundIdx = -1;
 
             for (let j = 0; j < root.filteredApps.count; j++) {
-                if (root.filteredApps.get(j).name === targetApp.name) {
+                if (root.filteredApps.get(j).id === targetApp.id) {
                     foundIdx = j;
                     break;
                 }

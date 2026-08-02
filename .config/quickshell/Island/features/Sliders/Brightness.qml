@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import "../../theme"
-import "../../services"
+import "../../services/integrations" // Укажите правильный путь к папке, где лежит BrightnessService.qml
 
 Item {
     id: root
@@ -9,17 +9,14 @@ Item {
     property bool active: true
     signal closeRequested
 
-    implicitWidth: slider.implicitWidth + 32
-    implicitHeight: slider.implicitHeight + 24
-
-    BrightnessService {
-        id: brightnessService
-    }
+    implicitWidth: slider.implicitWidth + Configs.osdPaddingX
+    implicitHeight: slider.implicitHeight + Configs.osdPaddingY
 
     Timer {
         id: idleTimer
-        interval: 3000
+        interval: Configs.osdIdleTimeout
         running: root.active
+        repeat: false
         onTriggered: root.closeRequested()
     }
 
@@ -29,12 +26,14 @@ Item {
     }
 
     onActiveChanged: {
-        if (active)
+        if (root.active)
             bumpIdle();
     }
 
+    // Подключаемся к глобальному синглтону
     Connections {
-        target: brightnessService
+        target: BrightnessService
+
         function onLevelChanged() {
             root.bumpIdle();
         }
@@ -44,13 +43,16 @@ Item {
         id: slider
         anchors.centerIn: parent
 
-        value: brightnessService.level
+        // Используем данные из синглтона напрямую
+        value: BrightnessService.level
         fillColor: Theme.accent
         iconSource: Qt.resolvedUrl("../../assets/icons/Brightness.png")
-        interactiveIcon: false
+        interactiveIcon: true
 
-        // ИСПРАВЛЕНИЕ: Ловим правильный сигнал от дочернего компонента
-        onRequestValueChange: val => brightnessService.setLevel(val)
+        onRequestValueChange: function (requestedValue) {
+            BrightnessService.setLevel(requestedValue);
+        }
+
         onInteracted: root.bumpIdle()
     }
 }

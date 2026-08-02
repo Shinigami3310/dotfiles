@@ -1,11 +1,8 @@
 import QtQuick
-import "../../../services"
+import "../../../services/integrations/"
 
 ControlSlider {
-    BrightnessService {
-        id: brightnessService
-    }
     icon: "Brightness.png"
-    value: brightnessService.level
-    onSliderMoved: newVal => brightnessService.setLevel(newVal)
+    value: BrightnessService.level
+    onSliderMoved: newVal => BrightnessService.setLevel(newVal)
 }

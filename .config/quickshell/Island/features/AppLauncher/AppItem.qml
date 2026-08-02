@@ -4,7 +4,6 @@ import "../../theme"
 Rectangle {
     id: root
 
-    // Явные свойства вместо объекта appData
     property string appName: ""
     property string appIcon: ""
     property string appExec: ""
@@ -12,9 +11,9 @@ Rectangle {
 
     signal clicked
 
-    width: ListView.view ? ListView.view.width : 360
-    height: 44
-    radius: 6
+    width: ListView.view ? ListView.view.width : Configs.appLauncherWidth
+    height: Configs.appListItemHeight
+    radius: Configs.appListItemRadius
 
     color: isCurrent ? Theme.accent : (mouseArea.containsMouse ? Theme.hover : "transparent")
 
@@ -34,19 +33,20 @@ Rectangle {
         Image {
             id: iconImg
             anchors.verticalCenter: parent.verticalCenter
-            width: 24
-            height: 24
+            width: Configs.appListIconSize
+            height: Configs.appListIconSize
 
+            // Обработка путей иконок (абсолютные или из темы иконок)
             source: {
                 if (!root.appIcon)
                     return "";
-                if (root.appIcon.startsWith("/"))
-                    return "file://" + root.appIcon;
-                return "image://icon/" + root.appIcon;
+                return root.appIcon.startsWith("/") ? ("file://" + root.appIcon) : ("image://icon/" + root.appIcon);
             }
-            sourceSize: Qt.size(24, 24)
+
+            sourceSize: Qt.size(width, height)
             fillMode: Image.PreserveAspectFit
 
+            // Заглушка, если иконка не найдена
             Rectangle {
                 anchors.fill: parent
                 radius: 4
@@ -56,9 +56,11 @@ Rectangle {
                 Text {
                     anchors.centerIn: parent
                     text: root.appName ? root.appName.charAt(0).toUpperCase() : "?"
-                    font.family: Theme.font
-                    font.pixelSize: 12
-                    font.weight: Font.Bold
+                    font {
+                        family: Theme.font
+                        pixelSize: 12
+                        weight: Font.Bold
+                    }
                     color: root.isCurrent ? Theme.accent : Theme.text
                 }
             }
@@ -68,8 +70,10 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             width: parent.width - iconImg.width - parent.spacing
             text: root.appName
-            font.family: Theme.font
-            font.pixelSize: 14
+            font {
+                family: Theme.font
+                pixelSize: Configs.appListTitleSize
+            }
             color: root.isCurrent ? Theme.accentText : Theme.text
             elide: Text.ElideRight
 

@@ -5,11 +5,6 @@ import "../../services"
 Item {
     id: root
 
-    property real paddingX: 18
-    property real paddingY: 16
-    property real gridGap: 4
-    property real cellSize: 30
-
     property int viewYear: CalendarService.today.getFullYear()
     property int viewMonth: CalendarService.today.getMonth()
     property string selectedDateKey: ""
@@ -18,9 +13,8 @@ Item {
     readonly property int firstWeekdayOffset: (new Date(viewYear, viewMonth, 1).getDay() + 6) % 7
     readonly property int daysInMonth: new Date(viewYear, viewMonth + 1, 0).getDate()
 
-    // Размеры автоматически считаются от внутреннего контента
-    implicitWidth: contentColumn.implicitWidth + (paddingX * 2)
-    implicitHeight: contentColumn.implicitHeight + (paddingY * 2)
+    implicitWidth: contentColumn.implicitWidth + (Configs.calPaddingX * 2)
+    implicitHeight: contentColumn.implicitHeight + (Configs.calPaddingY * 2)
 
     function resetView() {
         viewYear = CalendarService.today.getFullYear();
@@ -29,25 +23,24 @@ Item {
     }
 
     function selectDay(day) {
-        if (day >= 1 && day <= daysInMonth)
+        if (day >= 1 && day <= daysInMonth) {
             selectedDateKey = CalendarService.dayKey(viewYear, viewMonth, day);
+        }
     }
 
     function changeMonth(delta) {
         if (transitioning)
             return;
         transitioning = true;
-        monthFade.opacity = 0;
         transitionTimer.delta = delta;
         transitionTimer.start();
     }
 
     Timer {
         id: transitionTimer
-        interval: 300
+        interval: Configs.calTransitionDuration
         property int delta: 0
         onTriggered: {
-            // Упрощенная логика смены месяца
             let newMonth = root.viewMonth + delta;
             if (newMonth < 0) {
                 root.viewMonth = 11;
@@ -59,12 +52,10 @@ Item {
                 root.viewMonth = newMonth;
             }
             root.selectedDateKey = "";
-            monthFade.opacity = 1;
             root.transitioning = false;
         }
     }
 
-    // Вся верстка календаря автоматически складывается в колонку
     Column {
         id: contentColumn
         anchors.centerIn: parent
@@ -73,7 +64,7 @@ Item {
         // Заголовок (кнопки и месяц)
         Row {
             width: dayGrid.implicitWidth
-            height: 28
+            height: Configs.calHeaderHeight
 
             NavButton {
                 text: "‹"
@@ -87,7 +78,7 @@ Item {
                 text: CalendarService.monthTitle(root.viewYear, root.viewMonth)
                 font {
                     family: Theme.font
-                    pixelSize: 13
+                    pixelSize: Configs.calTitleSize
                     weight: Font.DemiBold
                 }
                 color: Theme.text
@@ -102,16 +93,16 @@ Item {
 
         // Дни недели
         Row {
-            spacing: root.gridGap
+            spacing: Configs.calGridGap
             Repeater {
                 model: ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
                 delegate: Text {
-                    width: root.cellSize
+                    width: Configs.calCellSize
                     horizontalAlignment: Text.AlignHCenter
                     text: modelData
                     font {
                         family: Theme.font
-                        pixelSize: 9
+                        pixelSize: Configs.calWeekdaySize
                         weight: Font.DemiBold
                     }
                     color: Theme.textMuted
@@ -125,9 +116,11 @@ Item {
             implicitWidth: dayGrid.implicitWidth
             implicitHeight: dayGrid.implicitHeight
 
+            // Декларативная привязка анимации исчезновения
+            opacity: root.transitioning ? 0 : 1
             Behavior on opacity {
                 NumberAnimation {
-                    duration: 300
+                    duration: Configs.calTransitionDuration
                     easing.type: Motion.easeStandard
                 }
             }
@@ -135,8 +128,8 @@ Item {
             Grid {
                 id: dayGrid
                 columns: 7
-                rowSpacing: root.gridGap
-                columnSpacing: root.gridGap
+                rowSpacing: Configs.calGridGap
+                columnSpacing: Configs.calGridGap
 
                 Repeater {
                     model: 42

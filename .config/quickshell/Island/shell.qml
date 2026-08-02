@@ -69,4 +69,16 @@ PanelWindow {
             root.requestSurface(name);
         }
     }
+    Connections {
+        target: BrightnessService
+        function onSurfaceRequested(name) {
+            root.requestSurface(name);
+        }
+    }
+    Connections {
+        target: AudioService
+        function onSurfaceRequested(name) {
+            root.requestSurface(name);
+        }
+    }
 }

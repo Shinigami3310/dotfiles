@@ -14,8 +14,8 @@ Item {
 
     readonly property bool hovered: mouseArea.containsMouse
 
-    width: 30
-    height: 30
+    width: Configs.calCellSize
+    height: Configs.calCellSize
     transformOrigin: Item.Center
 
     scale: hovered ? 1.1 : 1.0
@@ -32,16 +32,24 @@ Item {
         anchors.fill: parent
         radius: 8
         color: root.selected ? Theme.accent : (root.hovered ? Theme.hover : "transparent")
-        border.width: (root.selected || root.isToday || root.hovered) ? 1 : 0
-        border.color: (root.selected || root.isToday) ? Theme.accent : Theme.separator
+
+        border {
+            width: (root.selected || root.isToday || root.hovered) ? 1 : 0
+            color: (root.selected || root.isToday) ? Theme.accent : Theme.separator
+        }
+        Behavior on color {
+            ColorAnimation {
+                duration: Motion.fast
+            }
+        }
     }
 
     Text {
         anchors.centerIn: parent
-        text: root.inMonth ? root.dayNumber : ""
+        text: root.inMonth ? root.dayNumber.toString() : ""
         font {
             family: Theme.font
-            pixelSize: 12
+            pixelSize: Configs.calDayTextSize
             weight: root.selected ? Font.DemiBold : Font.Medium
         }
         color: root.selected ? Theme.accentText : (root.isToday ? Theme.text : Theme.textMuted)
@@ -52,7 +60,7 @@ Item {
         anchors.fill: parent
         enabled: root.inMonth
         hoverEnabled: true
-        cursorShape: Qt.PointingHandCursor
+        cursorShape: inMonth ? Qt.PointingHandCursor : Qt.ArrowCursor
         onClicked: root.clicked()
     }
 }

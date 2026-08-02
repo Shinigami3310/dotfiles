@@ -5,8 +5,8 @@ import "../../theme"
 Item {
     id: root
 
-    implicitWidth: layout.implicitWidth + 32
-    implicitHeight: layout.implicitHeight + 32
+    implicitWidth: layout.implicitWidth + Configs.batteryLayoutPadding
+    implicitHeight: layout.implicitHeight + Configs.batteryLayoutPadding
 
     BatteryService {
         id: batteryService
@@ -26,42 +26,40 @@ Item {
     Column {
         id: layout
         anchors.centerIn: parent
-        spacing: 20
+        spacing: Configs.batteryLayoutSpacing
 
         Row {
             anchors.horizontalCenter: parent.horizontalCenter
-            spacing: 16
+            spacing: Configs.batteryHeaderSpacing
 
             Item {
                 anchors.verticalCenter: parent.verticalCenter
                 width: Configs.batteryFrameWidth
                 height: Configs.batteryFrameHeight
 
-                // Внешний контур батареи
                 Rectangle {
                     id: batteryFrame
                     anchors {
                         fill: parent
-                        rightMargin: 5
+                        rightMargin: Configs.batteryTerminalWidth + 1
                     }
-                    radius: 6
+                    radius: Configs.batteryFrameRadius
                     color: "transparent"
                     border {
                         color: Theme.text
-                        width: 2.5
+                        width: Configs.batteryBorderWidth
                     }
 
-                    // Индикатор заряда
                     Rectangle {
                         anchors {
                             left: parent.left
                             top: parent.top
                             bottom: parent.bottom
-                            margins: 3.5
+                            margins: Configs.batteryInnerMargin
                         }
-                        // Вычисляем ширину в зависимости от процентов
-                        width: Math.max(0, (parent.width - 7) * (root.displayPercent / 100))
-                        radius: 3
+
+                        width: Math.max(0, (parent.width - (Configs.batteryInnerMargin * 2)) * (root.displayPercent / 100))
+                        radius: Configs.batteryIndicatorRadius
                         color: batteryService.isCharging ? Theme.accent : Theme.text
 
                         Behavior on color {
@@ -72,15 +70,14 @@ Item {
                     }
                 }
 
-                // "Клемма" батареи
                 Rectangle {
                     anchors {
                         right: parent.right
                         verticalCenter: parent.verticalCenter
                     }
-                    width: 4
-                    height: 12
-                    radius: 2
+                    width: Configs.batteryTerminalWidth
+                    height: Configs.batteryTerminalHeight
+                    radius: Configs.batteryTerminalRadius
                     color: Theme.text
                 }
             }
@@ -99,7 +96,7 @@ Item {
 
         Row {
             anchors.horizontalCenter: parent.horizontalCenter
-            spacing: 12
+            spacing: Configs.batteryProfileSpacing
 
             ProfileButton {
                 profileId: "power-saver"

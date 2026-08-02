@@ -11,7 +11,11 @@ RowLayout {
     property real iconOpacity: 1.0
     property bool interactiveIcon: false
     property color fillColor: Theme.accent
-    property real percentWidth: 40
+
+    readonly property real clampedValue: Math.max(0.0, Math.min(1.0, root.value))
+
+    // Декларативная привязка (значение всегда актуально)
+    property real visualValue: clampedValue
 
     signal requestValueChange(real requestedValue)
     signal iconClicked
@@ -19,20 +23,39 @@ RowLayout {
 
     spacing: 10
 
+    // Анимация визуальной части
+    Behavior on visualValue {
+        // Ключевой момент: отключаем анимацию при ручном перетаскивании (убираем "лаг" за мышью).
+        // Анимация работает только при изменении извне.
+        enabled: !sliderMouse.pressed
+
+        NumberAnimation {
+            duration: Motion.fast
+            easing.type: Motion.easeStandard
+        }
+    }
+
+    function clamp(val, minValue, maxValue) {
+        return Math.max(minValue, Math.min(maxValue, val));
+    }
+
     Rectangle {
         id: iconBtn
-        Layout.preferredWidth: 32
-        Layout.preferredHeight: 32
+        Layout.preferredWidth: Configs.sliderIconBoxSize
+        Layout.preferredHeight: Configs.sliderIconBoxSize
         Layout.alignment: Qt.AlignVCenter
         radius: 10
         color: Theme.surface1
-        border.color: (root.interactiveIcon && iconMouse.containsMouse) ? Theme.accentSoft : Theme.panelBorder
-        border.width: 1
+
+        border {
+            color: (root.interactiveIcon && iconMouse.containsMouse) ? Theme.accentSoft : Theme.panelBorder
+            width: 1
+        }
 
         Image {
             anchors.centerIn: parent
-            width: 18
-            height: 18
+            width: Configs.sliderIconSize
+            height: Configs.sliderIconSize
             source: root.iconSource
             fillMode: Image.PreserveAspectFit
             smooth: true
@@ -44,6 +67,8 @@ RowLayout {
             anchors.fill: parent
             hoverEnabled: root.interactiveIcon
             enabled: root.interactiveIcon
+            cursorShape: root.interactiveIcon ? Qt.PointingHandCursor : Qt.ArrowCursor
+
             onClicked: {
                 root.iconClicked();
                 root.interacted();
@@ -53,28 +78,23 @@ RowLayout {
 
     Rectangle {
         id: track
-        Layout.preferredWidth: 180
-        Layout.preferredHeight: 10
+        Layout.preferredWidth: Configs.sliderTrackWidth
+        Layout.preferredHeight: Configs.sliderTrackHeight
         Layout.alignment: Qt.AlignVCenter
         radius: height / 2
         color: Theme.surface1
-        border.color: sliderMouse.containsMouse ? Theme.accentSoft : Theme.panelBorder
-        border.width: 1
         clip: true
+
+        border {
+            color: sliderMouse.containsMouse ? Theme.accentSoft : Theme.panelBorder
+            width: 1
+        }
 
         Rectangle {
             height: parent.height
-            width: parent.width * Math.max(0.0, Math.min(1.0, root.value))
+            width: parent.width * root.visualValue
             radius: parent.radius
             color: root.fillColor
-
-            Behavior on width {
-                enabled: !sliderMouse.pressed
-                NumberAnimation {
-                    duration: Motion.fast
-                    easing.type: Motion.easeStandard
-                }
-            }
         }
 
         MouseArea {
@@ -84,31 +104,38 @@ RowLayout {
             preventStealing: true
 
             function updatePos(mouseX) {
-                let val = Math.max(0.0, Math.min(1.0, mouseX / width));
-                root.requestValueChange(val);
+                const nextValue = root.clamp(mouseX / width, 0.0, 1.0);
+                root.requestValueChange(nextValue);
                 root.interacted();
             }
 
-            onPressed: mouse => updatePos(mouse.x)
-            onPositionChanged: mouse => {
+            onPressed: function (mouse) {
+                updatePos(mouse.x);
+            }
+
+            onPositionChanged: function (mouse) {
                 if (pressed)
                     updatePos(mouse.x);
             }
-            onWheel: wheel => {
-                let delta = wheel.angleDelta.y > 0 ? root.step : -root.step;
-                let val = Math.max(0.0, Math.min(1.0, root.value + delta));
-                root.requestValueChange(val);
+
+            onWheel: function (wheel) {
+                const delta = wheel.angleDelta.y > 0 ? root.step : -root.step;
+                const nextValue = root.clamp(root.value + delta, 0.0, 1.0);
+                root.requestValueChange(nextValue);
                 root.interacted();
             }
         }
     }
 
     Text {
-        Layout.preferredWidth: root.percentWidth
+        Layout.preferredWidth: Configs.sliderTextWidth
         Layout.alignment: Qt.AlignVCenter
         horizontalAlignment: Text.AlignRight
-        text: Math.round(root.value * 100) + "%"
+        text: Math.round(root.clampedValue * 100) + "%"
         color: Theme.text
-        font.pixelSize: 14
+        font {
+            family: Theme.font
+            pixelSize: 14
+        }
     }
 }

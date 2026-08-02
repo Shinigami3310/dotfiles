@@ -1,28 +1,21 @@
 import QtQuick
 import "../../theme"
-import "../../services"
 
 Item {
     id: root
 
-    property int totalSeconds: 10
-    property int remainingSeconds: totalSeconds
-
-    property real paddingX: 60
-    property real paddingY: 12
-
-    implicitWidth: timeText.implicitWidth + paddingX * 2
-    implicitHeight: timeText.implicitHeight + paddingY * 2
-
+    property int remainingSeconds: Configs.eyeSurfaceDuration
     signal backRequested
 
+    implicitWidth: timeText.implicitWidth + (Configs.eyePaddingX * 2)
+    implicitHeight: timeText.implicitHeight + (Configs.eyePaddingY * 2)
+
     Timer {
-        id: countdown
         interval: 1000
         repeat: true
         running: true
         onTriggered: {
-            if (remainingSeconds > 0) {
+            if (remainingSeconds > 1) {
                 remainingSeconds--;
             } else {
                 stop();
@@ -34,10 +27,12 @@ Item {
     Text {
         id: timeText
         anchors.centerIn: parent
-        text: "00:" + String(remainingSeconds).padStart(2, '0')
-        font.family: Theme.font
-        font.pixelSize: 22
-        font.weight: Font.Bold
+        text: `00:${String(remainingSeconds).padStart(2, '0')}`
+        font {
+            family: Theme.font
+            pixelSize: Configs.eyeTextSize
+            weight: Font.Bold
+        }
         color: Theme.accent
         antialiasing: true
     }

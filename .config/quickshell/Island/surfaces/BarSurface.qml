@@ -10,6 +10,6 @@ SurfaceBase {
         id: bar
         anchors.centerIn: parent
         onSurfaceRequested: name => parent.surfaceRequested(name)
-        onCloseRequested: closeRequested()
+        onCloseRequested: parent.closeRequested()
     }
 }

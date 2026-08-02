@@ -16,43 +16,51 @@ QtObject {
         }
     }
 
-    property Process batteryMonitor: Process {
-        command: ["sh", "-c", `
-            while true; do
-                BAT=$(ls -d /sys/class/power_supply/BAT* 2>/dev/null | head -n 1)
-                if [ -n "$BAT" ]; then
-                    echo "$(cat $BAT/capacity 2>/dev/null || echo 100):$(cat $BAT/status 2>/dev/null || echo Discharging)"
-                else
-                    echo "100:Full"
-                fi
-                sleep 3
-            done
-        `]
+    property Process eventListener: Process {
+        command: ["udevadm", "monitor", "-s", "power_supply"]
+        running: true
+        stdout: SplitParser {
+            onRead: _ => {
+                if (!batProc.running)
+                    batProc.running = true;
+            }
+        }
+    }
+
+    property Process batProc: Process {
+        command: ["sh", "-c", "b=$(ls -d /sys/class/power_supply/BAT* 2>/dev/null | head -n 1); [ -n \"$b\" ] && echo \"$(cat $b/capacity 2>/dev/null):$(cat $b/status 2>/dev/null)\" || echo '100:Full'"]
         running: true
         stdout: SplitParser {
             onRead: data => {
-                const parts = data.trim().split(":");
+                let parts = data.trim().split(":");
                 if (parts.length === 2) {
-                    const cap = parseInt(parts[0], 10);
-                    if (!isNaN(cap)) {
-                        root.percent = Math.min(100, Math.max(0, cap));
-                    }
-                    const status = parts[1].toLowerCase();
-                    root.isCharging = ["charging", "full", "not charging"].includes(status);
+                    root.percent = parseInt(parts[0]) || 100;
+                    root.isCharging = ["Charging", "Full"].includes(parts[1]);
                 }
             }
         }
     }
 
-    property Process profileMonitor: Process {
-        command: ["sh", "-c", "while true; do powerprofilesctl get 2>/dev/null || echo balanced; sleep 3; done"]
-        running: true
+    property Process profileProc: Process {
+        command: ["powerprofilesctl", "get"]
+        running: false
         stdout: SplitParser {
             onRead: data => {
-                const trimmed = data.trim();
-                if (trimmed) {
+                let trimmed = data.trim();
+                if (trimmed)
                     root.activeProfile = trimmed;
-                }
+            }
+        }
+    }
+
+    property Timer profileTimer: Timer {
+        interval: 60000
+        repeat: true
+        running: true
+        triggeredOnStart: true
+        onTriggered: {
+            if (!root.profileProc.running) {
+                root.profileProc.running = true;
             }
         }
     }

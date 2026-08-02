@@ -4,8 +4,8 @@ import "../../theme"
 FocusScope {
     id: root
 
-    implicitWidth: 360
-    implicitHeight: 48
+    implicitWidth: Configs.appLauncherWidth
+    implicitHeight: Configs.appSearchHeight
     focus: true
 
     property alias text: input.text
@@ -21,10 +21,13 @@ FocusScope {
 
     Rectangle {
         anchors.fill: parent
-        radius: 8
+        radius: Configs.appSearchRadius
         color: Theme.surface2
-        border.color: input.activeFocus ? Theme.accent : "transparent"
-        border.width: 1
+
+        border {
+            color: input.activeFocus ? Theme.accent : "transparent"
+            width: 1
+        }
 
         Behavior on border.color {
             ColorAnimation {
@@ -42,29 +45,34 @@ FocusScope {
             Text {
                 anchors.verticalCenter: parent.verticalCenter
                 text: "🔍"
-                font.pixelSize: 16
+                font.pixelSize: Configs.appSearchIconSize
                 color: input.activeFocus ? Theme.accent : Theme.textMuted
             }
 
             TextInput {
                 id: input
                 anchors.verticalCenter: parent.verticalCenter
-                width: parent.width - 28
+                width: parent.width - 28 // Учет иконки и spacing
                 focus: true
 
-                font.family: Theme.font
-                font.pixelSize: 15
+                font {
+                    family: Theme.font
+                    pixelSize: Configs.appSearchTextSize
+                }
                 color: Theme.text
                 selectionColor: Theme.accent
                 selectedTextColor: Theme.accentText
                 clip: true
 
+                // Placeholder текст
                 Text {
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
-                    text: "Enter app name"
-                    font.family: Theme.font
-                    font.pixelSize: 15
+                    text: "Search apps..."
+                    font {
+                        family: Theme.font
+                        pixelSize: Configs.appSearchTextSize
+                    }
                     color: Theme.textMuted
                     visible: input.text === "" && !input.activeFocus
                 }
@@ -73,10 +81,11 @@ FocusScope {
                 Keys.onDownPressed: root.downPressed()
                 Keys.onReturnPressed: root.enterPressed()
                 Keys.onEscapePressed: {
-                    if (input.text !== "")
+                    if (input.text !== "") {
                         input.text = "";
-                    else
+                    } else {
                         root.escapePressed();
+                    }
                 }
             }
         }

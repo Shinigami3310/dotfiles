@@ -27,7 +27,7 @@ Row {
             height: Configs.workspaceDotSize
             radius: width / 2
 
-            scale: mouseArea.pressed ? 1.2 : (mouseArea.containsMouse ? 1.5 : 1.0)
+            scale: mouseArea.pressed ? 0.9 : (mouseArea.containsMouse ? 1.2 : 1.0)
             transformOrigin: Item.Center
 
             color: isActive ? Theme.accent : (isOccupied ? Theme.text : "transparent")

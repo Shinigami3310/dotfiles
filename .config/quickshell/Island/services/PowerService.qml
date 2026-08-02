@@ -7,6 +7,5 @@ QtObject {
 
     function openMenu() {
         Quickshell.execDetached(["qs", "-c", "PowerMenu"]);
-        root.closeRequested();
     }
 }

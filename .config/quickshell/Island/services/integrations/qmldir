@@ -2,3 +2,5 @@ singleton EyeReminderService EyeReminderService.qml
 singleton PomodoroService PomodoroService.qml
 singleton WifiService WifiService.qml
 singleton BluetoothService BluetoothService.qml
+singleton BrightnessService BrightnessService.qml
+singleton AudioService AudioService.qml

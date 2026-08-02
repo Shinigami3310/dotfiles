@@ -5,7 +5,7 @@ Item {
     id: root
 
     property alias model: listView.model
-    property int maxHeight: 360
+    property int maxHeight: Configs.appListMaxHeight
 
     signal launchRequested(string execCommand)
 
@@ -18,7 +18,6 @@ Item {
 
     clip: true
 
-    // Плавная анимация implicitHeight пробрасывается вверх в Column -> root -> Surface
     Behavior on implicitHeight {
         NumberAnimation {
             duration: Motion.fast
@@ -52,18 +51,17 @@ Item {
             }
         }
 
-        // Анимации элементов внутри списка
         add: Transition {
             NumberAnimation {
                 property: "opacity"
                 from: 0
                 to: 1
-                duration: Motion.fast
+                duration: Motion.standard
             }
             NumberAnimation {
                 property: "y"
                 from: -20
-                duration: Motion.fast
+                duration: Motion.standard
                 easing.type: Easing.OutQuart
             }
         }
@@ -72,14 +70,14 @@ Item {
             NumberAnimation {
                 property: "opacity"
                 to: 0
-                duration: Motion.fast
+                duration: Motion.standard
             }
         }
 
         displaced: Transition {
             NumberAnimation {
                 properties: "x,y"
-                duration: Motion.fast
+                duration: Motion.standard
                 easing.type: Easing.OutQuart
             }
         }
@@ -87,7 +85,7 @@ Item {
         move: Transition {
             NumberAnimation {
                 properties: "x,y"
-                duration: Motion.fast
+                duration: Motion.standard
                 easing.type: Easing.OutQuart
             }
         }
@@ -96,7 +94,6 @@ Item {
             appName: model.name
             appIcon: model.icon
             appExec: model.exec
-
             isCurrent: ListView.isCurrentItem
 
             onClicked: {

@@ -6,42 +6,21 @@ QtObject {
     id: root
 
     property bool active: false
-    property int temperature: 5000
+    property string temperature: "5000"
 
     function toggle() {
         if (active)
-            turnOff();
+            Quickshell.execDetached(["killall", "hyprsunset"]);
         else
-            turnOn();
+            Quickshell.execDetached(["hyprsunset", "-t", temperature]);
+        active = !active;
     }
 
-    function turnOn() {
-        Quickshell.execDetached(["hyprsunset", "-t", temperature.toString()]);
-        checkProc.running = true;
-    }
-
-    function turnOff() {
-        Quickshell.execDetached(["killall", "hyprsunset"]);
-        checkProc.running = true;
-    }
-
-    readonly property Process checkProc: Process {
+    property Process initCheck: Process {
         command: ["pgrep", "-x", "hyprsunset"]
-        running: false
+        running: true
         onExited: exitCode => {
             root.active = (exitCode === 0);
-        }
-    }
-
-    readonly property Timer syncTimer: Timer {
-        interval: 500
-        repeat: true
-        running: true
-        triggeredOnStart: true
-        onTriggered: {
-            if (!root.checkProc.running) {
-                root.checkProc.running = true;
-            }
         }
     }
 }
