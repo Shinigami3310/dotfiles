@@ -46,6 +46,12 @@ PanelWindow {
         id: catalog
     }
 
+    Component.onCompleted: {
+        Qt.application.organization = "Island";
+        Qt.application.domain = "island.com";
+        Qt.application.name = "Island";
+    }
+
     Island {
         id: island
 

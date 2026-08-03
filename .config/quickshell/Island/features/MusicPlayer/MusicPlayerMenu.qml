@@ -1,39 +1,60 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Controls
 import "../../theme"
 import "../../services/integrations"
 
 ColumnLayout {
     id: root
     spacing: 8
-
-    // 0 = Закрыто, 1 = Треки текущего плейлиста, 2 = Список плейлистов
     property int menuState: 0
 
-    // Кнопка Повтора (размещена ВЫШЕ стрелки)
-    Image {
+    // Кнопка Повтора
+    Button {
         Layout.alignment: Qt.AlignHCenter
-        source: MusicPlayerService.repeatTrack ? Qt.resolvedUrl("../../../assets/icons/repeat_on.png") : Qt.resolvedUrl("../../../assets/icons/repeat_off.png")
-        sourceSize: Qt.size(20, 20)
-
-        MouseArea {
-            anchors.fill: parent
-            anchors.margins: -8
-            onClicked: MusicPlayerService.toggleRepeat()
+        implicitWidth: 36
+        implicitHeight: 36
+        icon.source: Qt.resolvedUrl("../../assets/icons/Repeat.png")
+        icon.color: MusicPlayerService.repeatTrack ? Theme.accent : (pressed ? Theme.accent : Theme.text)
+        icon.width: 20
+        icon.height: 20
+        background: Item {}
+        scale: pressed ? 0.9 : (hovered ? 1.1 : 1.0)
+        Behavior on scale {
+            NumberAnimation {
+                duration: 150
+                easing.type: Easing.OutQuad
+            }
         }
+        onClicked: MusicPlayerService.toggleRepeat()
     }
 
-    // Стрелка раскрытия меню
+    // Разделитель
+    Rectangle {
+        Layout.fillWidth: true
+        Layout.preferredHeight: 1
+        Layout.topMargin: -4     // подтянет линию вверх, ближе к контролам
+        Layout.bottomMargin: -4  // или наоборот
+        color: Theme.panelBorder
+    }
+
+    // Стрелка меню
     Image {
         Layout.alignment: Qt.AlignHCenter
-        source: root.menuState === 0 ? Qt.resolvedUrl("../../../assets/icons/arrow_down.png") : Qt.resolvedUrl("../../../assets/icons/arrow_up.png")
+        source: Qt.resolvedUrl("../../assets/icons/Arrow_down.png")
         sourceSize: Qt.size(22, 22)
+        rotation: root.menuState === 0 ? 0 : 180
+        Behavior on rotation {
+            NumberAnimation {
+                duration: 250
+                easing.type: Easing.InOutQuad
+            }
+        }
 
         MouseArea {
             anchors.fill: parent
             anchors.margins: -8
             acceptedButtons: Qt.LeftButton | Qt.RightButton
-
             onClicked: mouse => {
                 if (mouse.button === Qt.LeftButton) {
                     root.menuState = (root.menuState === 1) ? 0 : 1;
@@ -44,12 +65,11 @@ ColumnLayout {
         }
     }
 
-    // Список элементов
+    // Список
     ListView {
         id: expandList
         Layout.fillWidth: true
         Layout.preferredHeight: root.menuState === 0 ? 0 : Math.min(contentHeight, 220)
-
         Behavior on Layout.preferredHeight {
             NumberAnimation {
                 duration: 200
@@ -59,26 +79,22 @@ ColumnLayout {
 
         clip: true
         spacing: 4
-
         model: root.menuState === 1 ? MusicPlayerService.playlist : (root.menuState === 2 ? MusicPlayerService.playlistNames : null)
-
         delegate: Rectangle {
             width: ListView.view.width
             height: 48
             color: itemMouse.containsMouse ? Theme.surface1 : "transparent"
             radius: 8
-
             MouseArea {
                 id: itemMouse
                 anchors.fill: parent
                 hoverEnabled: true
-
                 onClicked: {
                     if (root.menuState === 1) {
                         MusicPlayerService.loadTrack(index, true);
                     } else if (root.menuState === 2) {
                         MusicPlayerService.setPlaylist(modelData, false);
-                        root.menuState = 1; // Возвращаемся в панель треков этого плейлиста
+                        root.menuState = 1;
                     }
                 }
             }
@@ -87,29 +103,26 @@ ColumnLayout {
                 anchors.fill: parent
                 anchors.margins: 6
                 spacing: 10
-
-                // Маленькая обложка слева
+                // Обложка (только для треков)
                 Rectangle {
+                    visible: root.menuState === 1
                     width: 36
                     height: 36
                     radius: 6
                     color: Theme.surface1
                     clip: true
                     Layout.alignment: Qt.AlignVCenter
-
                     Image {
                         anchors.fill: parent
-                        source: (root.menuState === 1 && modelData.name) ? Qt.resolvedUrl(`${MusicPlayerService.coversPath}/${modelData.name}.png`) : Qt.resolvedUrl("../../../assets/icons/folder.png")
+                        source: (root.menuState === 1 && modelData.originalName) ? (MusicPlayerService.coversPath + "/" + modelData.originalName + ".png") : ""
                         fillMode: Image.PreserveAspectCrop
                     }
                 }
 
-                // Название трека и группы (для файлов) или название папки (для плейлистов)
                 ColumnLayout {
                     Layout.fillWidth: true
                     Layout.alignment: Qt.AlignVCenter
                     spacing: 2
-
                     Text {
                         Layout.fillWidth: true
                         text: root.menuState === 1 ? modelData.name : modelData
@@ -118,32 +131,21 @@ ColumnLayout {
                         font.bold: true
                         elide: Text.ElideRight
                     }
-
-                    Text {
-                        visible: root.menuState === 1
-                        Layout.fillWidth: true
-                        text: MusicPlayerService.playlist[index]?.artist || "Артист"
-                        color: Theme.subtext || Theme.text
-                        font.pixelSize: 11
-                        opacity: 0.7
-                        elide: Text.ElideRight
-                    }
                 }
 
-                // Кнопка быстрого запуска плейлиста справа (только в режиме плейлистов)
-                Image {
+                Button {
                     visible: root.menuState === 2
-                    source: Qt.resolvedUrl("../../../assets/icons/play_small.png")
-                    sourceSize: Qt.size(20, 20)
                     Layout.alignment: Qt.AlignVCenter
-
-                    MouseArea {
-                        anchors.fill: parent
-                        anchors.margins: -4
-                        onClicked: {
-                            MusicPlayerService.setPlaylist(modelData, true);
-                            root.menuState = 1;
-                        }
+                    implicitWidth: 32
+                    implicitHeight: 32
+                    icon.source: Qt.resolvedUrl("../../assets/icons/Play.png")
+                    icon.color: Theme.text
+                    icon.width: 16
+                    icon.height: 16
+                    background: Item {}
+                    onClicked: {
+                        MusicPlayerService.setPlaylist(modelData, true);
+                        root.menuState = 1;
                     }
                 }
             }

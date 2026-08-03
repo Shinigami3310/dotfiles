@@ -5,95 +5,139 @@ import "../../services/integrations"
 
 ColumnLayout {
     id: root
-    spacing: 12
+    spacing: 16
 
-    property string trackTitle: MusicPlayerService.playlist[MusicPlayerService.currentIndex]?.name || "Загрузка..."
-    property string trackArtist: "Исполнитель"
-    property string coverUrl: ""
+    property string currentCover: MusicPlayerService.trackCover
+    property string currentTitle: MusicPlayerService.trackTitle
+    property string currentArtist: MusicPlayerService.trackArtist
 
+    // Слушаем изменения и запускаем анимацию с задержкой, чтобы сгруппировать обновления
     Connections {
         target: MusicPlayerService
-        function onTrackChanged(title, artist, album, cover) {
-            root.trackTitle = title;
-            root.trackArtist = artist;
-            root.coverUrl = cover;
+        function onTrackTitleChanged() {
+            updateTimer.restart();
+        }
+        function onTrackCoverChanged() {
+            updateTimer.restart();
+        }
+        function onTrackArtistChanged() {
+            updateTimer.restart();
         }
     }
 
-    // 1. Обложка
-    Rectangle {
-        Layout.alignment: Qt.AlignHCenter
-        Layout.preferredWidth: 160
-        Layout.preferredHeight: 160
-        radius: 12
-        color: Theme.surface1
-        clip: true
-
-        Image {
-            anchors.fill: parent
-            source: root.coverUrl || Qt.resolvedUrl("../../../assets/icons/cover_fallback.png")
-            fillMode: Image.PreserveAspectCrop
-            smooth: true
-        }
-    }
-
-    // 2. Название трека (Бегущая строка по кругу)
-    Item {
-        Layout.fillWidth: true
-        Layout.preferredHeight: titleText.implicitHeight
-        clip: true
-
-        Text {
-            id: titleText
-            text: root.trackTitle
-            font.pixelSize: 16
-            font.bold: true
-            color: Theme.text
-
-            readonly property bool overflow: implicitWidth > parent.width
-
-            x: overflow ? marqueeAnim.currentX : (parent.width - implicitWidth) / 2
-
-            SequentialAnimation {
-                id: marqueeAnim
-                running: titleText.overflow
-                loops: Animation.Infinite
-                property real currentX: 0
-
-                PauseAnimation {
-                    duration: 1500
-                }
-                NumberAnimation {
-                    target: marqueeAnim
-                    property: "currentX"
-                    from: 0
-                    to: -(titleText.implicitWidth - titleText.parent.width)
-                    duration: Math.max(2000, (titleText.implicitWidth - titleText.parent.width) * 30)
-                    easing.type: Easing.InOutQuad
-                }
-                PauseAnimation {
-                    duration: 1500
-                }
-                NumberAnimation {
-                    target: marqueeAnim
-                    property: "currentX"
-                    to: 0
-                    duration: Math.max(2000, (titleText.implicitWidth - titleText.parent.width) * 30)
-                    easing.type: Easing.InOutQuad
-                }
+    Timer {
+        id: updateTimer
+        interval: 50
+        onTriggered: {
+            if (currentTitle !== MusicPlayerService.trackTitle || currentCover !== MusicPlayerService.trackCover) {
+                fadeAnim.restart();
+            } else if (currentArtist !== MusicPlayerService.trackArtist) {
+                currentArtist = MusicPlayerService.trackArtist;
+                fadeAnim.restart();
             }
         }
     }
 
-    // 3. Исполнитель / Группа
-    Text {
-        Layout.alignment: Qt.AlignHCenter
+    SequentialAnimation {
+        id: fadeAnim
+        NumberAnimation {
+            target: contentGroup
+            property: "opacity"
+            to: 0
+            duration: 150
+            easing.type: Easing.InOutQuad
+        }
+        ScriptAction {
+            script: {
+                currentCover = MusicPlayerService.trackCover;
+                currentTitle = MusicPlayerService.trackTitle;
+                currentArtist = MusicPlayerService.trackArtist;
+            }
+        }
+        NumberAnimation {
+            target: contentGroup
+            property: "opacity"
+            to: 1
+            duration: 150
+            easing.type: Easing.InOutQuad
+        }
+    }
+
+    ColumnLayout {
+        id: contentGroup
         Layout.fillWidth: true
-        horizontalAlignment: Text.AlignHCenter
-        text: root.trackArtist
-        font.pixelSize: 13
-        color: Theme.subtext || Theme.text
-        elide: Text.ElideRight
-        opacity: 0.8
+        spacing: 16
+
+        // 1. Обложка альбома
+        Rectangle {
+            Layout.alignment: Qt.AlignHCenter
+            Layout.preferredWidth: 200
+            Layout.preferredHeight: 200
+            radius: 12
+            color: Theme.surface1
+            clip: true
+
+            Image {
+                anchors.fill: parent
+                source: root.currentCover || Qt.resolvedUrl("../../assets/icons/Fallback.png")
+                fillMode: Image.PreserveAspectCrop
+                smooth: true
+            }
+        }
+
+        // 2. Название трека (Бегущая строка)
+        Item {
+            Layout.fillWidth: true
+            Layout.preferredHeight: titleText.implicitHeight
+            clip: true
+            Text {
+                id: titleText
+                text: root.currentTitle
+                font.pixelSize: 18
+                font.bold: true
+                color: Theme.text
+                x: fits ? (parent.width - implicitWidth) / 2 : anim.currentX
+                readonly property bool fits: implicitWidth <= parent.width
+
+                onTextChanged: anim.currentX = 0 // Сброс позиции при смене трека
+
+                SequentialAnimation {
+                    id: anim
+                    running: !titleText.fits
+                    loops: Animation.Infinite
+                    property real currentX: 0
+                    PauseAnimation {
+                        duration: 1500
+                    }
+                    NumberAnimation {
+                        target: anim
+                        property: "currentX"
+                        from: 0
+                        to: Math.min(0, titleText.parent ? (titleText.parent.width - titleText.implicitWidth) : 0)
+                        duration: Math.max(1, (titleText.implicitWidth - (titleText.parent ? titleText.parent.width : 0)) * 15)
+                    }
+                    PauseAnimation {
+                        duration: 1500
+                    }
+                    NumberAnimation {
+                        target: anim
+                        property: "currentX"
+                        to: 0
+                        duration: 0
+                    }
+                }
+            }
+        }
+
+        // 3. Исполнитель
+        Text {
+            Layout.alignment: Qt.AlignHCenter
+            Layout.maximumWidth: parent.width
+            text: root.currentArtist
+            font.pixelSize: 14
+            color: Theme.text
+            opacity: 0.8
+            elide: Text.ElideRight
+        }
     }
 }

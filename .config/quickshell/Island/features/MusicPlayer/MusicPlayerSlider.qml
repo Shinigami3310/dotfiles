@@ -3,15 +3,14 @@ import QtQuick.Layouts
 import "../../theme"
 import "../../services/integrations"
 
-RowLayout {
+ColumnLayout {
     id: root
-    spacing: 12
+    spacing: 8
 
     Rectangle {
         id: sliderTrack
         Layout.fillWidth: true
         Layout.preferredHeight: 6
-        Layout.alignment: Qt.AlignVCenter
         color: Theme.surface1
         radius: height / 2
 
@@ -25,11 +24,9 @@ RowLayout {
         MouseArea {
             id: sliderMouse
             anchors.fill: parent
-            anchors.margins: -8
 
             property bool dragActive: false
             property real visualProgress: 0
-            property bool wasPlaying: false
 
             function calcProgress(mouseX) {
                 return Math.max(0, Math.min(1, mouseX / width));
@@ -38,8 +35,6 @@ RowLayout {
             onPressed: mouse => {
                 dragActive = true;
                 visualProgress = calcProgress(mouse.x);
-                wasPlaying = MusicPlayerService.isPlaying;
-                MusicPlayerService.pause();
             }
 
             onPositionChanged: mouse => {
@@ -52,17 +47,27 @@ RowLayout {
                 visualProgress = calcProgress(mouse.x);
                 MusicPlayerService.seek(visualProgress * MusicPlayerService.duration);
                 dragActive = false;
-                if (wasPlaying) {
-                    MusicPlayerService.play();
-                }
             }
         }
     }
 
-    Text {
-        text: `${MusicPlayerService.formatTime(MusicPlayerService.position)} / ${MusicPlayerService.formatTime(MusicPlayerService.duration)}`
-        font.pixelSize: 11
-        color: Theme.text
-        Layout.alignment: Qt.AlignVCenter
+    RowLayout {
+        Layout.fillWidth: true
+
+        Text {
+            text: MusicPlayerService.formatTime(MusicPlayerService.position)
+            font.pixelSize: 11
+            color: Theme.text
+        }
+
+        Item {
+            Layout.fillWidth: true
+        }
+
+        Text {
+            text: MusicPlayerService.formatTime(MusicPlayerService.duration)
+            font.pixelSize: 11
+            color: Theme.text
+        }
     }
 }

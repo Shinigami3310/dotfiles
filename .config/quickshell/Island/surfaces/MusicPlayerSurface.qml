@@ -8,5 +8,6 @@ SurfaceBase {
     MusicPlayer {
         id: music
         anchors.centerIn: parent
+        onCloseRequested: parent.closeRequested()
     }
 }
