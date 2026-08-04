@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+# Включаем строгий режим: скрипт упадет при любой ошибке или необъявленной переменной
+set -euo pipefail
+
+WALLPAPER_DIR="$HOME/Pictures/Wallpapers"
+WALLPAPER_NAME="${1:-}" # Берем первый аргумент
+
+WALLPAPER_PATH="$WALLPAPER_DIR/$WALLPAPER_NAME"
+
+if [[ ! -f "$WALLPAPER_PATH" ]]; then
+  echo "Error: File '$WALLPAPER_PATH' not found."
+  exit 1
+fi
+
+# 1. Запуск анимации смены обоев (awww)
+# transition-pos 0.5,0.5 означает старт из центра экрана
+awww img "$WALLPAPER_PATH" \
+  --transition-type grow \
+  --transition-pos 0.5,0.5 \
+  --transition-duration 2.4 \
+  --transition-fps 60 &
+
+# 2. Генерация палитры
+# Запускаем matugen. Он обновит colors.json согласно config.toml
+matugen image "$WALLPAPER_PATH" --prefer saturation --type scheme-vibrant
+matugen image "$WALLPAPER_PATH" --prefer saturation --type scheme-vibrant
+
+echo "Theme set successfully: $WALLPAPER_NAME"

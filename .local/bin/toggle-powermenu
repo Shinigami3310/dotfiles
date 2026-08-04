@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+
+if pgrep -f "PowerMenu" > /dev/null; then
+    pkill -f "PowerMenu"
+else
+    qs -c PowerMenu
+fi
