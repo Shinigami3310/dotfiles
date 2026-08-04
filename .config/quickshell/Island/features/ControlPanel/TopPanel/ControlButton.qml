@@ -1,19 +1,26 @@
 import QtQuick
-import Qt5Compat.GraphicalEffects
+import QtQuick.Effects
 import "../../../theme"
 
 Item {
     id: root
 
+    // Локальные константы из Config
+    readonly property real controlButtonSize: 64
+    readonly property real controlImageSize: 28
+
     property string icon: ""
     property bool active: false
     property bool enableRightClick: false
 
+    readonly property bool hovered: hoverHandler.hovered
+    readonly property bool pressed: leftTap.pressed || rightTap.pressed
+
     signal clicked
     signal rightClicked
 
-    implicitWidth: Configs.controlButtonSize
-    implicitHeight: Configs.controlButtonSize
+    implicitWidth: controlButtonSize
+    implicitHeight: controlButtonSize
 
     Rectangle {
         id: bg
@@ -22,12 +29,12 @@ Item {
         height: parent.height
         radius: 12
 
-        border.color: Theme.panelBorder
+        border.color: root.active ? ThemeColor.primary : ThemeColor.outline_variant
         border.width: 1
 
-        color: Theme.surface1
+        color: "transparent"
 
-        scale: mouseArea.pressed ? 0.95 : (mouseArea.containsMouse ? 1.05 : 1.0)
+        scale: pressed ? 0.95 : (hovered ? 1.05 : 1.0)
 
         Behavior on color {
             ColorAnimation {
@@ -46,22 +53,23 @@ Item {
         Image {
             id: iconImage
             anchors.centerIn: parent
-            width: Configs.controlImageSize
-            height: Configs.controlImageSize
+            width: controlImageSize
+            height: controlImageSize
             sourceSize: Qt.size(width * 2, height * 2)
             source: root.icon !== "" ? Qt.resolvedUrl("../../../assets/icons/" + root.icon) : ""
             fillMode: Image.PreserveAspectFit
             smooth: true
+            mipmap: true
             visible: false
         }
 
-        ColorOverlay {
+        MultiEffect {
             anchors.fill: iconImage
             source: iconImage
-            color: (mouseArea.pressed || root.active) ? Theme.accent : Theme.textMuted
-            antialiasing: true
+            colorization: 1.0
+            colorizationColor: (pressed || root.active || hovered) ? ThemeColor.primary : ThemeColor.on_surface
 
-            Behavior on color {
+            Behavior on colorizationColor {
                 ColorAnimation {
                     duration: Motion.standard
                 }
@@ -69,18 +77,24 @@ Item {
         }
     }
 
-    MouseArea {
-        id: mouseArea
-        anchors.fill: parent
-        hoverEnabled: true
+    // Хэндлер для отслеживания курсора и наведения
+    HoverHandler {
+        id: hoverHandler
         cursorShape: Qt.PointingHandCursor
-        acceptedButtons: root.enableRightClick ? (Qt.LeftButton | Qt.RightButton) : Qt.LeftButton
+    }
 
-        onClicked: mouse => {
-            if (mouse.button === Qt.LeftButton)
-                root.clicked();
-            else if (mouse.button === Qt.RightButton)
-                root.rightClicked();
-        }
+    // Хэндлер клика ЛКМ
+    TapHandler {
+        id: leftTap
+        acceptedButtons: Qt.LeftButton
+        onTapped: root.clicked()
+    }
+
+    // Хэндлер клика ПКМ (включается только при enableRightClick)
+    TapHandler {
+        id: rightTap
+        enabled: root.enableRightClick
+        acceptedButtons: Qt.RightButton
+        onTapped: root.rightClicked()
     }
 }

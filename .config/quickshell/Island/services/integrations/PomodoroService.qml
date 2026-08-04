@@ -9,7 +9,10 @@ QtObject {
     property bool active: false
     property bool isWorking: true
     property int currentCycle: 1
-    property int remainingTime: Configs.pomodoroWorkTime
+    property int remainingTime: pomodoroWorkTime
+
+    readonly property int pomodoroWorkTime: 25 * 60
+    readonly property int pomodoroBreakTime: 5 * 60
 
     readonly property Timer timer: Timer {
         interval: 1000
@@ -31,7 +34,7 @@ QtObject {
             active = true;
             isWorking = true;
             currentCycle = 1;
-            remainingTime = Configs.pomodoroWorkTime;
+            remainingTime = pomodoroWorkTime;
             sendCliNotification("Timer start", "Time for work! (Cycle 1)");
         }
     }
@@ -43,13 +46,13 @@ QtObject {
                 sendCliNotification("Session done! ☕", "Take a long break.");
                 resetToInactive();
             } else {
-                remainingTime = Configs.pomodoroBreakTime;
+                remainingTime = pomodoroBreakTime;
                 sendCliNotification("Break Time", "Break for 5 minutes.");
             }
         } else {
             currentCycle++;
             isWorking = true;
-            remainingTime = Configs.pomodoroWorkTime;
+            remainingTime = pomodoroWorkTime;
             sendCliNotification("Work Time", `Work 25 minutes! (Cycle ${currentCycle})`);
         }
     }
@@ -62,6 +65,6 @@ QtObject {
         active = false;
         isWorking = true;
         currentCycle = 1;
-        remainingTime = Configs.pomodoroWorkTime;
+        remainingTime = pomodoroWorkTime;
     }
 }

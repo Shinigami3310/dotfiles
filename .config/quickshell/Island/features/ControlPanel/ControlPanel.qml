@@ -7,18 +7,23 @@ import "./TopPanel/"
 Item {
     id: root
 
+    // Локальные константы из Config
+    readonly property real controlPanelWidth: 300
+    readonly property real controlPanelPadding: 16
+    readonly property real controlButtonSize: 64
+
     signal surfaceRequested(string newName)
 
-    implicitWidth: Configs.controlPanelWidth + Configs.controlPanelPadding * 2
-    implicitHeight: mainColumn.implicitHeight + Configs.controlPanelPadding * 2
+    implicitWidth: controlPanelWidth + controlPanelPadding * 2
+    implicitHeight: mainColumn.implicitHeight + controlPanelPadding * 2
 
     Column {
         id: mainColumn
         anchors.centerIn: parent
         spacing: 12
         Row {
-            spacing: (width - (4 * Configs.controlButtonSize)) / 3
-            width: Configs.controlPanelWidth
+            spacing: (width - (4 * controlButtonSize)) / 3
+            width: controlPanelWidth
             WifiButton {
                 onSurfaceRequested: newName => root.surfaceRequested(newName)
             }
@@ -29,13 +34,13 @@ Item {
             NightModeButton {}
         }
         VolumeSliderRow {
-            width: Configs.controlPanelWidth
+            width: controlPanelWidth
         }
         BrightnessSliderRow {
-            width: Configs.controlPanelWidth
+            width: controlPanelWidth
         }
         ResourceRow {
-            width: Configs.controlPanelWidth
+            width: controlPanelWidth
         }
     }
 }

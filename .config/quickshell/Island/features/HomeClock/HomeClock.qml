@@ -7,8 +7,11 @@ Item {
 
     signal surfaceRequested(string name)
 
-    implicitWidth: timeText.implicitWidth + (Configs.clockPaddingX * 2)
-    implicitHeight: timeText.implicitHeight + (Configs.clockPaddingY * 2)
+    readonly property int paddingX: 40
+    readonly property int paddingY: 12
+
+    implicitWidth: timeText.implicitWidth + (paddingX * 2)
+    implicitHeight: timeText.implicitHeight + (paddingY * 2)
 
     SystemClock {
         id: clock
@@ -22,15 +25,14 @@ Item {
         font {
             family: Theme.font
             pixelSize: Configs.clockPixelSize
-            weight: Font.Medium
+            weight: Font.Normal
         }
-        color: Theme.text
+        color: ThemeColor.on_surface
         antialiasing: true
     }
 
-    MouseArea {
-        anchors.fill: parent
+    TapHandler {
         acceptedButtons: Qt.LeftButton
-        onClicked: root.surfaceRequested("bar")
+        onTapped: root.surfaceRequested("bar")
     }
 }

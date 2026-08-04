@@ -5,7 +5,7 @@ import "../../theme"
 
 Row {
     id: root
-    spacing: Configs.barActionsSpacing
+    spacing: 8
 
     signal surfaceRequested(string newName)
     signal closeRequested

@@ -9,7 +9,7 @@ QtObject {
     signal surfaceRequested(string newName)
 
     readonly property Timer timer: Timer {
-        interval: Configs.eyeReminderInterval
+        interval: 10 * 60 * 1000
         repeat: true
         running: root.active
         onTriggered: root.surfaceRequested("eyeReminder")

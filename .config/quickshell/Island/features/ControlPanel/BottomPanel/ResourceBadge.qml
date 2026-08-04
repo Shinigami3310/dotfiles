@@ -4,18 +4,22 @@ import "../../../theme"
 Item {
     id: root
 
+    // Локальные константы из Config
+    readonly property real resourceBadgeWidth: 54
+    readonly property real resourceRowHeight: 48
+
     property string label: ""
     property string valueText: ""
     property real progress: 0.0
 
-    implicitWidth: Configs.resourceBadgeWidth
-    implicitHeight: Configs.resourceRowHeight
+    implicitWidth: resourceBadgeWidth
+    implicitHeight: resourceRowHeight
 
     Rectangle {
         anchors.fill: parent
         radius: 10
-        color: Theme.surface1
-        border.color: Theme.panelBorder
+        color: "transparent"
+        border.color: ThemeColor.outline
         border.width: 1
 
         Rectangle {
@@ -24,7 +28,7 @@ Item {
             anchors.right: parent.right
             height: parent.height * Math.max(0, Math.min(1, root.progress))
             radius: 10
-            color: Theme.surface2
+            color: ThemeColor.surface_container_highest
             opacity: 0.6
         }
 
@@ -37,7 +41,7 @@ Item {
                 text: root.label
                 font.family: Theme.font
                 font.pixelSize: 10
-                color: Theme.textMuted
+                color: ThemeColor.on_surface
             }
 
             Text {
@@ -46,7 +50,7 @@ Item {
                 font.family: Theme.font
                 font.pixelSize: 11
                 font.bold: true
-                color: Theme.text
+                color: ThemeColor.on_surface
             }
         }
     }

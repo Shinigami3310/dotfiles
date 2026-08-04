@@ -4,7 +4,7 @@ import "../../theme"
 FocusScope {
     id: root
 
-    implicitHeight: Configs.appSearchHeight
+    implicitHeight: 48
     focus: true
 
     property alias text: input.text
@@ -20,11 +20,11 @@ FocusScope {
 
     Rectangle {
         anchors.fill: parent
-        radius: Configs.appSearchRadius
-        color: Theme.surface2
+        radius: 8
+        color: ThemeColor.surface
         border {
-            color: input.activeFocus ? Theme.accent : "transparent"
-            width: 1
+            color: input.activeFocus ? ThemeColor.primary : "transparent"
+            width: 2
         }
 
         Behavior on border.color {
@@ -37,28 +37,29 @@ FocusScope {
         Row {
             anchors {
                 fill: parent
-                leftMargin: Configs.appSearchIconMargin
-                rightMargin: Configs.appSearchIconMargin
+                leftMargin: 16
+                rightMargin: 16
             }
-            spacing: Configs.appSearchSpacing
+            spacing: 12
 
             Text {
+                id: searchIcon
                 anchors.verticalCenter: parent.verticalCenter
                 text: "🔍"
-                font.pixelSize: Configs.appSearchIconSize
-                color: input.activeFocus ? Theme.accent : Theme.textMuted
+                font.pixelSize: 16
+                color: input.activeFocus ? ThemeColor.primary : ThemeColor.on_surface
             }
 
             TextInput {
                 id: input
                 anchors.verticalCenter: parent.verticalCenter
-                width: parent.width - Configs.appSearchIconSize - Configs.appSearchSpacing
+                width: parent.width - searchIcon.width - parent.spacing
                 focus: true
                 clip: true
 
                 font {
                     family: Theme.font
-                    pixelSize: Configs.appSearchTextSize
+                    pixelSize: 15
                 }
                 color: Theme.text
                 selectionColor: Theme.accent

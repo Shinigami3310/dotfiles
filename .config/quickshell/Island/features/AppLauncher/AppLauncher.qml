@@ -11,9 +11,10 @@ FocusScope {
 
     signal closeRequested
 
-    implicitWidth: Configs.appLauncherWidth + (Configs.appLauncherPadding * 2)
+    readonly property int padding: 16
+    implicitWidth: 360 + (padding * 2)
 
-    readonly property int targetSurfaceHeight: layout.implicitHeight + (Configs.appLauncherPadding * 2)
+    readonly property int targetSurfaceHeight: layout.implicitHeight + (padding * 2)
 
     onTargetSurfaceHeightChanged: {
         if (targetSurfaceHeight > implicitHeight) {
@@ -28,7 +29,7 @@ FocusScope {
 
     Timer {
         id: resizeDebounce
-        interval: Configs.appLauncherDebounceDelay
+        interval: 150
         onTriggered: root.implicitHeight = root.targetSurfaceHeight
     }
 
@@ -39,10 +40,10 @@ FocusScope {
 
     Rectangle {
         anchors.fill: parent
-        color: Theme.panelBg
+        color: ThemeColor.surface
         radius: 12
         border {
-            color: Theme.separator
+            color: ThemeColor.outline_variant
             width: 1
         }
     }
@@ -53,14 +54,13 @@ FocusScope {
             top: parent.top
             left: parent.left
             right: parent.right
-            margins: Configs.appLauncherPadding
+            margins: root.padding
         }
-        spacing: Configs.appLauncherSpacing
+        spacing: 8
 
         SearchBar {
             id: searchBar
             width: parent.width
-            height: Configs.appSearchHeight
 
             onTextChanged: appService.filter(text)
             onDownPressed: appList.moveDown()
@@ -72,7 +72,6 @@ FocusScope {
         AppList {
             id: appList
             width: parent.width
-            maxHeight: Configs.appListMaxHeight
             model: appService.filteredApps
 
             onLaunchRequested: app => {

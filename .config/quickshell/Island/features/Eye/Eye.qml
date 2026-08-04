@@ -4,11 +4,14 @@ import "../../theme"
 Item {
     id: root
 
-    property int remainingSeconds: Configs.eyeSurfaceDuration
+    property int remainingSeconds: 10
     signal backRequested
 
-    implicitWidth: timeText.implicitWidth + (Configs.eyePaddingX * 2)
-    implicitHeight: timeText.implicitHeight + (Configs.eyePaddingY * 2)
+    readonly property int paddingX: 60
+    readonly property int paddingY: 12
+
+    implicitWidth: timeText.implicitWidth + (paddingX * 2)
+    implicitHeight: timeText.implicitHeight + (paddingY * 2)
 
     Timer {
         interval: 1000
@@ -30,10 +33,10 @@ Item {
         text: `00:${String(remainingSeconds).padStart(2, '0')}`
         font {
             family: Theme.font
-            pixelSize: Configs.eyeTextSize
+            pixelSize: 22
             weight: Font.Bold
         }
-        color: Theme.accent
+        color: ThemeColor.primary
         antialiasing: true
     }
 }

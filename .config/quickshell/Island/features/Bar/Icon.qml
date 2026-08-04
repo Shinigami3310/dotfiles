@@ -10,13 +10,13 @@ Item {
 
     signal clicked
 
-    implicitWidth: Configs.iconSize
-    implicitHeight: Configs.iconSize
+    implicitWidth: 24
+    implicitHeight: 24
 
-    readonly property bool hovered: mouseArea.containsMouse
-    readonly property bool pressed: mouseArea.pressed
+    readonly property bool hovered: hoverHandler.hovered
+    readonly property bool pressed: tapHandler.pressed
 
-    scale: pressed ? Configs.scalePressed : (hovered ? Configs.scaleHoverIcon : 1.0)
+    scale: pressed ? Configs.scalePressed : (hovered ? Configs.scaleHover : 1.0)
 
     Behavior on scale {
         NumberAnimation {
@@ -33,14 +33,14 @@ Item {
         cache: true
         smooth: true
         fillMode: Image.PreserveAspectFit
-        sourceSize: Qt.size(width * 2, height * 2)
+        sourceSize: Qt.size(width, height)
     }
 
     MultiEffect {
         anchors.fill: iconImage
         source: iconImage
         colorization: 1.0
-        colorizationColor: (root.active || root.pressed) ? Theme.accent : Theme.text
+        colorizationColor: (root.active || root.pressed) ? ThemeColor.primary : ThemeColor.on_surface
 
         Behavior on colorizationColor {
             ColorAnimation {
@@ -49,12 +49,13 @@ Item {
         }
     }
 
-    MouseArea {
-        id: mouseArea
-        anchors.fill: parent
+    TapHandler {
+        id: tapHandler
         acceptedButtons: Qt.LeftButton
-        hoverEnabled: true
+        onTapped: root.clicked()
+    }
+    HoverHandler {
+        id: hoverHandler
         cursorShape: Qt.PointingHandCursor
-        onClicked: root.clicked()
     }
 }

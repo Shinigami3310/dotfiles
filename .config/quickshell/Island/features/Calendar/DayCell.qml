@@ -13,12 +13,13 @@ Item {
     signal clicked
 
     readonly property bool hovered: hoverHandler.hovered
+    readonly property bool pressed: tapHandler.pressed
 
-    width: Configs.calCellSize
-    height: Configs.calCellSize
+    width: 30
+    height: 30
     transformOrigin: Item.Center
 
-    scale: hovered ? 1.1 : 1.0
+    scale: pressed ? Configs.scalePressed : (hovered ? Configs.scaleHover : 1.0)
     opacity: isPast ? 0.5 : 1.0
 
     Behavior on scale {
@@ -31,11 +32,11 @@ Item {
     Rectangle {
         anchors.fill: parent
         radius: 8
-        color: root.selected ? Theme.accent : (root.hovered ? Theme.hover : "transparent")
+        color: root.selected || root.hovered ? ThemeColor.surface_container_high : "transparent"
 
         border {
             width: (root.selected || root.isToday || root.hovered) ? 1 : 0
-            color: (root.selected || root.isToday) ? Theme.accent : Theme.separator
+            color: (root.selected || root.isToday) ? ThemeColor.primary : ThemeColor.outline
         }
 
         Behavior on color {
@@ -50,10 +51,10 @@ Item {
         text: root.inMonth ? root.dayNumber.toString() : ""
         font {
             family: Theme.font
-            pixelSize: Configs.calDayTextSize
-            weight: root.selected ? Font.DemiBold : Font.Medium
+            pixelSize: 12
+            weight: root.selected ? Font.Bold : Font.Normal
         }
-        color: root.selected ? Theme.accentText : (root.isToday ? Theme.text : Theme.textMuted)
+        color: root.selected || root.isToday ? ThemeColor.primary : ThemeColor.on_surface
     }
 
     HoverHandler {
@@ -63,6 +64,7 @@ Item {
     }
 
     TapHandler {
+        id: tapHandler
         enabled: root.inMonth
         onTapped: root.clicked()
     }

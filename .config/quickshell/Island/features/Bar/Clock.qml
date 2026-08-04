@@ -7,8 +7,13 @@ Item {
 
     signal surfaceRequested(string name)
 
-    implicitWidth: contentColumn.implicitWidth + (Configs.barClockPaddingX * 2)
-    implicitHeight: contentColumn.implicitHeight + (Configs.barClockPaddingY * 2)
+    readonly property int paddingX: 12
+    readonly property int paddingY: 8
+    readonly property int spacing: 8
+    readonly property int dateSize: 10
+
+    implicitWidth: contentColumn.implicitWidth + (paddingX * 2)
+    implicitHeight: contentColumn.implicitHeight + (paddingY * 2)
 
     SystemClock {
         id: clock
@@ -18,35 +23,35 @@ Item {
     Column {
         id: contentColumn
         anchors.centerIn: parent
-        spacing: Configs.barClockSpacing
+        spacing: spacing
 
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
             text: Qt.formatDateTime(clock.date, "hh:mm")
-            color: Theme.text
+            color: ThemeColor.on_surface
             font {
                 family: Theme.font
-                pixelSize: Configs.barClockTimeSize
-                weight: Font.Medium
+                pixelSize: Configs.clockPixelSize
+                weight: Font.Normal
             }
         }
 
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
             text: Qt.formatDateTime(clock.date, "ddd dd MMM").toUpperCase()
-            color: Theme.textMuted
+            color: ThemeColor.on_surface
             font {
                 family: Theme.font
-                pixelSize: Configs.barClockDateSize
-                weight: Font.Medium
+                pixelSize: root.dateSize
+                weight: Font.Normal
             }
         }
     }
 
-    MouseArea {
-        anchors.fill: parent
-        hoverEnabled: true
+    TapHandler {
+        onTapped: root.surfaceRequested("calendar")
+    }
+    HoverHandler {
         cursorShape: Qt.PointingHandCursor
-        onClicked: root.surfaceRequested("calendar")
     }
 }

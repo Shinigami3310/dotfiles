@@ -11,11 +11,15 @@ Rectangle {
 
     signal clicked
 
-    width: ListView.view ? ListView.view.width : Configs.appLauncherWidth
-    height: Configs.appListItemHeight
-    radius: Configs.appListItemRadius
+    width: ListView.view ? ListView.view.width : 360
+    height: 44
+    radius: 6
 
-    color: isCurrent ? Theme.accent : (mouseArea.containsMouse ? Theme.hover : "transparent")
+    color: isCurrent || hoverHandler.hovered ? ThemeColor.surface_container_high : "transparent"
+    border {
+        width: isCurrent ? 1 : 0
+        color: ThemeColor.primary
+    }
 
     Behavior on color {
         ColorAnimation {
@@ -27,16 +31,16 @@ Rectangle {
     Row {
         anchors {
             fill: parent
-            leftMargin: Configs.appListItemMargin
-            rightMargin: Configs.appListItemMargin
+            leftMargin: 12
+            rightMargin: 12
         }
-        spacing: Configs.appListItemSpacing
+        spacing: 12
 
         Image {
             id: iconImg
             anchors.verticalCenter: parent.verticalCenter
-            width: Configs.appListIconSize
-            height: Configs.appListIconSize
+            width: 24
+            height: 24
             sourceSize: Qt.size(width, height)
             fillMode: Image.PreserveAspectFit
 
@@ -49,31 +53,20 @@ Rectangle {
             Rectangle {
                 anchors.fill: parent
                 radius: 4
-                color: root.isCurrent ? Theme.accentText : Theme.surface2
+                color: root.isCurrent ? ThemeColor.surface_container_highest : ThemeColor.surface_container_high
                 visible: iconImg.status === Image.Error || iconImg.status === Image.Null || !root.appIcon
-
-                Text {
-                    anchors.centerIn: parent
-                    text: root.appName ? root.appName.charAt(0).toUpperCase() : "?"
-                    font {
-                        family: Theme.font
-                        pixelSize: 12
-                        weight: Font.Bold
-                    }
-                    color: root.isCurrent ? Theme.accent : Theme.text
-                }
             }
         }
 
         Text {
             anchors.verticalCenter: parent.verticalCenter
-            width: parent.width - iconImg.width - Configs.appListItemSpacing
+            width: parent.width - iconImg.width - parent.spacing
             text: root.appName
-            color: root.isCurrent ? Theme.accentText : Theme.text
+            color: root.isCurrent ? ThemeColor.primary : ThemeColor.on_surface
             elide: Text.ElideRight
             font {
                 family: Theme.font
-                pixelSize: Configs.appListTitleSize
+                pixelSize: 14
             }
 
             Behavior on color {
@@ -85,10 +78,10 @@ Rectangle {
         }
     }
 
-    MouseArea {
-        id: mouseArea
-        anchors.fill: parent
-        hoverEnabled: true
-        onClicked: root.clicked()
+    HoverHandler {
+        id: hoverHandler
+    }
+    TapHandler {
+        onTapped: root.clicked()
     }
 }

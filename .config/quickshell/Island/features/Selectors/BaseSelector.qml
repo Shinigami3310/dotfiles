@@ -1,9 +1,20 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Effects
 import "../../theme"
 
 Item {
     id: root
+
+    // Локальные константы
+    readonly property real selectorWidth: 320
+    readonly property real selectorMaxListHeight: 300
+    readonly property real selectorMinListHeight: 48
+    readonly property real selectorPadding: 16
+    readonly property real selectorSpacing: 16
+    readonly property real panelRadius: 16
+    readonly property real selectorIconSize: 24
+    readonly property real cardSpacing: 6
 
     property string title: "Selector"
     property string iconSource: ""
@@ -13,38 +24,55 @@ Item {
 
     signal toggleRequested
 
-    implicitWidth: Configs.selectorWidth
-    implicitHeight: layout.implicitHeight + (Configs.selectorPadding * 2)
+    implicitWidth: selectorWidth
+    implicitHeight: layout.implicitHeight + (selectorPadding * 2)
 
     Rectangle {
         anchors.fill: parent
-        radius: Configs.panelRadius
-        color: Theme.panelBg
-        border.color: Theme.panelBorder
+        radius: panelRadius
+        color: ThemeColor.surface_container
+        border.color: ThemeColor.outline_variant
         border.width: 1
     }
 
     Column {
         id: layout
         anchors.fill: parent
-        anchors.margins: Configs.selectorPadding
-        spacing: Configs.selectorSpacing
+        anchors.margins: selectorPadding
+        spacing: selectorSpacing
 
         RowLayout {
             width: parent.width
             spacing: 12
 
             Image {
+                id: sectionIcon
                 source: root.iconSource
-                Layout.preferredWidth: Configs.selectorIconSize
-                Layout.preferredHeight: Configs.selectorIconSize
+                Layout.preferredWidth: selectorIconSize
+                Layout.preferredHeight: selectorIconSize
                 Layout.alignment: Qt.AlignVCenter
                 fillMode: Image.PreserveAspectFit
                 smooth: true
+                mipmap: true
+                visible: false // Скрываем, так как используем MultiEffect
+            }
+
+            MultiEffect {
+                Layout.preferredWidth: selectorIconSize
+                Layout.preferredHeight: selectorIconSize
+                Layout.alignment: Qt.AlignVCenter
+                source: sectionIcon
+                colorization: 1.0
+                colorizationColor: ThemeColor.on_surface
                 opacity: root.isServiceEnabled ? 1.0 : 0.5
 
                 Behavior on opacity {
                     NumberAnimation {
+                        duration: Motion.fast
+                    }
+                }
+                Behavior on colorizationColor {
+                    ColorAnimation {
                         duration: Motion.fast
                     }
                 }
@@ -55,7 +83,7 @@ Item {
                 font.family: Theme.font
                 font.pixelSize: 16
                 font.bold: true
-                color: Theme.text
+                color: ThemeColor.on_surface
                 Layout.alignment: Qt.AlignVCenter
                 Layout.fillWidth: true
             }
@@ -70,7 +98,7 @@ Item {
         Item {
             id: listContainer
             width: parent.width
-            height: root.isServiceEnabled ? Math.max(Math.min(listView.contentHeight, Configs.selectorMaxListHeight), Configs.selectorMinListHeight) : 0
+            height: root.isServiceEnabled ? Math.max(Math.min(listView.contentHeight, selectorMaxListHeight), selectorMinListHeight) : 0
             opacity: root.isServiceEnabled ? 1.0 : 0.0
             visible: opacity > 0
             clip: true
@@ -93,7 +121,7 @@ Item {
                 anchors.fill: parent
                 model: root.listModel
                 delegate: root.delegate
-                spacing: Configs.cardSpacing
+                spacing: cardSpacing
                 boundsBehavior: Flickable.StopAtBounds
 
                 move: Transition {

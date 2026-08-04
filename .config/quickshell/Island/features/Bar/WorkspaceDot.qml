@@ -13,20 +13,20 @@ Rectangle {
     readonly property bool isActive: handler.isActive(workspaceId)
     readonly property bool isOccupied: handler.isOccupied(workspaceId)
 
-    readonly property bool hovered: mouseArea.containsMouse
-    readonly property bool pressed: mouseArea.pressed
+    readonly property bool hovered: hoverHandler.hovered
+    readonly property bool pressed: tapHandler.pressed
 
-    width: Configs.workspaceDotSize
-    height: Configs.workspaceDotSize
+    width: 16
+    height: 16
     radius: width / 2
     transformOrigin: Item.Center
 
-    scale: pressed ? Configs.scalePressed : (hovered ? Configs.scaleHoverWorkspace : 1.0)
-    color: isActive ? Theme.accent : (isOccupied ? Theme.text : "transparent")
+    scale: pressed ? Configs.scalePressed : (hovered ? 1.2 : 1.0)
+    color: isActive ? ThemeColor.primary : (isOccupied ? ThemeColor.on_surface : "transparent")
 
     border {
-        width: 1
-        color: isActive ? Theme.accent : (isOccupied ? Theme.text : Theme.separator)
+        width: 2
+        color: isActive ? ThemeColor.primary : ThemeColor.on_surface
     }
 
     Behavior on scale {
@@ -46,12 +46,14 @@ Rectangle {
         }
     }
 
-    MouseArea {
-        id: mouseArea
-        anchors.fill: parent
+    TapHandler {
+        id: tapHandler
         acceptedButtons: Qt.LeftButton
-        hoverEnabled: true
+        onTapped: handler.activateWorkspace(workspaceId)
+    }
+
+    HoverHandler {
+        id: hoverHandler
         cursorShape: Qt.PointingHandCursor
-        onClicked: handler.activateWorkspace(workspaceId)
     }
 }

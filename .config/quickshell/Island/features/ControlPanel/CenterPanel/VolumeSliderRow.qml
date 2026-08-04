@@ -7,6 +7,8 @@ ControlSlider {
     value: AudioService.volume
     muted: AudioService.muted
 
+    interactiveIcon: true
+
     onSliderMoved: newVal => AudioService.setVolume(newVal)
     onIconClicked: AudioService.toggleMute()
 }

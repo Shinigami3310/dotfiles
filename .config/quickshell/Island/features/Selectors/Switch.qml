@@ -4,13 +4,19 @@ import "../../theme"
 Item {
     id: root
 
+    // Локальные константы
+    readonly property real switchWidth: 44
+    readonly property real switchHeight: 24
+    readonly property real scaleHover: 1.05
+    readonly property real scalePressed: 0.95
+
     property bool checked: false
     signal toggled
 
-    implicitWidth: Configs.switchWidth
-    implicitHeight: Configs.switchHeight
+    implicitWidth: switchWidth
+    implicitHeight: switchHeight
 
-    scale: mouseArea.pressed ? Configs.clickScale : (mouseArea.containsMouse ? Configs.hoverScale : 1.0)
+    scale: mouseArea.pressed ? scalePressed : (mouseArea.containsMouse ? scaleHover : 1.0)
 
     Behavior on scale {
         NumberAnimation {
@@ -23,8 +29,8 @@ Item {
         id: bg
         anchors.fill: parent
         radius: height / 2
-        color: root.checked ? Theme.accent : Theme.surface2
-        border.color: Theme.panelBorder
+        color: root.checked ? ThemeColor.primary : ThemeColor.surface_container_high
+        border.color: ThemeColor.outline_variant
         border.width: 1
 
         Behavior on color {
@@ -41,12 +47,17 @@ Item {
             radius: height / 2
             anchors.verticalCenter: parent.verticalCenter
             x: root.checked ? bg.width - width - 3 : 3
-            color: Theme.text
+            color: root.checked ? ThemeColor.on_primary : ThemeColor.on_surface
 
             Behavior on x {
                 NumberAnimation {
                     duration: Motion.fast
                     easing.type: Easing.OutBack
+                }
+            }
+            Behavior on color {
+                ColorAnimation {
+                    duration: Motion.fast
                 }
             }
         }

@@ -46,15 +46,10 @@ PanelWindow {
         id: catalog
     }
 
-    Component.onCompleted: {
-        Qt.application.organization = "Island";
-        Qt.application.domain = "island.com";
-        Qt.application.name = "Island";
-    }
-
     Island {
         id: island
 
+        anchors.topMargin: root.isFullscreen ? 0 : 8
         SurfaceHost {
             id: host
             initialSurfaceName: root.isFullscreen ? "strip" : "homeClock"
@@ -72,7 +67,8 @@ PanelWindow {
     Connections {
         target: EyeReminderService
         function onSurfaceRequested(name) {
-            root.requestSurface(name);
+            if (!isFullscreen)
+                root.requestSurface(name);
         }
     }
     Connections {

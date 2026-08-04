@@ -7,13 +7,13 @@ Item {
     property alias text: label.text
     signal clicked
 
-    width: Configs.calNavButtonSize
-    height: Configs.calNavButtonSize
+    width: 20
+    height: 20
 
     readonly property bool hovered: hoverHandler.hovered
     readonly property bool pressed: tapHandler.pressed
 
-    scale: pressed ? 0.9 : (hovered ? 1.2 : 1.0)
+    scale: pressed ? Configs.scalePressed : (hovered ? 1.2 : 1.0)
 
     Behavior on scale {
         NumberAnimation {
@@ -26,10 +26,10 @@ Item {
         anchors.centerIn: parent
         font {
             family: Theme.font
-            pixelSize: Configs.calNavIconSize
-            weight: Font.DemiBold
+            pixelSize: 20
+            weight: Font.Bold
         }
-        color: root.hovered ? Theme.text : Theme.textMuted
+        color: root.hovered ? ThemeColor.primary : ThemeColor.on_surface
 
         Behavior on color {
             ColorAnimation {

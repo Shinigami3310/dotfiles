@@ -1,4 +1,4 @@
-singleton Palette Palette.qml
+singleton ThemeColor ThemeColor.qml
 singleton Theme Theme.qml
 singleton Configs Configs.qml
 singleton Motion Motion.qml

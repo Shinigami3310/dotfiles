@@ -6,12 +6,11 @@ Item {
 
     signal surfaceRequested(string name)
 
-    implicitWidth: Configs.stripWidth
-    implicitHeight: Configs.stripHeight
+    implicitWidth: 60
+    implicitHeight: 12
 
-    MouseArea {
-        anchors.fill: parent
+    TapHandler {
         acceptedButtons: Qt.LeftButton
-        onClicked: root.surfaceRequested("homeClock")
+        onTapped: root.surfaceRequested("homeClock")
     }
 }

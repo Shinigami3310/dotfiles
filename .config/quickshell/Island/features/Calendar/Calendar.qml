@@ -5,8 +5,11 @@ import "../../services"
 Item {
     id: root
 
-    implicitWidth: contentColumn.implicitWidth + (Configs.calPaddingX * 2)
-    implicitHeight: contentColumn.implicitHeight + (Configs.calPaddingY * 2)
+    readonly property int paddingX: 20
+    readonly property int paddingY: 16
+
+    implicitWidth: contentColumn.implicitWidth + (paddingX * 2)
+    implicitHeight: contentColumn.implicitHeight + (paddingY * 2)
 
     CalendarService {
         id: calendarService
@@ -21,14 +24,14 @@ Item {
                 target: monthFade
                 property: "opacity"
                 to: 0
-                duration: Configs.calTransitionDuration / 2
+                duration: Motion.morph
                 easing.type: Easing.InOutQuad
             }
             NumberAnimation {
                 target: monthTitleText
                 property: "opacity"
                 to: 0
-                duration: Configs.calTransitionDuration / 2
+                duration: Motion.morph
                 easing.type: Easing.InOutQuad
             }
         }
@@ -42,14 +45,14 @@ Item {
                 target: monthFade
                 property: "opacity"
                 to: 1
-                duration: Configs.calTransitionDuration / 2
+                duration: Motion.morph
                 easing.type: Easing.InOutQuad
             }
             NumberAnimation {
                 target: monthTitleText
                 property: "opacity"
                 to: 1
-                duration: Configs.calTransitionDuration / 2
+                duration: Motion.morph
                 easing.type: Easing.InOutQuad
             }
         }
@@ -69,7 +72,7 @@ Item {
 
         Row {
             width: dayGrid.implicitWidth
-            height: Configs.calHeaderHeight
+            height: 28
 
             NavButton {
                 text: "‹"
@@ -78,16 +81,16 @@ Item {
 
             Text {
                 id: monthTitleText
-                width: parent.width - (Configs.calNavButtonSize * 2)
+                width: parent.width - (24 * 2)
                 anchors.verticalCenter: parent.verticalCenter
                 horizontalAlignment: Text.AlignHCenter
                 text: calendarService.monthTitle(calendarService.viewYear, calendarService.viewMonth)
                 font {
                     family: Theme.font
-                    pixelSize: Configs.calTitleSize
-                    weight: Font.DemiBold
+                    pixelSize: 14
+                    weight: Font.Normal
                 }
-                color: Theme.text
+                color: ThemeColor.on_surface
                 elide: Text.ElideRight
             }
 
@@ -98,19 +101,19 @@ Item {
         }
 
         Row {
-            spacing: Configs.calGridGap
+            spacing: 4
             Repeater {
-                model: Configs.calWeekdays
+                model: ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
                 delegate: Text {
-                    width: Configs.calCellSize
+                    width: 30
                     horizontalAlignment: Text.AlignHCenter
                     text: modelData
                     font {
                         family: Theme.font
-                        pixelSize: Configs.calWeekdaySize
-                        weight: Font.DemiBold
+                        pixelSize: 12
+                        weight: Font.Normal
                     }
-                    color: Theme.textMuted
+                    color: ThemeColor.on_surface
                 }
             }
         }
@@ -123,8 +126,8 @@ Item {
             Grid {
                 id: dayGrid
                 columns: 7
-                rowSpacing: Configs.calGridGap
-                columnSpacing: Configs.calGridGap
+                rowSpacing: 4
+                columnSpacing: 4
 
                 Repeater {
                     model: 42

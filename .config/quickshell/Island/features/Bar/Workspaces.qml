@@ -5,14 +5,14 @@ import "../../services"
 
 Row {
     id: root
-    spacing: Configs.workspaceGap
+    spacing: 12
 
     WorkspaceService {
         id: handler
     }
 
     Repeater {
-        model: Configs.workspaceCount
+        model: 5
         delegate: WorkspaceDot {
             handler: handler
         }

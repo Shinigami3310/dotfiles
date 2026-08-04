@@ -1,5 +1,4 @@
 import QtQuick
-import "../theme"
 
 FocusScope {
     id: root
@@ -20,10 +19,9 @@ FocusScope {
     Keys.onEscapePressed: if (canGoBack)
         closeRequested()
 
-    MouseArea {
-        anchors.fill: parent
+    TapHandler {
         acceptedButtons: Qt.RightButton
-        onClicked: if (canGoBack)
+        onTapped: if (canGoBack)
             backRequested()
     }
 

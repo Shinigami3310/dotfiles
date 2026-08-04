@@ -4,10 +4,15 @@ import "../../../theme/"
 
 Item {
     id: root
+
+    // Локальная константа из Config
+    readonly property real resourceRowHeight: 48
+
     SystemStatsService {
         id: systemStatsService
     }
-    implicitHeight: Configs.resourceRowHeight
+
+    implicitHeight: resourceRowHeight
 
     Row {
         anchors.fill: parent

@@ -5,7 +5,7 @@ Item {
     id: root
 
     property alias model: listView.model
-    property int maxHeight: Configs.appListMaxHeight
+    property int maxHeight: 360
 
     signal launchRequested(var app)
 
@@ -42,12 +42,12 @@ Item {
                 property: "opacity"
                 from: 0
                 to: 1
-                duration: Motion.fast
+                duration: Motion.morph
             }
             NumberAnimation {
                 property: "y"
                 from: -10
-                duration: Motion.fast
+                duration: Motion.morph
                 easing.type: Easing.OutQuart
             }
         }
@@ -56,14 +56,14 @@ Item {
             NumberAnimation {
                 property: "opacity"
                 to: 0
-                duration: Motion.fast
+                duration: Motion.morph
             }
         }
 
         displaced: Transition {
             NumberAnimation {
                 properties: "x,y"
-                duration: Motion.fast
+                duration: Motion.morph
                 easing.type: Easing.OutQuart
             }
         }

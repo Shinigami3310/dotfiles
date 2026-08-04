@@ -1,9 +1,16 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Effects
 import "../../theme"
 
 RowLayout {
     id: root
+
+    readonly property int iconBoxSize: 32
+    readonly property int iconSize: 24
+    readonly property int trackHeight: 10
+    readonly property int trackDefaultWidth: 200
+    readonly property int textWidth: 32
 
     property real value: 0.0
     property real step: 0.05
@@ -19,7 +26,7 @@ RowLayout {
     signal iconClicked
     signal interacted
 
-    implicitWidth: Configs.sliderTrackDefaultWidth + Configs.sliderIconBoxSize + Configs.sliderTextWidth + (spacing * 2)
+    implicitWidth: trackDefaultWidth + iconBoxSize + textWidth + (spacing * 2)
     spacing: 12
 
     Behavior on visualValue {
@@ -30,27 +37,75 @@ RowLayout {
         }
     }
 
-    Rectangle {
-        id: iconBtn
-        Layout.preferredWidth: Configs.sliderIconBoxSize
-        Layout.preferredHeight: Configs.sliderIconBoxSize
+    Item {
+        id: iconBox
+        Layout.preferredWidth: iconBoxSize
+        Layout.preferredHeight: iconBoxSize
         Layout.alignment: Qt.AlignVCenter
-        radius: 10
-        color: Theme.surface1
 
-        border {
-            color: (root.interactiveIcon && iconMouse.containsMouse) ? Theme.accentSoft : Theme.panelBorder
-            width: 1
+        // Локальное свойство для промежуточного хранения пути
+        property string displayedSource: root.iconSource
+
+        // Анимация смены иконки
+        SequentialAnimation {
+            id: iconSwitchAnimation
+
+            NumberAnimation {
+                target: iconEffect
+                property: "opacity"
+                to: 0.0
+                duration: Motion.morph
+                easing.type: Motion.easeStandard
+            }
+            ScriptAction {
+                script: iconBox.displayedSource = root.iconSource
+            }
+            NumberAnimation {
+                target: iconEffect
+                property: "opacity"
+                to: 1.0
+                duration: Motion.morph
+                easing.type: Motion.easeStandard
+            }
+        }
+
+        // Отслеживаем изменение свойства iconSource извне
+        Connections {
+            target: root
+            function onIconSourceChanged() {
+                if (iconEffect.opacity > 0) {
+                    iconSwitchAnimation.restart();
+                } else {
+                    iconBox.displayedSource = root.iconSource;
+                }
+            }
         }
 
         Image {
+            id: iconImage
             anchors.centerIn: parent
-            width: Configs.sliderIconSize
-            height: Configs.sliderIconSize
-            source: root.iconSource
+            width: iconSize
+            height: iconSize
+            source: iconBox.displayedSource // Используем промежуточное свойство
             fillMode: Image.PreserveAspectFit
             smooth: true
-            opacity: root.iconOpacity
+            mipmap: true
+            sourceSize: Qt.size(iconSize * 2, iconSize * 2) // Четкость без пикселей
+            visible: false
+        }
+
+        MultiEffect {
+            id: iconEffect
+            anchors.fill: iconImage
+            source: iconImage
+            colorization: 1.0
+            colorizationColor: iconMouse.containsMouse ? ThemeColor.primary : ThemeColor.on_surface
+
+            Behavior on colorizationColor {
+                ColorAnimation {
+                    duration: Motion.fast
+                }
+            }
         }
 
         MouseArea {
@@ -69,23 +124,18 @@ RowLayout {
 
     Rectangle {
         id: track
-        width: Configs.sliderTrackDefaultWidth
-        Layout.preferredHeight: Configs.sliderTrackHeight
+        width: trackDefaultWidth
+        Layout.preferredHeight: trackHeight
         Layout.alignment: Qt.AlignVCenter
         radius: height / 2
-        color: Theme.surface1
+        color: ThemeColor.surface_container_high
         clip: true
-
-        border {
-            color: sliderMouse.containsMouse ? Theme.accentSoft : Theme.panelBorder
-            width: 1
-        }
 
         Rectangle {
             height: parent.height
             width: parent.width * root.visualValue
             radius: parent.radius
-            color: root.fillColor
+            color: ThemeColor.primary
         }
 
         MouseArea {
@@ -115,11 +165,11 @@ RowLayout {
     }
 
     Text {
-        Layout.preferredWidth: Configs.sliderTextWidth
+        Layout.preferredWidth: textWidth
         Layout.alignment: Qt.AlignVCenter
         horizontalAlignment: Text.AlignRight
         text: Math.round(root.clampedValue * 100) + "%"
-        color: Theme.text
+        color: ThemeColor.on_surface
         font {
             family: Theme.font
             pixelSize: 13

@@ -8,14 +8,18 @@ Item {
     signal surfaceRequested(string name)
     signal closeRequested
 
-    implicitWidth: workspaces.implicitWidth + clock.implicitWidth + rightActions.implicitWidth + (Configs.barBlockSpacing * 2) + (Configs.barPaddingX * 2)
-    implicitHeight: Math.max(workspaces.implicitHeight, clock.implicitHeight, rightActions.implicitHeight) + (Configs.barPaddingY * 2)
+    readonly property int spacing: 32
+    readonly property int paddingX: 24
+    readonly property int paddingY: 8
+
+    implicitWidth: workspaces.implicitWidth + clock.implicitWidth + rightActions.implicitWidth + (spacing * 2) + (paddingX * 2)
+    implicitHeight: Math.max(workspaces.implicitHeight, clock.implicitHeight, rightActions.implicitHeight) + (paddingY * 2)
 
     Workspaces {
         id: workspaces
         anchors {
             left: parent.left
-            leftMargin: Configs.barPaddingX
+            leftMargin: root.paddingX
             verticalCenter: parent.verticalCenter
         }
     }
@@ -30,7 +34,7 @@ Item {
         id: rightActions
         anchors {
             right: parent.right
-            rightMargin: Configs.barPaddingX
+            rightMargin: root.paddingX
             verticalCenter: parent.verticalCenter
         }
 

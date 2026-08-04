@@ -3,15 +3,13 @@ import "../theme"
 
 Rectangle {
     id: root
-
     anchors.top: parent.top
-    anchors.topMargin: isFullscreen ? 0 : 8
     anchors.horizontalCenter: parent.horizontalCenter
 
-    color: Theme.panelBg
+    color: ThemeColor.surface
     radius: 24
     border.width: 2
-    border.color: Theme.panelBorder
+    border.color: ThemeColor.outline_variant
     antialiasing: true
 
     implicitWidth: childrenRect.width
