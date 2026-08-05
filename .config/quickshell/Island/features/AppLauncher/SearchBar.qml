@@ -4,7 +4,7 @@ import "../../theme"
 FocusScope {
     id: root
 
-    implicitHeight: 48
+    implicitHeight: AppLauncherConfig.searchBarHeight
     focus: true
 
     property alias text: input.text
@@ -20,11 +20,11 @@ FocusScope {
 
     Rectangle {
         anchors.fill: parent
-        radius: 8
+        radius: AppLauncherConfig.searchBarRadius
         color: ThemeColor.surface
         border {
             color: input.activeFocus ? ThemeColor.primary : "transparent"
-            width: 2
+            width: AppLauncherConfig.searchBarBorderWidth
         }
 
         Behavior on border.color {
@@ -37,16 +37,16 @@ FocusScope {
         Row {
             anchors {
                 fill: parent
-                leftMargin: 16
-                rightMargin: 16
+                leftMargin: AppLauncherConfig.searchBarHorizontalPadding
+                rightMargin: AppLauncherConfig.searchBarHorizontalPadding
             }
-            spacing: 12
+            spacing: AppLauncherConfig.searchBarSpacing
 
             Text {
                 id: searchIcon
                 anchors.verticalCenter: parent.verticalCenter
                 text: "🔍"
-                font.pixelSize: 16
+                font.pixelSize: AppLauncherConfig.searchIconSize
                 color: input.activeFocus ? ThemeColor.primary : ThemeColor.on_surface
             }
 
@@ -59,11 +59,11 @@ FocusScope {
 
                 font {
                     family: Theme.font
-                    pixelSize: 15
+                    pixelSize: AppLauncherConfig.searchInputSize
                 }
-                color: Theme.text
-                selectionColor: Theme.accent
-                selectedTextColor: Theme.accentText
+                color: ThemeColor.on_surface
+                selectionColor: ThemeColor.primary
+                selectedTextColor: ThemeColor.on_primary
 
                 Keys.onUpPressed: root.upPressed()
                 Keys.onDownPressed: root.downPressed()

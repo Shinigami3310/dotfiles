@@ -6,16 +6,6 @@ import "../../theme"
 Item {
     id: root
 
-    // Локальные константы
-    readonly property real selectorWidth: 320
-    readonly property real selectorMaxListHeight: 300
-    readonly property real selectorMinListHeight: 48
-    readonly property real selectorPadding: 16
-    readonly property real selectorSpacing: 16
-    readonly property real panelRadius: 16
-    readonly property real selectorIconSize: 24
-    readonly property real cardSpacing: 6
-
     property string title: "Selector"
     property string iconSource: ""
     property bool isServiceEnabled: false
@@ -24,12 +14,12 @@ Item {
 
     signal toggleRequested
 
-    implicitWidth: selectorWidth
-    implicitHeight: layout.implicitHeight + (selectorPadding * 2)
+    implicitWidth: SelectorConfig.width
+    implicitHeight: layout.implicitHeight + (SelectorConfig.padding * 2)
 
     Rectangle {
         anchors.fill: parent
-        radius: panelRadius
+        radius: SelectorConfig.panelRadius
         color: ThemeColor.surface_container
         border.color: ThemeColor.outline_variant
         border.width: 1
@@ -38,33 +28,33 @@ Item {
     Column {
         id: layout
         anchors.fill: parent
-        anchors.margins: selectorPadding
-        spacing: selectorSpacing
+        anchors.margins: SelectorConfig.padding
+        spacing: SelectorConfig.spacing
 
         RowLayout {
             width: parent.width
-            spacing: 12
+            spacing: SelectorConfig.headerSpacing
 
             Image {
                 id: sectionIcon
                 source: root.iconSource
-                Layout.preferredWidth: selectorIconSize
-                Layout.preferredHeight: selectorIconSize
+                Layout.preferredWidth: SelectorConfig.iconSize
+                Layout.preferredHeight: SelectorConfig.iconSize
                 Layout.alignment: Qt.AlignVCenter
                 fillMode: Image.PreserveAspectFit
                 smooth: true
                 mipmap: true
-                visible: false // Скрываем, так как используем MultiEffect
+                visible: false // Скрыто для MultiEffect
             }
 
             MultiEffect {
-                Layout.preferredWidth: selectorIconSize
-                Layout.preferredHeight: selectorIconSize
+                Layout.preferredWidth: SelectorConfig.iconSize
+                Layout.preferredHeight: SelectorConfig.iconSize
                 Layout.alignment: Qt.AlignVCenter
                 source: sectionIcon
                 colorization: 1.0
                 colorizationColor: ThemeColor.on_surface
-                opacity: root.isServiceEnabled ? 1.0 : 0.5
+                opacity: root.isServiceEnabled ? 1.0 : SelectorConfig.iconOpacityDisabled
 
                 Behavior on opacity {
                     NumberAnimation {
@@ -81,7 +71,7 @@ Item {
             Text {
                 text: root.title
                 font.family: Theme.font
-                font.pixelSize: 16
+                font.pixelSize: SelectorConfig.titleFontSize
                 font.bold: true
                 color: ThemeColor.on_surface
                 Layout.alignment: Qt.AlignVCenter
@@ -98,7 +88,7 @@ Item {
         Item {
             id: listContainer
             width: parent.width
-            height: root.isServiceEnabled ? Math.max(Math.min(listView.contentHeight, selectorMaxListHeight), selectorMinListHeight) : 0
+            height: root.isServiceEnabled ? Math.max(Math.min(listView.contentHeight, SelectorConfig.maxListHeight), SelectorConfig.minListHeight) : 0
             opacity: root.isServiceEnabled ? 1.0 : 0.0
             visible: opacity > 0
             clip: true
@@ -119,9 +109,9 @@ Item {
             ListView {
                 id: listView
                 anchors.fill: parent
-                model: root.listModel
+                model: root.isServiceEnabled ? root.listModel : null
                 delegate: root.delegate
-                spacing: cardSpacing
+                spacing: SelectorConfig.cardSpacing
                 boundsBehavior: Flickable.StopAtBounds
 
                 move: Transition {

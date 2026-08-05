@@ -11,13 +11,17 @@ FocusScope {
     signal backRequested
     signal closeRequested
 
-    readonly property bool keyboardActive: active && canGoBack
+    readonly property bool requiresKeyboard: active && canGoBack
 
-    focus: keyboardActive
-    Keys.enabled: keyboardActive
+    focus: requiresKeyboard
+    Keys.enabled: requiresKeyboard
 
-    Keys.onEscapePressed: if (canGoBack)
-        closeRequested()
+    Keys.onEscapePressed: event => {
+        if (canGoBack) {
+            closeRequested();
+            event.accepted = true;
+        }
+    }
 
     TapHandler {
         acceptedButtons: Qt.RightButton
@@ -28,7 +32,7 @@ FocusScope {
     function enter() {
         active = true;
     }
-    function exit(nextSurfaceName) {
+    function exit(nextSurfaceName: string) {
         active = false;
     }
 }

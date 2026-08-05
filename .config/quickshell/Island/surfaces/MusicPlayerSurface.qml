@@ -2,12 +2,12 @@ import "../core"
 import "../features/MusicPlayer"
 
 SurfaceBase {
+    id: root
     surfaceName: "musicPlayer"
     implicitWidth: music.implicitWidth
     implicitHeight: music.implicitHeight
     MusicPlayer {
         id: music
-        anchors.centerIn: parent
-        onCloseRequested: parent.closeRequested()
+        onCloseRequested: root.closeRequested()
     }
 }

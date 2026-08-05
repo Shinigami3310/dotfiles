@@ -21,18 +21,20 @@ Item {
     Text {
         id: timeText
         anchors.centerIn: parent
-        text: Qt.formatDateTime(clock.date, "hh:mm")
+        text: Qt.formatTime(clock.date, "hh:mm")
         font {
             family: Theme.font
-            pixelSize: Configs.clockPixelSize
+            pixelSize: 18
             weight: Font.Normal
         }
         color: ThemeColor.on_surface
-        antialiasing: true
     }
 
     TapHandler {
         acceptedButtons: Qt.LeftButton
         onTapped: root.surfaceRequested("bar")
+    }
+    HoverHandler {
+        cursorShape: Qt.PointingHandCursor
     }
 }

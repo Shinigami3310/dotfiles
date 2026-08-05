@@ -5,6 +5,7 @@ QtObject {
     id: root
 
     readonly property var locale: Qt.locale("en_US")
+
     readonly property SystemClock clock: SystemClock {
         precision: SystemClock.Hours
     }
@@ -14,12 +15,10 @@ QtObject {
     readonly property int currentMonth: today.getMonth()
     readonly property int currentDay: today.getDate()
 
-    // --- State Management ---
     property int viewYear: currentYear
     property int viewMonth: currentMonth
     property string selectedDateKey: ""
 
-    // Автоматический перерасчет при изменении viewYear/viewMonth
     readonly property int firstWeekdayOffset: (new Date(viewYear, viewMonth, 1).getDay() + 6) % 7
     readonly property int daysInMonth: new Date(viewYear, viewMonth + 1, 0).getDate()
 
@@ -29,40 +28,32 @@ QtObject {
         selectedDateKey = "";
     }
 
-    function selectDay(day) {
+    function selectDay(day: int) {
         if (day >= 1 && day <= daysInMonth) {
             selectedDateKey = dayKey(viewYear, viewMonth, day);
         }
     }
 
-    function changeMonth(delta) {
-        let newMonth = viewMonth + delta;
-        if (newMonth < 0) {
-            viewMonth = 11;
-            viewYear--;
-        } else if (newMonth > 11) {
-            viewMonth = 0;
-            viewYear++;
-        } else {
-            viewMonth = newMonth;
-        }
+    function changeMonth(delta: int) {
+        let d = new Date(viewYear, viewMonth + delta, 1);
+        viewYear = d.getFullYear();
+        viewMonth = d.getMonth();
         selectedDateKey = "";
     }
 
-    // --- Helpers ---
-    function monthTitle(year, month) {
+    function monthTitle(year: int, month: int): string {
         return locale.toString(new Date(year, month, 1), "MMMM yyyy").toUpperCase();
     }
 
-    function dayKey(year, month, day) {
+    function dayKey(year: int, month: int, day: int): string {
         return `${year}-${month + 1}-${day}`;
     }
 
-    function isToday(year, month, day) {
+    function isToday(year: int, month: int, day: int): bool {
         return day === currentDay && month === currentMonth && year === currentYear;
     }
 
-    function isPast(year, month, day) {
+    function isPast(year: int, month: int, day: int): bool {
         if (year !== currentYear)
             return year < currentYear;
         if (month !== currentMonth)

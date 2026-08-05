@@ -4,7 +4,6 @@ import "../../theme"
 Item {
     id: root
 
-    // Локальные конфиги без префиксов
     readonly property int paddingX: 20
     readonly property int paddingY: 12
     readonly property int idleTimeout: 2500

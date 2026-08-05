@@ -10,30 +10,34 @@ import "services/integrations"
 PanelWindow {
     id: root
 
+    readonly property list<string> nonFocusSurfaces: ["eyeReminder", "brightnessSlider", "volumeSlider", "strip", "homeClock"]
+    readonly property bool requiresFocus: host.currentName !== host.initialSurfaceName && !nonFocusSurfaces.includes(host.currentName)
+    readonly property bool isFullscreen: modeController.isFullscreen
+
     anchors {
         left: true
         right: true
         top: true
         bottom: true
     }
+
     color: "transparent"
     exclusionMode: ExclusionMode.Ignore
 
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.anchors.top: true
-    WlrLayershell.keyboardFocus: needFocus ? WlrKeyboardFocus.None : WlrKeyboardFocus.Exclusive
+    WlrLayershell.keyboardFocus: requiresFocus ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
     mask: Region {
-        item: island
+        item: requiresFocus ? root.contentItem : island
     }
 
-    readonly property var nonFocusSurfaces: ["eyeReminder", "brightnessSlider", "volumeSlider", "strip"]
-    readonly property bool needFocus: host.currentName === host.initialSurfaceName || nonFocusSurfaces.includes(host.currentName)
-    readonly property bool isFullscreen: modeController.isFullscreen
-
-    function requestSurface(name) {
-        if (!root.isFullscreen) {
-            host.open(name);
+    TapHandler {
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
+        onTapped: eventPoint => {
+            if (!island.contains(island.mapFromItem(root.contentItem, eventPoint.position))) {
+                host.close();
+            }
         }
     }
 
@@ -48,12 +52,18 @@ PanelWindow {
 
     Island {
         id: island
-
         anchors.topMargin: root.isFullscreen ? 0 : 8
+
         SurfaceHost {
             id: host
             initialSurfaceName: root.isFullscreen ? "strip" : "homeClock"
             surfaces: catalog
+        }
+    }
+
+    function requestSurface(name) {
+        if (!root.isFullscreen) {
+            host.open(name);
         }
     }
 
@@ -66,21 +76,20 @@ PanelWindow {
 
     Connections {
         target: EyeReminderService
-        function onSurfaceRequested(name) {
-            if (!isFullscreen)
-                root.requestSurface(name);
+        function onSurfaceRequested(name: string) {
+            root.requestSurface(name);
         }
     }
     Connections {
         target: BrightnessService
-        function onSurfaceRequested(name) {
-            root.requestSurface(name);
+        function onSurfaceRequested(name: string) {
+            host.open(name);
         }
     }
     Connections {
         target: AudioService
-        function onSurfaceRequested(name) {
-            root.requestSurface(name);
+        function onSurfaceRequested(name: string) {
+            host.open(name);
         }
     }
 }

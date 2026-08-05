@@ -21,7 +21,7 @@ BaseSelector {
             isConnected: model.connected
             isConnecting: BluetoothService.connectingMac === model.mac
 
-            onConnectRequested: {
+            onConnectRequested: password => {
                 BluetoothService.connectToDevice(model.mac);
             }
         }

@@ -17,7 +17,6 @@ RowLayout {
     property string iconSource: ""
     property real iconOpacity: 1.0
     property bool interactiveIcon: false
-    property color fillColor: Theme.accent
 
     readonly property real clampedValue: Math.max(0.0, Math.min(1.0, root.value))
     property real visualValue: clampedValue
@@ -43,10 +42,8 @@ RowLayout {
         Layout.preferredHeight: iconBoxSize
         Layout.alignment: Qt.AlignVCenter
 
-        // Локальное свойство для промежуточного хранения пути
         property string displayedSource: root.iconSource
 
-        // Анимация смены иконки
         SequentialAnimation {
             id: iconSwitchAnimation
 
@@ -69,7 +66,6 @@ RowLayout {
             }
         }
 
-        // Отслеживаем изменение свойства iconSource извне
         Connections {
             target: root
             function onIconSourceChanged() {
@@ -86,11 +82,11 @@ RowLayout {
             anchors.centerIn: parent
             width: iconSize
             height: iconSize
-            source: iconBox.displayedSource // Используем промежуточное свойство
+            source: iconBox.displayedSource
             fillMode: Image.PreserveAspectFit
             smooth: true
             mipmap: true
-            sourceSize: Qt.size(iconSize * 2, iconSize * 2) // Четкость без пикселей
+            sourceSize: Qt.size(iconSize, iconSize)
             visible: false
         }
 
@@ -124,7 +120,7 @@ RowLayout {
 
     Rectangle {
         id: track
-        width: trackDefaultWidth
+        Layout.preferredWidth: trackDefaultWidth
         Layout.preferredHeight: trackHeight
         Layout.alignment: Qt.AlignVCenter
         radius: height / 2

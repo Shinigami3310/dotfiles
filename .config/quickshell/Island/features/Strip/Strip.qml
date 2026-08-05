@@ -9,6 +9,9 @@ Item {
     implicitWidth: 60
     implicitHeight: 12
 
+    HoverHandler {
+        cursorShape: Qt.PointingHandCursor
+    }
     TapHandler {
         acceptedButtons: Qt.LeftButton
         onTapped: root.surfaceRequested("homeClock")

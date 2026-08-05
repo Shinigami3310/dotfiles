@@ -9,7 +9,7 @@ QtObject {
     property bool isCharging: false
     property string activeProfile: "balanced"
 
-    function setProfile(profileName) {
+    function setProfile(profileName: string) {
         if (activeProfile !== profileName) {
             activeProfile = profileName;
             Quickshell.execDetached(["powerprofilesctl", "set", profileName]);
@@ -34,7 +34,7 @@ QtObject {
             onRead: data => {
                 let parts = data.trim().split(":");
                 if (parts.length === 2) {
-                    root.percent = parseInt(parts[0]) || 100;
+                    root.percent = parseInt(parts[0], 10) || 100;
                     root.isCharging = ["Charging", "Full"].includes(parts[1]);
                 }
             }
@@ -43,24 +43,12 @@ QtObject {
 
     property Process profileProc: Process {
         command: ["powerprofilesctl", "get"]
-        running: false
+        running: true
         stdout: SplitParser {
             onRead: data => {
                 let trimmed = data.trim();
                 if (trimmed)
                     root.activeProfile = trimmed;
-            }
-        }
-    }
-
-    property Timer profileTimer: Timer {
-        interval: 60000
-        repeat: true
-        running: true
-        triggeredOnStart: true
-        onTriggered: {
-            if (!root.profileProc.running) {
-                root.profileProc.running = true;
             }
         }
     }

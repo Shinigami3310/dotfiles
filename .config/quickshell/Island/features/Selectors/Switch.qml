@@ -4,19 +4,16 @@ import "../../theme"
 Item {
     id: root
 
-    // Локальные константы
-    readonly property real switchWidth: 44
-    readonly property real switchHeight: 24
-    readonly property real scaleHover: 1.05
-    readonly property real scalePressed: 0.95
-
     property bool checked: false
     signal toggled
 
-    implicitWidth: switchWidth
-    implicitHeight: switchHeight
+    implicitWidth: SelectorConfig.switchWidth
+    implicitHeight: SelectorConfig.switchHeight
 
-    scale: mouseArea.pressed ? scalePressed : (mouseArea.containsMouse ? scaleHover : 1.0)
+    readonly property bool hovered: hoverHandler.hovered
+    readonly property bool pressed: tapHandler.pressed
+
+    scale: pressed ? SelectorConfig.switchPressedScale : (hovered ? SelectorConfig.switchHoverScale : 1.0)
 
     Behavior on scale {
         NumberAnimation {
@@ -31,7 +28,7 @@ Item {
         radius: height / 2
         color: root.checked ? ThemeColor.primary : ThemeColor.surface_container_high
         border.color: ThemeColor.outline_variant
-        border.width: 1
+        border.width: SelectorConfig.switchBorderWidth
 
         Behavior on color {
             ColorAnimation {
@@ -42,11 +39,11 @@ Item {
 
         Rectangle {
             id: handle
-            height: bg.height - 6
+            height: bg.height - (SelectorConfig.switchHandleMargin * 2)
             width: height
             radius: height / 2
             anchors.verticalCenter: parent.verticalCenter
-            x: root.checked ? bg.width - width - 3 : 3
+            x: root.checked ? (bg.width - width - SelectorConfig.switchHandleMargin) : SelectorConfig.switchHandleMargin
             color: root.checked ? ThemeColor.on_primary : ThemeColor.on_surface
 
             Behavior on x {
@@ -63,14 +60,13 @@ Item {
         }
     }
 
-    MouseArea {
-        id: mouseArea
-        anchors.fill: parent
-        hoverEnabled: true
+    HoverHandler {
+        id: hoverHandler
         cursorShape: Qt.PointingHandCursor
-        onClicked: {
-            root.checked = !root.checked;
-            root.toggled();
-        }
+    }
+
+    TapHandler {
+        id: tapHandler
+        onTapped: root.toggled()
     }
 }

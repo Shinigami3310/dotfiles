@@ -4,12 +4,12 @@ import "../theme"
 Item {
     id: root
 
-    property var surfaces: ({})
+    property QtObject surfaces: null
     property string initialSurfaceName: ""
 
     property string currentName: ""
     property Item currentItem: null
-    property var history: []
+    property list<string> history: []
     property bool busy: false
 
     property Item outgoingItem: null
@@ -23,8 +23,7 @@ Item {
 
     Connections {
         target: root.currentItem
-        ignoreUnknownSignals: true
-        function onSurfaceRequested(newName) {
+        function onSurfaceRequested(newName: string) {
             root.open(newName);
         }
         function onBackRequested() {

@@ -15,12 +15,11 @@ Item {
     readonly property bool hovered: hoverHandler.hovered
     readonly property bool pressed: tapHandler.pressed
 
-    width: 30
-    height: 30
-    transformOrigin: Item.Center
+    width: CalendarConfig.cellSize
+    height: CalendarConfig.cellSize
 
     scale: pressed ? Configs.scalePressed : (hovered ? Configs.scaleHover : 1.0)
-    opacity: isPast ? 0.5 : 1.0
+    opacity: isPast ? CalendarConfig.pastDayOpacity : 1.0
 
     Behavior on scale {
         NumberAnimation {
@@ -31,15 +30,21 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        radius: 8
-        color: root.selected || root.hovered ? ThemeColor.surface_container_high : "transparent"
+        radius: CalendarConfig.cellRadius
+        color: root.hovered ? ThemeColor.surface_container_high : "transparent"
 
         border {
-            width: (root.selected || root.isToday || root.hovered) ? 1 : 0
-            color: (root.selected || root.isToday) ? ThemeColor.primary : ThemeColor.outline
+            width: (root.selected || root.isToday || root.hovered) ? CalendarConfig.cellBorderWidth : 0
+            color: (root.selected || root.isToday) ? ThemeColor.primary : ThemeColor.outline_variant
         }
 
         Behavior on color {
+            ColorAnimation {
+                duration: Motion.fast
+            }
+        }
+
+        Behavior on border.color {
             ColorAnimation {
                 duration: Motion.fast
             }
@@ -51,7 +56,7 @@ Item {
         text: root.inMonth ? root.dayNumber.toString() : ""
         font {
             family: Theme.font
-            pixelSize: 12
+            pixelSize: CalendarConfig.cellTextSize
             weight: root.selected ? Font.Bold : Font.Normal
         }
         color: root.selected || root.isToday ? ThemeColor.primary : ThemeColor.on_surface

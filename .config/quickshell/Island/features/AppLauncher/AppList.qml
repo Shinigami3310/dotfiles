@@ -5,11 +5,10 @@ Item {
     id: root
 
     property alias model: listView.model
-    property int maxHeight: 360
 
     signal launchRequested(var app)
 
-    implicitHeight: Math.min(listView.contentHeight, maxHeight)
+    implicitHeight: Math.min(listView.contentHeight, AppLauncherConfig.listMaxHeight)
     clip: true
 
     function moveDown() {
@@ -29,7 +28,7 @@ Item {
         id: listView
         anchors.fill: parent
         boundsBehavior: Flickable.StopAtBounds
-        spacing: 2
+        spacing: AppLauncherConfig.listSpacing
 
         onCountChanged: {
             if (count > 0 && currentIndex === -1) {
@@ -46,7 +45,7 @@ Item {
             }
             NumberAnimation {
                 property: "y"
-                from: -10
+                from: AppLauncherConfig.listAnimOffsetY
                 duration: Motion.morph
                 easing.type: Easing.OutQuart
             }

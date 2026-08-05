@@ -1,314 +1,174 @@
 pragma Singleton
-import QtQml
-import QtMultimedia
+import QtQuick
 import QtCore
 import Qt.labs.folderlistmodel
+import Quickshell.Io
 
 QtObject {
     id: root
 
-    readonly property string musicRootPath: StandardPaths.standardLocations(StandardPaths.MusicLocation)[0]
-    readonly property string coversPath: musicRootPath + "/Cover"
+    property bool active: false
+    property bool isPlaylistMode: true
+    property bool isPlaying: false
 
-    // ==========================================
-    // СОСТОЯНИЕ ПЛЕЕРА И ПЛЕЙЛИСТОВ
-    // ==========================================
-    property var playlistNames: []
-    property string currentPlaylistName: ""
-    property var playlist: []
-    property int currentIndex: -1
+    property int playlistIndex: 0
+    property int trackIndex: 0
 
-    property bool isSleeping: false
-    property bool pendingPlay: false
+    property var playlists: []
+    property var tracks: []
+    property string selectedFolder: ""
 
-    // ==========================================
-    // ДАННЫЕ UI (ДЛЯ БИНДИНГОВ)
-    // ==========================================
-    property string trackTitle: "Playlist empty"
-    property string trackArtist: ""
-    property string trackCover: ""
+    readonly property string musicDir: StandardPaths.standardLocations(StandardPaths.MusicLocation)[0]
+    readonly property string currentPlaylistName: playlists[playlistIndex] ?? "No playlists"
+    readonly property string currentTrackDisplay: tracks[trackIndex]?.cleanName ?? "No track"
+    readonly property string socketPath: "/tmp/qsh-mpv.sock"
 
-    // ==========================================
-    // АЛИАСЫ СОСТОЯНИЯ
-    // ==========================================
-    readonly property alias currentTrackUrl: mediaPlayer.source
-    readonly property alias duration: mediaPlayer.duration
-    readonly property alias position: mediaPlayer.position
-    readonly property alias playbackState: mediaPlayer.playbackState
-    readonly property bool isPlaying: playbackState === MediaPlayer.PlayingState
-    property alias repeatTrack: appSettings.repeatTrack
+    property bool _explicitStop: false
 
-    // ==========================================
-    // КОМПОНЕНТЫ
-    // ==========================================
-    property Settings appSettings: Settings {
-        id: appSettings
-        category: "MusicPlayer"
-        location: "Config.ini"
-        property string currentPlaylistName: ""
-        property string currentTrack: ""
-        property bool repeatTrack: false
-    }
-
-    property MediaDevices mediaDevices: MediaDevices {
-        id: mediaDevices
-        onAudioOutputsChanged: audioOutput.device = mediaDevices.defaultAudioOutput
-    }
-
-    property MediaPlayer mediaPlayer: MediaPlayer {
-        id: mediaPlayer
-
-        audioOutput: AudioOutput {
-            id: audioOutput
-            volume: 1.0
-            device: mediaDevices.defaultAudioOutput
-        }
-
-        onMediaStatusChanged: {
-            if (mediaStatus === MediaPlayer.EndOfMedia) {
-                root.repeatTrack ? (root.seek(0), root.play()) : root.next();
-            }
-        }
-
-        onMetaDataChanged: {
-            if (root.isSleeping)
-                return;
-
-            const meta = mediaPlayer.metaData;
-            const currentItem = root.playlist[root.currentIndex] || {};
-
-            // Исполнитель может лежать в разных ключах в зависимости от бэкенда (GStreamer)
-            let metaAuthor = meta.stringValue(MediaMetaData.Author) || meta.stringValue(MediaMetaData.LeadPerformer) || meta.stringValue(MediaMetaData.ContributingArtist);
-
-            root.trackTitle = meta.stringValue(MediaMetaData.Title) || currentItem.name || (root.playlist.length ? "Unknown Track" : "Playlist empty");
-
-            root.trackArtist = metaAuthor || currentItem.artist || "";
-
-            root.trackCover = currentItem.originalName ? (root.coversPath + "/" + currentItem.originalName + ".png") : "";
+    function wakeUp() {
+        active = true;
+        if (!tracks.length && !isPlaying) {
+            isPlaylistMode = true;
         }
     }
 
-    // ==========================================
-    // ФАЙЛОВЫЕ МОДЕЛИ
-    // ==========================================
-    property FolderListModel playlistsModel: FolderListModel {
-        id: playlistsModel
-        folder: root.isSleeping ? "" : root.musicRootPath
-        showDirs: true
-        showFiles: false
-        showDotAndDotDot: false
-
-        onStatusChanged: {
-            if (status === FolderListModel.Ready && !root.isSleeping) {
-                let names = [];
-                for (let i = 0; i < count; i++) {
-                    const dirName = get(i, "fileName");
-                    if (dirName !== "Cover")
-                        names.push(dirName);
-                }
-                root.playlistNames = names;
-
-                const saved = appSettings.currentPlaylistName;
-                root.currentPlaylistName = names.includes(saved) ? saved : (names.length ? names[0] : "");
-                appSettings.currentPlaylistName = root.currentPlaylistName;
-
-                tracksModel.folder = root.currentPlaylistName ? (root.musicRootPath + "/" + root.currentPlaylistName) : "";
-            }
-        }
-    }
-
-    property FolderListModel tracksModel: FolderListModel {
-        id: tracksModel
-        showDirs: false
-        showFiles: true
-        nameFilters: ["*.mp3", "*.flac", "*.wav", "*.m4a", "*.ogg"]
-
-        onStatusChanged: {
-            if (status === FolderListModel.Ready && !root.isSleeping) {
-                let items = [];
-                for (let i = 0; i < count; i++) {
-                    const fileName = get(i, "fileName");
-                    const lastDot = fileName.lastIndexOf('.');
-                    const baseName = lastDot > 0 ? fileName.substring(0, lastDot) : fileName;
-
-                    items.push({
-                        path: get(i, "fileUrl").toString(),
-                        originalName: baseName,
-                        artist: ""      // артист берётся только из метаданных
-                        ,
-                        name: baseName
-                    });
-                }
-
-                root.playlist = items;
-
-                if (root.pendingPlay && root.playlist.length > 0) {
-                    root.pendingPlay = false;
-                    root.play();
-                } else if (items.length > 0) {
-                    const idx = items.findIndex(t => t.path === appSettings.currentTrack);
-                    root.loadTrack(Math.max(0, idx), false);
-                } else {
-                    root.clearPlayer();
-                }
-            }
-        }
-    }
-
-    // ==========================================
-    // ЛОГИКА СНА (ЭКОНОМИЯ РЕСУРСОВ)
-    // ==========================================
     function sleep() {
-        if (isSleeping)
-            return;
-        stop();
-        mediaPlayer.source = "";
-        playlistsModel.folder = "";
-        tracksModel.folder = "";
-        isSleeping = true;
+        active = false;
+        isPlaying = false;
+        mpvProcess.running = false;
     }
 
-    function wake() {
-        if (!isSleeping)
+    function playStop() {
+        if (!tracks.length)
             return;
-        isSleeping = false;
-        playlistsModel.folder = musicRootPath;
-        if (currentPlaylistName) {
-            tracksModel.folder = musicRootPath + "/" + currentPlaylistName;
+
+        if (mpvProcess.running) {
+            mpvCommand.command = ["sh", "-c", `echo 'cycle pause' | socat - ${socketPath}`];
+            mpvCommand.running = true;
+            isPlaying = !isPlaying;
+        } else {
+            _playCurrentTrack();
         }
     }
 
-    function toggleSleep() {
-        isSleeping ? wake() : sleep();
-    }
-
-    // ==========================================
-    // УПРАВЛЕНИЕ ВОСПРОИЗВЕДЕНИЕМ
-    // ==========================================
-    function play() {
-        if (isSleeping)
-            wake();
-        if (!playlist.length) {
-            pendingPlay = true;
-            return;
-        }
-        pendingPlay = false;
-
-        if (currentIndex === -1)
-            loadTrack(0, false);
-        mediaPlayer.play();
-    }
-
-    function pause() {
-        mediaPlayer.pause();
-    }
-
-    function togglePlay() {
-        isPlaying ? pause() : play();
-    }
-
-    function stop() {
-        mediaPlayer.stop();
+    function togglePlaylistMode() {
+        isPlaylistMode = true;
     }
 
     function next() {
-        if (isSleeping)
-            wake();
-        if (!playlist.length) {
-            pendingPlay = true;
-            return;
-        }
-        pendingPlay = false;
-
-        const nextIdx = (currentIndex + 1) % playlist.length;
-        playlist.length === 1 ? (seek(0), play()) : loadTrack(nextIdx, true);
+        _navigate(1);
     }
-
     function previous() {
-        if (isSleeping)
-            wake();
-        if (!playlist.length) {
-            pendingPlay = true;
+        _navigate(-1);
+    }
+
+    function confirmSelection() {
+        if (!isPlaylistMode || !playlists[playlistIndex])
             return;
+
+        selectedFolder = `${musicDir}/${playlists[playlistIndex]}`;
+        trackIndex = 0;
+        isPlaylistMode = false;
+    }
+
+    function cancelSelection() {
+        if (isPlaylistMode && tracks.length > 0) {
+            isPlaylistMode = false;
         }
-        pendingPlay = false;
-
-        const prevIdx = (currentIndex - 1 + playlist.length) % playlist.length;
-        playlist.length === 1 ? (seek(0), play()) : loadTrack(prevIdx, true);
     }
 
-    function toggleRepeat() {
-        appSettings.repeatTrack = !appSettings.repeatTrack;
-    }
-
-    function setPlaylist(name, autoPlay = false) {
-        if (isSleeping)
-            wake();
-        if (!playlistNames.includes(name))
+    function _navigate(step) {
+        const list = isPlaylistMode ? playlists : tracks;
+        if (!list.length)
             return;
-        stop();
-        appSettings.currentPlaylistName = name;
-        currentPlaylistName = name;
-        tracksModel.folder = musicRootPath + "/" + name;
 
-        if (autoPlay) {
-            if (tracksModel.status === FolderListModel.Ready) {
-                play();
+        const currentIndex = isPlaylistMode ? playlistIndex : trackIndex;
+        const newIndex = (currentIndex + step + list.length) % list.length;
+
+        if (isPlaylistMode) {
+            playlistIndex = newIndex;
+        } else {
+            trackIndex = newIndex;
+            _playCurrentTrack();
+        }
+    }
+
+    function _playCurrentTrack() {
+        if (!tracks.length || trackIndex < 0 || trackIndex >= tracks.length)
+            return;
+
+        const safePath = decodeURIComponent(tracks[trackIndex].filePath.replace(/^file:\/\//, ""));
+
+        if (mpvProcess.running) {
+            root._explicitStop = true;   // Помечаем, что это принудительная остановка
+            mpvProcess.running = false;
+        }
+
+        mpvProcess.command = ["mpv", "--no-video", "--no-terminal", `--input-ipc-server=${socketPath}`, "--", safePath];
+        mpvProcess.running = true;
+        isPlaying = true;
+    }
+
+    readonly property Process mpvProcess: Process {
+        onExited: exitCode => {
+            if (root._explicitStop) {
+                root._explicitStop = false;
+                return;
+            }
+
+            if (root.isPlaying && exitCode === 0) {
+                root.next();
             } else {
-                pendingPlay = true;
+                root.isPlaying = false;
             }
         }
     }
 
-    function loadTrack(index, autoPlay = true) {
-        if (isSleeping)
-            wake();
-        if (index < 0 || index >= playlist.length) {
-            stop();
-            return;
+    readonly property Process mpvCommand: Process {}
+
+    readonly property FolderListModel playlistScanner: FolderListModel {
+        folder: root.active ? root.musicDir : ""
+        showFiles: false
+        showDirs: true
+        showDotAndDotDot: false
+
+        onStatusChanged: {
+            if (status === FolderListModel.Ready) {
+                const list = new Array(count);
+                for (let i = 0; i < count; i++) {
+                    list[i] = get(i, "fileName");
+                }
+                root.playlists = list;
+            }
         }
+    }
 
-        if (currentIndex !== index || mediaPlayer.source !== playlist[index].path) {
-            mediaPlayer.stop();
+    readonly property FolderListModel trackScanner: FolderListModel {
+        folder: (root.active && root.selectedFolder) ? root.selectedFolder : ""
+        showDirs: false
+        showDotAndDotDot: false
+        nameFilters: ["*.mp3", "*.wav", "*.flac"]
+        sortField: FolderListModel.Name
+
+        onStatusChanged: {
+            if (status === FolderListModel.Ready) {
+                const list = new Array(count);
+                for (let i = 0; i < count; i++) {
+                    const fileName = get(i, "fileName");
+                    const dotIdx = fileName.lastIndexOf('.');
+
+                    list[i] = {
+                        fileName: fileName,
+                        cleanName: dotIdx > 0 ? fileName.substring(0, dotIdx) : fileName,
+                        filePath: String(get(i, "filePath"))
+                    };
+                }
+                root.tracks = list;
+
+                if (list.length > 0 && root.trackIndex === 0 && !root.mpvProcess.running && !root.isPlaylistMode) {
+                    root._playCurrentTrack();
+                }
+            }
         }
-
-        currentIndex = index;
-        const item = playlist[index];
-
-        trackTitle = item.name;
-        trackArtist = item.artist;
-        trackCover = coversPath + "/" + item.originalName + ".png";
-
-        appSettings.currentTrack = item.path;
-        mediaPlayer.source = item.path;
-
-        if (autoPlay)
-            mediaPlayer.play();
-    }
-
-    function clearPlayer() {
-        mediaPlayer.source = "";
-        currentIndex = -1;
-        trackTitle = "Playlist empty";
-        trackArtist = "";
-        trackCover = "";
-    }
-
-    // ==========================================
-    // УТИЛИТЫ
-    // ==========================================
-    function seek(ms) {
-        if (isSleeping)
-            return;
-        mediaPlayer.position = Math.max(0, Math.min(ms, mediaPlayer.duration));
-    }
-
-    function formatTime(ms) {
-        if (isNaN(ms) || ms <= 0)
-            return "00:00";
-        const sec = Math.floor(ms / 1000);
-        const m = String(Math.floor(sec / 60)).padStart(2, '0');
-        const s = String(sec % 60).padStart(2, '0');
-        return `${m}:${s}`;
     }
 }

@@ -11,6 +11,7 @@ Item {
     readonly property int paddingY: 8
     readonly property int spacing: 8
     readonly property int dateSize: 10
+    readonly property int timeSize: 18
 
     implicitWidth: contentColumn.implicitWidth + (paddingX * 2)
     implicitHeight: contentColumn.implicitHeight + (paddingY * 2)
@@ -27,18 +28,18 @@ Item {
 
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
-            text: Qt.formatDateTime(clock.date, "hh:mm")
+            text: Qt.formatTime(clock.date, "hh:mm")
             color: ThemeColor.on_surface
             font {
                 family: Theme.font
-                pixelSize: Configs.clockPixelSize
+                pixelSize: root.timeSize
                 weight: Font.Normal
             }
         }
 
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
-            text: Qt.formatDateTime(clock.date, "ddd dd MMM").toUpperCase()
+            text: Qt.formatDate(clock.date, "ddd dd MMM").toUpperCase()
             color: ThemeColor.on_surface
             font {
                 family: Theme.font

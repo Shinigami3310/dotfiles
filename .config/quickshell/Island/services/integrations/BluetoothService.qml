@@ -3,21 +3,162 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-Item {
+QtObject {
     id: root
 
     property bool enabled: false
     property string connectingMac: ""
-    property alias deviceModel: deviceModel
-
     property int activeClients: 0
     property bool isAwake: false
+    readonly property ListModel deviceModel: ListModel {}
 
-    property bool _isScanning: false
     property bool _isToggling: false
 
-    ListModel {
-        id: deviceModel
+    property Timer sleepTimer: Timer {
+        interval: 1000
+        onTriggered: root.isAwake = false
+    }
+
+    property Timer updateThrottleTimer: Timer {
+        interval: 500
+        onTriggered: {
+            if (!scanProc.running) {
+                scanParser.lines = [];
+                scanProc.running = true;
+            }
+        }
+    }
+
+    property Timer stateCheckTimer: Timer {
+        interval: 5000
+        repeat: true
+        onTriggered: checkStateProc.running = true
+    }
+
+    property Timer retryScanTimer: Timer {
+        interval: 1000
+        onTriggered: startScan()
+    }
+
+    property Process checkStateProc: Process {
+        command: ["bash", "-c", "bluetoothctl show | grep -q 'Powered: yes' && echo 1 || echo 0"]
+        stdout: SplitParser {
+            onRead: data => {
+                if (root._isToggling)
+                    return;
+                const newState = data.trim() === "1";
+                if (root.enabled !== newState) {
+                    root.enabled = newState;
+                }
+            }
+        }
+    }
+
+    property Process continuousScanProc: Process {
+        command: ["bluetoothctl", "scan", "on"]
+        stdout: SplitParser {
+            onRead: _ => {
+                if (!updateThrottleTimer.running)
+                    updateThrottleTimer.start();
+            }
+        }
+        stderr: SplitParser {
+            onRead: err => console.error(`[Bluetooth] Scan Error: ${err.trim()}`)
+        }
+        onExited: exitCode => {
+            if (root.isAwake && root.enabled && !root._isToggling) {
+                retryScanTimer.start();
+            }
+        }
+    }
+
+    property Process scanProc: Process {
+        command: ["bash", "-c", `
+            p=$(bluetoothctl devices Paired | awk '{print $2}')
+            devs=$(bluetoothctl devices | awk '{print $2}')
+            c=""
+            for mac in $devs; do
+                info=$(bluetoothctl info "$mac" | sed 's/\x1b\\[[0-9;]*m//g')
+                if echo "$info" | grep -q "Connected: yes"; then
+                    if echo "$info" | grep -q "ServicesResolved: yes"; then
+                        c="$c $mac"
+                    fi
+                fi
+            done
+            bluetoothctl devices | awk -v c_list="$c" -v p_list="$p" '
+            BEGIN {
+                split(c_list, c_arr, " ");
+                for (i in c_arr) if (c_arr[i] != "") connected_map[c_arr[i]] = 1;
+                split(p_list, p_arr, " ");
+                for (i in p_arr) if (p_arr[i] != "") paired_map[p_arr[i]] = 1;
+            }
+            NF>1 {
+                mac = $2;
+                $1 = ""; $2 = "";
+                sub(/^[ \\t]+/, "");
+                name = $0;
+                is_c = (mac in connected_map) ? "true" : "false";
+                is_p = (mac in paired_map) ? "true" : "false";
+                print mac "|" is_c "|" is_p "|" name
+            }'
+        `]
+        stdout: SplitParser {
+            id: scanParser
+            property var lines: []
+            onRead: data => {
+                if (data.trim())
+                    scanParser.lines.push(data.trim());
+            }
+        }
+        onExited: exitCode => {
+            if (exitCode === 0 && root.isAwake) {
+                root.updateModel(scanParser.lines);
+            }
+            scanParser.lines = [];
+        }
+    }
+
+    property Process toggleProc: Process {
+        property string targetState: "on"
+        command: ["bluetoothctl", "power", targetState]
+        onExited: () => {
+            root._isToggling = false;
+            if (targetState === "on" && root.isAwake) {
+                startScan();
+            }
+            checkStateProc.running = true;
+        }
+    }
+
+    property Process connectProc: Process {
+        stderr: SplitParser {
+            onRead: err => console.error(`[Bluetooth] Connect Error: ${err.trim()}`)
+        }
+        onExited: () => {
+            root.connectingMac = "";
+            startScan();
+        }
+    }
+
+    onIsAwakeChanged: {
+        if (isAwake) {
+            checkStateProc.running = true;
+            stateCheckTimer.start();
+            if (enabled && !_isToggling)
+                startScan();
+        } else {
+            stateCheckTimer.stop();
+            stopScan();
+        }
+    }
+
+    onEnabledChanged: {
+        if (enabled && isAwake && !_isToggling) {
+            startScan();
+        } else if (!enabled) {
+            stopScan();
+            deviceModel.clear();
+        }
     }
 
     function retain() {
@@ -28,166 +169,76 @@ Item {
 
     function release() {
         activeClients = Math.max(0, activeClients - 1);
-        if (activeClients === 0) {
+        if (activeClients === 0)
             sleepTimer.restart();
-        }
-    }
-
-    Timer {
-        id: sleepTimer
-        interval: 1000
-        onTriggered: root.isAwake = false
-    }
-
-    onIsAwakeChanged: {
-        if (isAwake) {
-            checkStateProc.running = true;
-            syncTimer.start();
-        } else {
-            syncTimer.stop();
-            scanProc.running = false;
-        }
-    }
-
-    onEnabledChanged: {
-        if (enabled && isAwake)
-            scan();
-        else if (!enabled)
-            deviceModel.clear();
-    }
-
-    Timer {
-        id: syncTimer
-        interval: 5000
-        repeat: true
-        onTriggered: {
-            checkStateProc.running = true;
-            if (root.enabled)
-                root.scan();
-        }
-    }
-
-    Process {
-        id: checkStateProc
-        command: ["bash", "-c", "bluetoothctl show | grep -q 'Powered: yes' && echo enabled || echo disabled"]
-        stdout: SplitParser {
-            onRead: data => {
-                if (!root._isToggling) {
-                    root.enabled = (data.trim() === "enabled");
-                }
-            }
-        }
-    }
-
-    Process {
-        id: scanProc
-        command: ["bash", "-c", "bluetoothctl --timeout 3 scan on >/dev/null 2>&1; bluetoothctl devices | while read -r _ mac name; do info=$(bluetoothctl info \"$mac\"); if echo \"$info\" | grep -q 'Connected: yes'; then c='true'; else c='false'; fi; if echo \"$info\" | grep -q 'Paired: yes'; then p='true'; else p='false'; fi; echo \"$mac|$c|$p|$name\"; done"]
-        stdout: SplitParser {
-            id: scanParser
-            property var lines: []
-            onRead: data => {
-                if (data.trim() !== "")
-                    lines.push(data.trim());
-            }
-        }
-        onExited: code => {
-            root._isScanning = false;
-            if (code === 0 && root.isAwake) {
-                root.updateModel(scanParser.lines);
-            }
-            scanParser.lines = [];
-        }
-    }
-
-    Process {
-        id: toggleProc
-        property string targetState: "on"
-        command: ["bluetoothctl", "power", targetState]
-        onExited: {
-            root._isToggling = false;
-            checkStateProc.running = true;
-        }
-    }
-
-    Process {
-        id: connectProc
-        onExited: {
-            root.connectingMac = "";
-            root.scan();
-        }
-    }
-
-    function scan() {
-        if (!enabled || _isScanning)
-            return;
-        _isScanning = true;
-        scanProc.running = false;
-        scanProc.running = true;
     }
 
     function toggle() {
         if (_isToggling)
             return;
         _isToggling = true;
-
-        root.enabled = !root.enabled;
-        toggleProc.targetState = root.enabled ? "on" : "off";
+        enabled = !enabled;
+        toggleProc.targetState = enabled ? "on" : "off";
         toggleProc.running = false;
         toggleProc.running = true;
     }
 
-    function connectToDevice(mac) {
+    function connectToDevice(mac: string) {
         if (connectingMac !== "")
             return;
         connectingMac = mac;
 
-        connectProc.command = ["bash", "-c", `bluetoothctl pair ${mac}; bluetoothctl connect ${mac}`];
+        connectProc.command = ["bash", "-c", "bluetoothctl pair \"$1\"; sleep 0.5; bluetoothctl connect \"$1\"; bluetoothctl info \"$1\" | grep -q 'Connected: yes' && echo OK || echo FAIL", "--", mac];
+
         connectProc.running = false;
         connectProc.running = true;
     }
 
-    function updateModel(lines) {
-        let targets = [];
+    function startScan() {
+        if (!enabled || continuousScanProc.running)
+            return;
+        retryScanTimer.stop();
+        continuousScanProc.running = false;
+        continuousScanProc.running = true;
+        updateThrottleTimer.start();
+    }
 
-        for (let i = 0; i < lines.length; i++) {
-            let parts = lines[i].split('|');
-            if (parts.length < 4)
-                continue;
+    function stopScan() {
+        retryScanTimer.stop();
+        updateThrottleTimer.stop();
 
-            targets.push({
-                mac: parts[0],
-                connected: (parts[1] === "true"),
-                paired: (parts[2] === "true"),
-                name: parts.slice(3).join('|') || "Неизвестное устройство"
-            });
+        if (continuousScanProc.running) {
+            continuousScanProc.running = false;
+            Quickshell.execDetached(["bluetoothctl", "scan", "off"]);
         }
+    }
 
-        targets.sort((a, b) => b.connected - a.connected || b.paired - a.paired || a.name.localeCompare(b.name));
+    function updateModel(lines: var) {
+        const targets = lines.map(line => line.split('|')).filter(parts => parts.length >= 4).map(parts => ({
+                    mac: parts[0],
+                    connected: parts[1] === "true",
+                    paired: parts[2] === "true",
+                    name: parts.slice(3).join('|') || "Unknown Device"
+                })).sort((a, b) => b.connected - a.connected || b.paired - a.paired || a.name.localeCompare(b.name));
 
-        let targetMap = {};
-        for (let i = 0; i < targets.length; i++) {
-            targetMap[targets[i].mac] = targets[i];
-        }
+        const targetMap = new Map(targets.map(t => [t.mac, t]));
 
         for (let i = deviceModel.count - 1; i >= 0; i--) {
-            if (!targetMap[deviceModel.get(i).mac]) {
+            if (!targetMap.has(deviceModel.get(i).mac)) {
                 deviceModel.remove(i);
             }
         }
 
-        for (let i = 0; i < targets.length; i++) {
-            let t = targets[i];
+        targets.forEach((t, index) => {
             let foundIdx = -1;
-
-            for (let j = i; j < deviceModel.count; j++) {
+            for (let j = 0; j < deviceModel.count; j++) {
                 if (deviceModel.get(j).mac === t.mac) {
                     foundIdx = j;
                     break;
                 }
             }
-
             if (foundIdx !== -1) {
-                let item = deviceModel.get(foundIdx);
+                const item = deviceModel.get(foundIdx);
                 if (item.connected !== t.connected)
                     deviceModel.setProperty(foundIdx, "connected", t.connected);
                 if (item.paired !== t.paired)
@@ -195,12 +246,12 @@ Item {
                 if (item.name !== t.name)
                     deviceModel.setProperty(foundIdx, "name", t.name);
 
-                if (foundIdx !== i) {
-                    deviceModel.move(foundIdx, i, 1);
+                if (foundIdx !== index) {
+                    deviceModel.move(foundIdx, index, 1);
                 }
             } else {
-                deviceModel.insert(i, t);
+                deviceModel.insert(index, t);
             }
-        }
+        });
     }
 }

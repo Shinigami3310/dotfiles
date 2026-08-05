@@ -1,3 +1,4 @@
+pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
@@ -7,6 +8,7 @@ QtObject {
 
     property var allApps: []
     readonly property ListModel filteredApps: ListModel {}
+    readonly property list<string> blackList: ["Avahi SSH Server Browser", "Avahi VNC Server Browser", "Avahi Zeroconf Browser", "mpv Media Player"]
 
     property var _rawAppsBuffer: []
 
@@ -15,7 +17,7 @@ QtObject {
         running: true
 
         stdout: SplitParser {
-            onRead: function (data) {
+            onRead: data => {
                 let parts = data.trim().split("\x1F");
                 if (parts.length >= 5) {
                     root._rawAppsBuffer.push({
@@ -31,21 +33,18 @@ QtObject {
 
         onExited: {
             root._rawAppsBuffer.sort((a, b) => a.name.localeCompare(b.name));
-            root.allApps = root._rawAppsBuffer;
+            root.allApps = root._rawAppsBuffer.filter(app => !blackList.includes(app.id) && !blackList.includes(app.name));
             root.filter("");
             root._rawAppsBuffer = [];
         }
     }
 
-    function filter(query) {
+    function filter(query: string) {
         let q = (query || "").toLowerCase();
-        let targetApps = q === "" ? root.allApps : root.allApps.filter(function (app) {
-            return app.name.toLowerCase().includes(q);
-        });
 
-        let targetIds = new Set(targetApps.map(function (app) {
-            return app.id;
-        }));
+        let targetApps = q === "" ? root.allApps : root.allApps.filter(app => app.name.toLowerCase().includes(q));
+        let targetIds = new Set(targetApps.map(app => app.id));
+
         for (let i = root.filteredApps.count - 1; i >= 0; i--) {
             if (!targetIds.has(root.filteredApps.get(i).id)) {
                 root.filteredApps.remove(i);
@@ -73,12 +72,15 @@ QtObject {
         }
     }
 
-    function launchApp(arg) {
+    function launchApp(arg: var) {
         let execCommand = arg.exec;
         if (!execCommand)
             return;
-        if (arg.terminal)
-            execCommand = "kitty -e \"" + execCommand + "\"";
+
+        if (arg.terminal) {
+            execCommand = `kitty -e ${execCommand}`;
+        }
+
         Quickshell.execDetached(["sh", "-c", execCommand]);
     }
 }

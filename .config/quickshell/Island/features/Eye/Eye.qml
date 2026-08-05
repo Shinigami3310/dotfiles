@@ -18,9 +18,8 @@ Item {
         repeat: true
         running: true
         onTriggered: {
-            if (remainingSeconds > 1) {
-                remainingSeconds--;
-            } else {
+            root.remainingSeconds--;
+            if (root.remainingSeconds <= 0) {
                 stop();
                 root.backRequested();
             }
@@ -38,5 +37,6 @@ Item {
         }
         color: ThemeColor.primary
         antialiasing: true
+        renderType: Text.NativeRendering
     }
 }

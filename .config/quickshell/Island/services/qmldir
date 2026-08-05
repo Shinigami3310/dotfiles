@@ -1,0 +1,7 @@
+BatteryService BatteryService.qml
+CalendarService CalendarService.qml
+DndService DndService.qml
+ModeController ModeController.qml
+NightModeService NightModeService.qml
+PowerService PowerService.qml
+SystemStatsService SystemStatsService.qml

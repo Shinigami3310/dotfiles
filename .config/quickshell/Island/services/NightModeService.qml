@@ -6,13 +6,13 @@ QtObject {
     id: root
 
     property bool active: false
-    property string temperature: "5000"
+    property int temperature: 5000
 
     function toggle() {
         if (active)
             Quickshell.execDetached(["killall", "hyprsunset"]);
         else
-            Quickshell.execDetached(["hyprsunset", "-t", temperature]);
+            Quickshell.execDetached(["hyprsunset", "-t", temperature.toString()]);
         active = !active;
     }
 

@@ -1,0 +1,3 @@
+singleton BatteryConfig BatteryConfig.qml
+Battery Battery.qml
+ProfileButton ProfileButton.qml

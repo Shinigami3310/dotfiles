@@ -1,17 +1,16 @@
 import QtQuick
 import "../../theme"
-import "../../services"
+import "../../services/integrations/"
 
 Rectangle {
     id: root
 
     required property int index
-    required property WorkspaceService handler
 
     readonly property int workspaceId: index + 1
 
-    readonly property bool isActive: handler.isActive(workspaceId)
-    readonly property bool isOccupied: handler.isOccupied(workspaceId)
+    readonly property bool isActive: WorkspaceService.isActive(workspaceId)
+    readonly property bool isOccupied: WorkspaceService.isOccupied(workspaceId)
 
     readonly property bool hovered: hoverHandler.hovered
     readonly property bool pressed: tapHandler.pressed
@@ -19,7 +18,6 @@ Rectangle {
     width: 16
     height: 16
     radius: width / 2
-    transformOrigin: Item.Center
 
     scale: pressed ? Configs.scalePressed : (hovered ? 1.2 : 1.0)
     color: isActive ? ThemeColor.primary : (isOccupied ? ThemeColor.on_surface : "transparent")
@@ -49,7 +47,7 @@ Rectangle {
     TapHandler {
         id: tapHandler
         acceptedButtons: Qt.LeftButton
-        onTapped: handler.activateWorkspace(workspaceId)
+        onTapped: WorkspaceService.activateWorkspace(workspaceId)
     }
 
     HoverHandler {

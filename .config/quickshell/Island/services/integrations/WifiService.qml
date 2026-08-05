@@ -3,12 +3,12 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-Item {
+QtObject {
     id: root
 
     property bool enabled: false
     property string connectingBssid: ""
-    property alias networkModel: networkModel
+    readonly property ListModel networkModel: ListModel {}
 
     property int activeClients: 0
     property bool isAwake: false
@@ -16,8 +16,85 @@ Item {
     property bool _isScanning: false
     property bool _isToggling: false
 
-    ListModel {
-        id: networkModel
+    property Timer sleepTimer: Timer {
+        interval: 1000
+        onTriggered: root.isAwake = false
+    }
+
+    property Timer syncTimer: Timer {
+        interval: 5000
+        repeat: true
+        onTriggered: {
+            root.checkStateProc.running = true;
+            if (root.enabled) {
+                root.scan();
+            }
+        }
+    }
+
+    property Process checkStateProc: Process {
+        command: ["nmcli", "-t", "radio", "wifi"]
+        stdout: SplitParser {
+            onRead: data => {
+                if (!root._isToggling) {
+                    root.enabled = (data.trim() === "enabled");
+                }
+            }
+        }
+    }
+
+    property Process scanProc: Process {
+        command: ["nmcli", "-t", "-f", "SSID,BSSID,SECURITY,IN-USE,SIGNAL", "dev", "wifi", "list"]
+        stdout: SplitParser {
+            id: scanParser
+            property var lines: []
+            onRead: data => {
+                let trimmed = data.trim();
+                if (trimmed !== "") {
+                    lines.push(trimmed);
+                }
+            }
+        }
+        onExited: code => {
+            root._isScanning = false;
+            if (code === 0 && root.isAwake) {
+                root.updateModel(scanParser.lines);
+            }
+            scanParser.lines = [];
+        }
+    }
+
+    property Process toggleProc: Process {
+        property string targetState: "on"
+        command: ["nmcli", "radio", "wifi", targetState]
+        onExited: {
+            root._isToggling = false;
+            root.checkStateProc.running = true;
+        }
+    }
+
+    property Process connectProc: Process {
+        onExited: {
+            root.connectingBssid = "";
+            root.scan();
+        }
+    }
+
+    onIsAwakeChanged: {
+        if (isAwake) {
+            checkStateProc.running = true;
+            syncTimer.start();
+        } else {
+            syncTimer.stop();
+        }
+    }
+
+    onEnabledChanged: {
+        if (enabled && isAwake) {
+            scan();
+        } else if (!enabled) {
+            networkModel.clear();
+        }
     }
 
     function retain() {
@@ -33,93 +110,13 @@ Item {
         }
     }
 
-    Timer {
-        id: sleepTimer
-        interval: 1000
-        onTriggered: root.isAwake = false
-    }
-
-    onIsAwakeChanged: {
-        if (isAwake) {
-            checkStateProc.running = true;
-            syncTimer.start();
-        } else {
-            syncTimer.stop();
-        }
-    }
-
-    onEnabledChanged: {
-        if (enabled && isAwake)
-            scan();
-        else if (!enabled)
-            networkModel.clear();
-    }
-
-    Timer {
-        id: syncTimer
-        interval: 5000
-        repeat: true
-        onTriggered: {
-            checkStateProc.running = true;
-            if (root.enabled)
-                root.scan();
-        }
-    }
-
-    Process {
-        id: checkStateProc
-        command: ["nmcli", "-t", "radio", "wifi"]
-        stdout: SplitParser {
-            onRead: data => {
-                if (!root._isToggling) {
-                    root.enabled = (data.trim() === "enabled");
-                }
-            }
-        }
-    }
-
-    Process {
-        id: scanProc
-        command: ["nmcli", "-t", "-f", "SSID,BSSID,SECURITY,IN-USE,SIGNAL", "dev", "wifi", "list"]
-        stdout: SplitParser {
-            id: scanParser
-            property var lines: []
-            onRead: data => {
-                if (data.trim() !== "")
-                    lines.push(data.trim());
-            }
-        }
-        onExited: code => {
-            root._isScanning = false;
-            if (code === 0 && root.isAwake) {
-                root.updateModel(scanParser.lines);
-            }
-            scanParser.lines = [];
-        }
-    }
-
-    Process {
-        id: toggleProc
-        property string targetState: "on"
-        command: ["nmcli", "radio", "wifi", targetState]
-        onExited: {
-            root._isToggling = false;
-            checkStateProc.running = true;
-        }
-    }
-
-    Process {
-        id: connectProc
-        onExited: {
-            root.connectingBssid = "";
-            root.scan();
-        }
-    }
-
     function scan() {
         if (!enabled || _isScanning)
             return;
         _isScanning = true;
+
+        scanParser.lines = [];
+
         scanProc.running = false;
         scanProc.running = true;
     }
@@ -129,46 +126,49 @@ Item {
             return;
         _isToggling = true;
 
-        root.enabled = !root.enabled;
-        toggleProc.targetState = root.enabled ? "on" : "off";
+        enabled = !enabled;
+        toggleProc.targetState = enabled ? "on" : "off";
         toggleProc.running = false;
         toggleProc.running = true;
     }
 
-    function connectToNetwork(bssid, password) {
+    function connectToNetwork(bssid: string, password: string) {
         if (connectingBssid !== "")
             return;
         connectingBssid = bssid;
 
-        connectProc.command = (password !== "") ? ["nmcli", "dev", "wifi", "connect", bssid, "password", password] : ["nmcli", "dev", "wifi", "connect", bssid];
+        connectProc.command = password.length > 0 ? ["nmcli", "dev", "wifi", "connect", bssid, "password", password] : ["nmcli", "dev", "wifi", "connect", bssid];
+
         connectProc.running = false;
         connectProc.running = true;
     }
 
-    function updateModel(lines) {
-        let targets = [];
+    function updateModel(lines: var) {
+        const targets = [];
+        const unescapeColon = str => str.replace(/___COLON___/g, ":");
 
         for (let i = 0; i < lines.length; i++) {
-            let safeLine = lines[i].replace(/\\:/g, "___COLON___");
-            let parts = safeLine.split(":");
+            const safeLine = lines[i].replace(/\\:/g, "___COLON___");
+            const parts = safeLine.split(":");
             if (parts.length < 5)
                 continue;
-            let ssid = parts[0].replace(/___COLON___/g, ":");
+
+            const ssid = unescapeColon(parts[0]);
             if (ssid === "")
                 continue;
 
             targets.push({
-                ssid: parts[0].replace(/___COLON___/g, ":") || "Hidden network",
-                bssid: parts[1].replace(/___COLON___/g, ":"),
-                security: parts[2].replace(/___COLON___/g, ":"),
-                connected: (parts[3] === "*"),
-                signal: parseInt(parts[4]) || 0
+                ssid: ssid,
+                bssid: unescapeColon(parts[1]),
+                security: unescapeColon(parts[2]),
+                connected: parts[3] === "*",
+                signal: parseInt(parts[4], 10) || 0
             });
         }
 
-        targets.sort((a, b) => b.connected - a.connected || b.signal - a.signal);
+        targets.sort((a, b) => (b.connected - a.connected) || (b.signal - a.signal));
 
-        let targetMap = {};
+        const targetMap = {};
         for (let i = 0; i < targets.length; i++) {
             targetMap[targets[i].bssid] = targets[i];
         }
@@ -180,10 +180,10 @@ Item {
         }
 
         for (let i = 0; i < targets.length; i++) {
-            let t = targets[i];
+            const t = targets[i];
             let foundIdx = -1;
 
-            for (let j = i; j < networkModel.count; j++) {
+            for (let j = 0; j < networkModel.count; j++) {
                 if (networkModel.get(j).bssid === t.bssid) {
                     foundIdx = j;
                     break;
@@ -191,7 +191,7 @@ Item {
             }
 
             if (foundIdx !== -1) {
-                let item = networkModel.get(foundIdx);
+                const item = networkModel.get(foundIdx);
                 if (item.connected !== t.connected)
                     networkModel.setProperty(foundIdx, "connected", t.connected);
                 if (item.signal !== t.signal)

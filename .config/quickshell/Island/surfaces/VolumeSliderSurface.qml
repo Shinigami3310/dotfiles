@@ -2,12 +2,12 @@ import "../core"
 import "../features/Sliders/"
 
 SurfaceBase {
+    id: root
     surfaceName: "volumeSlider"
     implicitWidth: volume.implicitWidth
     implicitHeight: volume.implicitHeight
     Volume {
         id: volume
-        anchors.centerIn: parent
-        onCloseRequested: parent.closeRequested()
+        onCloseRequested: root.closeRequested()
     }
 }

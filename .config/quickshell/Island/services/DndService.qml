@@ -18,7 +18,7 @@ QtObject {
 
         stdout: SplitParser {
             onRead: data => {
-                root.active = data == "true";
+                root.active = (data.trim() === "true");
             }
         }
     }

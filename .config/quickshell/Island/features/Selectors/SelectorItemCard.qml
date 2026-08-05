@@ -4,14 +4,6 @@ import "../../theme"
 Rectangle {
     id: root
 
-    // Локальные константы
-    readonly property real cardBaseHeight: 48
-    readonly property real cardInputHeight: 88
-    readonly property real cardRadius: 12
-    readonly property real scaleHover: 1.02
-    readonly property real scalePressed: 0.95
-    readonly property real fallbackWidth: 320
-
     property string name: "Unknown"
     property string security: ""
     property bool isConnected: false
@@ -20,17 +12,20 @@ Rectangle {
 
     signal connectRequested(string password)
 
-    width: ListView.view ? ListView.view.width : fallbackWidth
-    height: isInputting ? cardInputHeight : cardBaseHeight
+    readonly property bool hovered: hoverHandler.hovered
+    readonly property bool pressed: tapHandler.pressed
+
+    width: ListView.view ? ListView.view.width : SelectorConfig.width
+    height: isInputting ? SelectorConfig.cardInputHeight : SelectorConfig.cardBaseHeight
     implicitHeight: height
-    radius: cardRadius
+    radius: SelectorConfig.cardRadius
 
     color: isConnected ? ThemeColor.primary : ThemeColor.surface_container_low
-    border.color: (mouseArea.containsMouse && !isConnected) ? ThemeColor.primary : "transparent"
-    border.width: 1
+    border.color: (hovered && !isConnected) ? ThemeColor.primary : "transparent"
+    border.width: SelectorConfig.cardBorderWidth
     clip: true
 
-    scale: mouseArea.pressed ? 0.95 : (mouseArea.containsMouse ? 1 : 0.95)
+    scale: pressed ? SelectorConfig.cardPressedScale : (hovered ? SelectorConfig.cardHoverScale : 0.95)
 
     Behavior on scale {
         NumberAnimation {
@@ -60,14 +55,14 @@ Rectangle {
 
     Column {
         anchors.centerIn: parent
-        width: parent.width - 24
-        spacing: 8
+        width: parent.width - (SelectorConfig.cardContentMargin * 2)
+        spacing: SelectorConfig.cardContentSpacing
 
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
             text: root.isConnecting ? "Connecting" : root.name
             font.family: Theme.font
-            font.pixelSize: 13
+            font.pixelSize: SelectorConfig.cardTextSize
             color: root.isConnected ? ThemeColor.on_primary : ThemeColor.on_surface
             opacity: root.isConnecting ? pulseAnim.opacityValue : 1.0
 
@@ -75,8 +70,8 @@ Rectangle {
                 id: pulseAnim
                 property real opacityValue: 1.0
                 from: 1.0
-                to: 0.4
-                duration: 600
+                to: SelectorConfig.pulseMinOpacity
+                duration: SelectorConfig.pulseDuration
                 loops: Animation.Infinite
                 running: root.isConnecting
                 easing.type: Easing.InOutSine
@@ -87,11 +82,11 @@ Rectangle {
             id: inputContainer
             anchors.horizontalCenter: parent.horizontalCenter
             width: parent.width
-            height: 28
-            radius: 6
+            height: SelectorConfig.inputContainerHeight
+            radius: SelectorConfig.inputRadius
             color: ThemeColor.surface_container_highest
             visible: root.isInputting
-            opacity: root.isInputting ? 1 : 0
+            opacity: root.isInputting ? 1.0 : 0.0
             border.color: pwdInput.activeFocus ? ThemeColor.primary : "transparent"
             border.width: 1
 
@@ -110,10 +105,10 @@ Rectangle {
             TextInput {
                 id: pwdInput
                 anchors.fill: parent
-                anchors.margins: 8
+                anchors.margins: SelectorConfig.inputPadding
                 verticalAlignment: TextInput.AlignVCenter
                 color: ThemeColor.on_surface
-                font.pixelSize: 13
+                font.pixelSize: SelectorConfig.cardTextSize
                 echoMode: TextInput.Password
                 passwordCharacter: "•"
 
@@ -134,13 +129,14 @@ Rectangle {
         }
     }
 
-    MouseArea {
-        id: mouseArea
-        anchors.fill: parent
-        hoverEnabled: true
+    HoverHandler {
+        id: hoverHandler
         cursorShape: (root.isConnected || root.isConnecting) ? Qt.ArrowCursor : Qt.PointingHandCursor
+    }
 
-        onClicked: {
+    TapHandler {
+        id: tapHandler
+        onTapped: {
             if (root.isConnected || root.isConnecting)
                 return;
 

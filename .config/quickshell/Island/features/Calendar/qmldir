@@ -1,0 +1,4 @@
+singleton CalendarConfig CalendarConfig.qml
+Calendar Calendar.qml
+DayCell DayCell.qml
+NavButton NavButton.qml

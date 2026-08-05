@@ -11,13 +11,13 @@ Rectangle {
 
     signal clicked
 
-    width: ListView.view ? ListView.view.width : 360
-    height: 44
-    radius: 6
+    width: ListView.view ? ListView.view.width : AppLauncherConfig.baseWidth
+    height: AppLauncherConfig.itemHeight
+    radius: AppLauncherConfig.itemRadius
 
     color: isCurrent || hoverHandler.hovered ? ThemeColor.surface_container_high : "transparent"
     border {
-        width: isCurrent ? 1 : 0
+        width: isCurrent ? AppLauncherConfig.itemActiveBorderWidth : 0
         color: ThemeColor.primary
     }
 
@@ -31,18 +31,19 @@ Rectangle {
     Row {
         anchors {
             fill: parent
-            leftMargin: 12
-            rightMargin: 12
+            leftMargin: AppLauncherConfig.itemHorizontalPadding
+            rightMargin: AppLauncherConfig.itemHorizontalPadding
         }
-        spacing: 12
+        spacing: AppLauncherConfig.itemSpacing
 
         Image {
             id: iconImg
             anchors.verticalCenter: parent.verticalCenter
-            width: 24
-            height: 24
+            width: AppLauncherConfig.itemIconSize
+            height: AppLauncherConfig.itemIconSize
             sourceSize: Qt.size(width, height)
             fillMode: Image.PreserveAspectFit
+            asynchronous: true
 
             source: {
                 if (!root.appIcon)
@@ -52,7 +53,7 @@ Rectangle {
 
             Rectangle {
                 anchors.fill: parent
-                radius: 4
+                radius: AppLauncherConfig.itemIconRadius
                 color: root.isCurrent ? ThemeColor.surface_container_highest : ThemeColor.surface_container_high
                 visible: iconImg.status === Image.Error || iconImg.status === Image.Null || !root.appIcon
             }
@@ -66,7 +67,7 @@ Rectangle {
             elide: Text.ElideRight
             font {
                 family: Theme.font
-                pixelSize: 14
+                pixelSize: AppLauncherConfig.itemTextSize
             }
 
             Behavior on color {
@@ -80,7 +81,9 @@ Rectangle {
 
     HoverHandler {
         id: hoverHandler
+        cursorShape: Qt.PointingHandCursor
     }
+
     TapHandler {
         onTapped: root.clicked()
     }

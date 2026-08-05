@@ -1,0 +1,5 @@
+AppItem AppItem.qml
+AppLauncher AppLauncher.qml
+singleton AppLauncherConfig AppLauncherConfig.qml
+AppList AppList.qml
+SearchBar SearchBar.qml

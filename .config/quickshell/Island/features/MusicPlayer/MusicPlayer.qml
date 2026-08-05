@@ -1,66 +1,55 @@
 import QtQuick
-import QtQuick.Layouts
 import "../../theme"
 import "../../services/integrations"
 
-Rectangle {
+Item {
     id: root
 
-    width: 340
-    implicitHeight: mainLayout.implicitHeight + (mainLayout.anchors.margins * 2)
-    implicitWidth: 340
-
-    color: Theme.surface
-    radius: 16
-
-    border.color: Theme.panelBorder
-    border.width: 1
+    implicitWidth: 360
+    implicitHeight: 100
 
     signal closeRequested
 
-    focus: true
+    property bool isClosing: true
 
     Component.onCompleted: {
-        MusicPlayerService.wake();
+        MusicPlayerService.wakeUp();
+        root.forceActiveFocus();
     }
 
-    Keys.onSpacePressed: event => {
-        controls.triggerPlay();
-        event.accepted = true;
+    Keys.onPressed: event => {
+        if (event.key === Qt.Key_Space) {
+            MusicPlayerService.playStop();
+            event.accepted = true;
+        } else if (event.key === Qt.Key_Left) {
+            MusicPlayerService.previous();
+            event.accepted = true;
+        } else if (event.key === Qt.Key_Right) {
+            MusicPlayerService.next();
+            event.accepted = true;
+        } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+            MusicPlayerService.confirmSelection();
+            event.accepted = true;
+        } else if (event.key === Qt.Key_Escape) {
+            if (MusicPlayerService.isPlaylistMode) {
+                MusicPlayerService.cancelSelection();
+            } else {
+                root.closeRequested();
+            }
+            event.accepted = true;
+        }
     }
-    Keys.onLeftPressed: event => {
-        controls.triggerPrevious();
-        event.accepted = true;
+
+    PlaybackView {
+        id: playbackView
+        anchors.fill: parent
+        anchors.margins: 14
+        isClosing: root.isClosing
+        onCloseRequested: root.closeRequested()
     }
-    Keys.onRightPressed: event => {
-        controls.triggerNext();
-        event.accepted = true;
-    }
 
-    ColumnLayout {
-        id: mainLayout
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.margins: 16
-        spacing: 10
-
-        MusicPlayerHeader {
-            Layout.fillWidth: true
-        }
-
-        MusicPlayerSlider {
-            Layout.fillWidth: true
-        }
-
-        MusicPlayerControls {
-            id: controls
-            Layout.fillWidth: true
-            onCloseRequested: root.closeRequested()
-        }
-
-        MusicPlayerMenu {
-            Layout.fillWidth: true
-        }
+    PlaylistView {
+        id: playlistView
+        anchors.fill: parent
     }
 }

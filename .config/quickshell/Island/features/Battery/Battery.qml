@@ -5,28 +5,8 @@ import "../../theme"
 Item {
     id: root
 
-    readonly property int layoutPadding: 52
-    readonly property int layoutSpacing: 20
-    readonly property int headerSpacing: 16
-    readonly property int profileSpacing: 12
-
-    readonly property int frameRadius: 6
-    readonly property real borderWidth: 2.5
-    readonly property real innerMargin: 3.5
-    readonly property int indicatorRadius: 3
-
-    readonly property int terminalWidth: 4
-    readonly property int terminalHeight: 12
-    readonly property int terminalRadius: 2
-
-    readonly property int frameWidth: 62
-    readonly property int frameHeight: 32
-    readonly property int textSize: 28
-
-    readonly property int chargeAnimDuration: 2700
-
-    implicitWidth: layout.implicitWidth + layoutPadding
-    implicitHeight: layout.implicitHeight + layoutPadding
+    implicitWidth: layout.implicitWidth + BatteryConfig.layoutPadding
+    implicitHeight: layout.implicitHeight + BatteryConfig.layoutPadding
 
     BatteryService {
         id: batteryService
@@ -36,38 +16,48 @@ Item {
     readonly property real displayPercent: batteryService.isCharging ? chargeAnimVal : batteryService.percent
 
     NumberAnimation on chargeAnimVal {
-        from: 0
+        id: chargeAnim
+        from: batteryService.percent
         to: 100
-        duration: chargeAnimDuration
+        duration: BatteryConfig.chargeAnimDuration
         loops: Animation.Infinite
         running: batteryService.isCharging
+    }
+
+    Connections {
+        target: batteryService
+        function onPercentChanged() {
+            if (batteryService.isCharging) {
+                chargeAnim.restart();
+            }
+        }
     }
 
     Column {
         id: layout
         anchors.centerIn: parent
-        spacing: layoutSpacing
+        spacing: BatteryConfig.layoutSpacing
 
         Row {
             anchors.horizontalCenter: parent.horizontalCenter
-            spacing: headerSpacing
+            spacing: BatteryConfig.headerSpacing
 
             Item {
                 anchors.verticalCenter: parent.verticalCenter
-                width: frameWidth
-                height: frameHeight
+                width: BatteryConfig.frameWidth
+                height: BatteryConfig.frameHeight
 
                 Rectangle {
                     id: batteryFrame
                     anchors {
                         fill: parent
-                        rightMargin: terminalWidth + 1
+                        rightMargin: BatteryConfig.terminalWidth + 1
                     }
-                    radius: frameRadius
+                    radius: BatteryConfig.frameRadius
                     color: "transparent"
                     border {
                         color: ThemeColor.on_surface
-                        width: borderWidth
+                        width: BatteryConfig.borderWidth
                     }
 
                     Rectangle {
@@ -75,11 +65,11 @@ Item {
                             left: parent.left
                             top: parent.top
                             bottom: parent.bottom
-                            margins: innerMargin
+                            margins: BatteryConfig.innerMargin
                         }
 
-                        width: Math.max(0, (parent.width - (innerMargin * 2)) * (root.displayPercent / 100))
-                        radius: indicatorRadius
+                        width: Math.max(0, (parent.width - (BatteryConfig.innerMargin * 2)) * (root.displayPercent / 100))
+                        radius: BatteryConfig.indicatorRadius
                         color: batteryService.isCharging ? ThemeColor.primary : ThemeColor.secondary
 
                         Behavior on color {
@@ -95,9 +85,9 @@ Item {
                         right: parent.right
                         verticalCenter: parent.verticalCenter
                     }
-                    width: terminalWidth
-                    height: terminalHeight
-                    radius: terminalRadius
+                    width: BatteryConfig.terminalWidth
+                    height: BatteryConfig.terminalHeight
+                    radius: BatteryConfig.terminalRadius
                     color: ThemeColor.on_surface
                 }
             }
@@ -107,16 +97,17 @@ Item {
                 text: `${batteryService.percent}%`
                 font {
                     family: Theme.font
-                    pixelSize: textSize
+                    pixelSize: BatteryConfig.textSize
                     weight: Font.Bold
                 }
                 color: ThemeColor.on_surface
+                renderType: Text.NativeRendering
             }
         }
 
         Row {
             anchors.horizontalCenter: parent.horizontalCenter
-            spacing: profileSpacing
+            spacing: BatteryConfig.profileSpacing
 
             ProfileButton {
                 profileId: "power-saver"

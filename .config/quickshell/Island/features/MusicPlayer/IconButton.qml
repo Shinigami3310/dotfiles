@@ -16,7 +16,7 @@ Item {
     readonly property bool hovered: hoverHandler.hovered
     readonly property bool pressed: tapHandler.pressed
 
-    scale: pressed ? Configs.scalePressed : (hovered ? Configs.scaleHover : 1.0)
+    scale: pressed ? (Configs.scalePressed ?? 0.9) : (hovered ? (Configs.scaleHover ?? 1.1) : 1.0)
 
     Behavior on scale {
         NumberAnimation {
@@ -42,9 +42,6 @@ Item {
         colorization: 1.0
         colorizationColor: (root.active || root.pressed) ? ThemeColor.primary : ThemeColor.on_surface
 
-        paddingRect: Qt.rect(0, 0, width, height)
-        autoPaddingEnabled: false
-
         Behavior on colorizationColor {
             ColorAnimation {
                 duration: Motion.fast
@@ -57,6 +54,7 @@ Item {
         acceptedButtons: Qt.LeftButton
         onTapped: root.clicked()
     }
+
     HoverHandler {
         id: hoverHandler
         cursorShape: Qt.PointingHandCursor

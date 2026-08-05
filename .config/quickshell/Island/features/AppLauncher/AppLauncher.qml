@@ -1,20 +1,15 @@
 import QtQuick
-import "../../services"
+import "../../services/integrations"
 import "../../theme"
 
 FocusScope {
     id: root
 
-    AppService {
-        id: appService
-    }
-
     signal closeRequested
 
-    readonly property int padding: 16
-    implicitWidth: 360 + (padding * 2)
+    implicitWidth: AppLauncherConfig.baseWidth + (AppLauncherConfig.windowPadding * 2)
 
-    readonly property int targetSurfaceHeight: layout.implicitHeight + (padding * 2)
+    readonly property int targetSurfaceHeight: layout.implicitHeight + (AppLauncherConfig.windowPadding * 2)
 
     onTargetSurfaceHeightChanged: {
         if (targetSurfaceHeight > implicitHeight) {
@@ -29,7 +24,7 @@ FocusScope {
 
     Timer {
         id: resizeDebounce
-        interval: 150
+        interval: AppLauncherConfig.resizeDebounceInterval
         onTriggered: root.implicitHeight = root.targetSurfaceHeight
     }
 
@@ -41,10 +36,10 @@ FocusScope {
     Rectangle {
         anchors.fill: parent
         color: ThemeColor.surface
-        radius: 12
+        radius: AppLauncherConfig.windowRadius
         border {
             color: ThemeColor.outline_variant
-            width: 1
+            width: AppLauncherConfig.windowBorderWidth
         }
     }
 
@@ -54,15 +49,15 @@ FocusScope {
             top: parent.top
             left: parent.left
             right: parent.right
-            margins: root.padding
+            margins: AppLauncherConfig.windowPadding
         }
-        spacing: 8
+        spacing: AppLauncherConfig.layoutSpacing
 
         SearchBar {
             id: searchBar
             width: parent.width
 
-            onTextChanged: appService.filter(text)
+            onTextChanged: AppService.filter(text)
             onDownPressed: appList.moveDown()
             onUpPressed: appList.moveUp()
             onEnterPressed: appList.launchCurrent()
@@ -72,10 +67,10 @@ FocusScope {
         AppList {
             id: appList
             width: parent.width
-            model: appService.filteredApps
+            model: AppService.filteredApps
 
             onLaunchRequested: app => {
-                appService.launchApp(app);
+                AppService.launchApp(app);
                 root.closeRequested();
             }
         }

@@ -8,10 +8,10 @@ QtObject {
 
     signal surfaceRequested(string componentName)
 
-    property string device: "intel_backlight"
     property int current: 0
     property int max: 100
-    readonly property real level: current / max
+
+    readonly property real level: max > 0 ? current / max : 0
     property bool firstRun: true
 
     property bool _isInternalChange: false
@@ -26,7 +26,7 @@ QtObject {
     }
 
     property Timer resetInternalFlagTimer: Timer {
-        interval: 500
+        interval: 600
         onTriggered: root._isInternalChange = false
     }
 
@@ -44,12 +44,12 @@ QtObject {
     }
 
     property Process fetcher: Process {
-        command: ["brightnessctl", "-m", "-d", root.device]
+        command: ["brightnessctl", "-m"]
         running: false
         stdout: SplitParser {
             onRead: data => {
                 const parts = data.trim().split(",");
-                if (parts.length >= 5 && parts[0] === root.device) {
+                if (parts.length >= 5) {
                     const cur = parseInt(parts[2], 10);
                     const maxRaw = parseInt(parts[4], 10);
 
@@ -70,12 +70,12 @@ QtObject {
 
     property Timer setTimer: Timer {
         interval: 20
-        property int targetPercent: 50
+        property int targetPercent: 0
         onTriggered: {
             if (setter.running) {
                 restart();
             } else {
-                setter.command = ["brightnessctl", "-d", root.device, "set", `${targetPercent}%`];
+                setter.command = ["brightnessctl", "set", `${targetPercent}%`];
                 setter.running = true;
             }
         }

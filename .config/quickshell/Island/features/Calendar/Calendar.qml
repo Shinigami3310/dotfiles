@@ -5,11 +5,8 @@ import "../../services"
 Item {
     id: root
 
-    readonly property int paddingX: 20
-    readonly property int paddingY: 16
-
-    implicitWidth: contentColumn.implicitWidth + (paddingX * 2)
-    implicitHeight: contentColumn.implicitHeight + (paddingY * 2)
+    implicitWidth: layout.implicitWidth + (CalendarConfig.paddingX * 2)
+    implicitHeight: layout.implicitHeight + (CalendarConfig.paddingY * 2)
 
     CalendarService {
         id: calendarService
@@ -66,28 +63,32 @@ Item {
     }
 
     Column {
-        id: contentColumn
+        id: layout
         anchors.centerIn: parent
-        spacing: 10
+        spacing: CalendarConfig.layoutSpacing
 
-        Row {
+        Item {
             width: dayGrid.implicitWidth
-            height: 28
+            height: CalendarConfig.headerHeight
 
             NavButton {
+                anchors {
+                    left: parent.left
+                    verticalCenter: parent.verticalCenter
+                }
                 text: "‹"
                 onClicked: root.requestMonthChange(-1)
             }
 
             Text {
                 id: monthTitleText
-                width: parent.width - (24 * 2)
-                anchors.verticalCenter: parent.verticalCenter
+                anchors.centerIn: parent
                 horizontalAlignment: Text.AlignHCenter
                 text: calendarService.monthTitle(calendarService.viewYear, calendarService.viewMonth)
+                renderType: Text.NativeRendering
                 font {
                     family: Theme.font
-                    pixelSize: 14
+                    pixelSize: CalendarConfig.titleTextSize
                     weight: Font.Normal
                 }
                 color: ThemeColor.on_surface
@@ -95,22 +96,26 @@ Item {
             }
 
             NavButton {
+                anchors {
+                    right: parent.right
+                    verticalCenter: parent.verticalCenter
+                }
                 text: "›"
                 onClicked: root.requestMonthChange(1)
             }
         }
 
         Row {
-            spacing: 4
+            spacing: CalendarConfig.weekdaySpacing
             Repeater {
-                model: ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
+                model: CalendarConfig.daysOfWeek
                 delegate: Text {
-                    width: 30
+                    width: CalendarConfig.weekdayCellWidth
                     horizontalAlignment: Text.AlignHCenter
                     text: modelData
                     font {
                         family: Theme.font
-                        pixelSize: 12
+                        pixelSize: CalendarConfig.weekdayTextSize
                         weight: Font.Normal
                     }
                     color: ThemeColor.on_surface
@@ -125,12 +130,12 @@ Item {
 
             Grid {
                 id: dayGrid
-                columns: 7
-                rowSpacing: 4
-                columnSpacing: 4
+                columns: CalendarConfig.gridColumns
+                rowSpacing: CalendarConfig.gridRowSpacing
+                columnSpacing: CalendarConfig.gridColumnSpacing
 
                 Repeater {
-                    model: 42
+                    model: CalendarConfig.totalCells
                     delegate: DayCell {
                         required property int index
 

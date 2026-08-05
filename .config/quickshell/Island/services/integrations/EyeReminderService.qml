@@ -6,7 +6,7 @@ QtObject {
     id: root
 
     property bool active: true
-    signal surfaceRequested(string newName)
+    signal surfaceRequested(newName: string)
 
     readonly property Timer timer: Timer {
         interval: 10 * 60 * 1000

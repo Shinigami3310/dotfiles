@@ -43,7 +43,7 @@ QtObject {
         if (isWorking) {
             isWorking = false;
             if (currentCycle >= 4) {
-                sendCliNotification("Session done! ☕", "Take a long break.");
+                sendCliNotification("Session done!", "Take a long break.");
                 resetToInactive();
             } else {
                 remainingTime = pomodoroBreakTime;
@@ -57,7 +57,7 @@ QtObject {
         }
     }
 
-    function sendCliNotification(title, message) {
+    function sendCliNotification(title: string, message: string) {
         Quickshell.execDetached(["notify-send", "-a", "Pomodoro", "-i", "/home/Rostislav/.config/quickshell/Island/assets/icons/PomodoroService.png", title, message]);
     }
 

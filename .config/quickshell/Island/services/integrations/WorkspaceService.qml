@@ -1,3 +1,4 @@
+pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Hyprland
@@ -5,21 +6,21 @@ import Quickshell.Hyprland
 QtObject {
     readonly property int currentWorkspaceId: Hyprland.focusedWorkspace?.id ?? 0
 
-    function workspaceById(id) {
+    function workspaceById(id: int): QtObject {
         return Hyprland.workspaces.values.find(ws => ws.id === id) ?? null;
     }
 
-    function isOccupied(id) {
+    function isOccupied(id: int): bool {
         const ws = workspaceById(id);
         return (ws?.toplevels?.values?.length ?? 0) > 0;
     }
 
-    function isActive(id) {
+    function isActive(id: int): bool {
         return id === currentWorkspaceId;
     }
 
-    function activateWorkspace(id) {
-        Hyprland.dispatch("hl.dsp.focus({ workspace = " + id + " })");
+    function activateWorkspace(id: int) {
+        Hyprland.dispatch(`hl.dsp.focus({ workspace = ${id} })`);
     }
 
     Component.onCompleted: {

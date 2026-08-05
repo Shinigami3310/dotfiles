@@ -9,7 +9,6 @@ SurfaceBase {
     onBackRequested: root.surfaceRequested("strip")
     HomeClock {
         id: clock
-        anchors.centerIn: parent
-        onSurfaceRequested: name => parent.surfaceRequested(name)
+        onSurfaceRequested: name => root.surfaceRequested(name)
     }
 }

@@ -19,17 +19,21 @@ QtObject {
     function toggleMute() {
         _isInternalChange = true;
         Quickshell.execDetached(["wpctl", "set-mute", "@DEFAULT_AUDIO_SINK@", "toggle"]);
-        muted = !muted;
         resetInternalFlagTimer.restart();
     }
 
-    function setVolume(val) {
+    function setVolume(val: real) {
         _isInternalChange = true;
-        const percent = Math.round(Math.max(0.0, Math.min(1.0, val)) * 100);
-        Quickshell.execDetached(["wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", `${percent}%`]);
-        volume = Math.max(0.0, Math.min(1.0, val));
-        if (muted && val > 0)
-            muted = false;
+
+        const safeVal = Math.max(0.0, Math.min(1.0, val));
+        const percent = Math.round(safeVal * 100);
+
+        Quickshell.execDetached(["wpctl", "set-volume", "-l", "1.0", "@DEFAULT_AUDIO_SINK@", `${percent}%`]);
+
+        if (muted && safeVal > 0) {
+            Quickshell.execDetached(["wpctl", "set-mute", "@DEFAULT_AUDIO_SINK@", "0"]);
+        }
+
         resetInternalFlagTimer.restart();
     }
 
@@ -70,7 +74,7 @@ QtObject {
                 const newMuted = data.includes("[MUTED]");
 
                 if (!isNaN(newVol) && (newVol !== root.volume || newMuted !== root.muted)) {
-                    root.volume = newVol;
+                    root.volume = Math.min(newVol, 1.0);
                     root.muted = newMuted;
 
                     if (!root._isInternalChange && !root.firstRun) {
@@ -80,6 +84,5 @@ QtObject {
                 }
             }
         }
-        onExited: {}
     }
 }

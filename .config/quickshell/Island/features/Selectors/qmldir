@@ -1,0 +1,6 @@
+singleton SelectorConfig SelectorConfig.qml
+BaseSelector BaseSelector.qml
+BluetoothSelector BluetoothSelector.qml
+SelectorItemCard SelectorItemCard.qml
+Switch Switch.qml
+WifiSelector WifiSelector.qml
