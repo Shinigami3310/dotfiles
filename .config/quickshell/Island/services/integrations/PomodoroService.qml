@@ -58,7 +58,7 @@ QtObject {
     }
 
     function sendCliNotification(title: string, message: string) {
-        Quickshell.execDetached(["notify-send", "-a", "Pomodoro", "-i", "/home/Rostislav/.config/quickshell/Island/assets/icons/PomodoroService.png", title, message]);
+        Quickshell.execDetached(["notify-send", "-a", "Pomodoro", "-i", Paths.pomodoroIcon, title, message]);
     }
 
     function resetToInactive() {

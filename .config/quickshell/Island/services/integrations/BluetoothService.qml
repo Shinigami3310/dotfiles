@@ -2,22 +2,18 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import "../../core"
 
 QtObject {
     id: root
 
     property bool enabled: false
     property string connectingMac: ""
-    property int activeClients: 0
-    property bool isAwake: false
     readonly property ListModel deviceModel: ListModel {}
 
-    property bool _isToggling: false
+    property ActivityTracker activityTracker: ActivityTracker {}
 
-    property Timer sleepTimer: Timer {
-        interval: 1000
-        onTriggered: root.isAwake = false
-    }
+    property bool _isToggling: false
 
     property Timer updateThrottleTimer: Timer {
         interval: 500
@@ -66,7 +62,7 @@ QtObject {
             onRead: err => console.error(`[Bluetooth] Scan Error: ${err.trim()}`)
         }
         onExited: exitCode => {
-            if (root.isAwake && root.enabled && !root._isToggling) {
+            if (root.activityTracker.isAwake && root.enabled && !root._isToggling) {
                 retryScanTimer.start();
             }
         }
@@ -111,7 +107,7 @@ QtObject {
             }
         }
         onExited: exitCode => {
-            if (exitCode === 0 && root.isAwake) {
+            if (exitCode === 0 && root.activityTracker.isAwake) {
                 root.updateModel(scanParser.lines);
             }
             scanParser.lines = [];
@@ -123,7 +119,7 @@ QtObject {
         command: ["bluetoothctl", "power", targetState]
         onExited: () => {
             root._isToggling = false;
-            if (targetState === "on" && root.isAwake) {
+            if (targetState === "on" && root.activityTracker.isAwake) {
                 startScan();
             }
             checkStateProc.running = true;
@@ -140,20 +136,23 @@ QtObject {
         }
     }
 
-    onIsAwakeChanged: {
-        if (isAwake) {
-            checkStateProc.running = true;
-            stateCheckTimer.start();
-            if (enabled && !_isToggling)
-                startScan();
-        } else {
-            stateCheckTimer.stop();
-            stopScan();
+    property Connections activityConnections: Connections {
+        target: root.activityTracker
+        function onAwakeChanged(awake: bool) {
+            if (awake) {
+                checkStateProc.running = true;
+                stateCheckTimer.start();
+                if (enabled && !_isToggling)
+                    startScan();
+            } else {
+                stateCheckTimer.stop();
+                stopScan();
+            }
         }
     }
 
     onEnabledChanged: {
-        if (enabled && isAwake && !_isToggling) {
+        if (enabled && activityTracker.isAwake && !_isToggling) {
             startScan();
         } else if (!enabled) {
             stopScan();
@@ -162,15 +161,11 @@ QtObject {
     }
 
     function retain() {
-        activeClients++;
-        sleepTimer.stop();
-        isAwake = true;
+        activityTracker.retain();
     }
 
     function release() {
-        activeClients = Math.max(0, activeClients - 1);
-        if (activeClients === 0)
-            sleepTimer.restart();
+        activityTracker.release();
     }
 
     function toggle() {
@@ -221,37 +216,6 @@ QtObject {
                     name: parts.slice(3).join('|') || "Unknown Device"
                 })).sort((a, b) => b.connected - a.connected || b.paired - a.paired || a.name.localeCompare(b.name));
 
-        const targetMap = new Map(targets.map(t => [t.mac, t]));
-
-        for (let i = deviceModel.count - 1; i >= 0; i--) {
-            if (!targetMap.has(deviceModel.get(i).mac)) {
-                deviceModel.remove(i);
-            }
-        }
-
-        targets.forEach((t, index) => {
-            let foundIdx = -1;
-            for (let j = 0; j < deviceModel.count; j++) {
-                if (deviceModel.get(j).mac === t.mac) {
-                    foundIdx = j;
-                    break;
-                }
-            }
-            if (foundIdx !== -1) {
-                const item = deviceModel.get(foundIdx);
-                if (item.connected !== t.connected)
-                    deviceModel.setProperty(foundIdx, "connected", t.connected);
-                if (item.paired !== t.paired)
-                    deviceModel.setProperty(foundIdx, "paired", t.paired);
-                if (item.name !== t.name)
-                    deviceModel.setProperty(foundIdx, "name", t.name);
-
-                if (foundIdx !== index) {
-                    deviceModel.move(foundIdx, index, 1);
-                }
-            } else {
-                deviceModel.insert(index, t);
-            }
-        });
+        ListModelDiff.sync(root.deviceModel, targets, "mac", ["connected", "paired", "name"]);
     }
 }

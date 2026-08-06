@@ -25,6 +25,8 @@ QtObject {
         resetInternalFlagTimer.restart();
     }
 
+    // Защита от эхо: после setLevel() игнорируем собственные события
+    // от udevadm в течение этого окна.
     property Timer resetInternalFlagTimer: Timer {
         interval: 600
         onTriggered: root._isInternalChange = false
@@ -38,6 +40,7 @@ QtObject {
         }
     }
 
+    // Дебаунс событий udevadm: группируем пачку событий в одно чтение.
     property Timer fetchTimer: Timer {
         interval: 50
         onTriggered: fetcher.running ? restart() : (fetcher.running = true)
@@ -64,6 +67,12 @@ QtObject {
                         root.firstRun = false;
                     }
                 }
+            }
+        }
+
+        onExited: exitCode => {
+            if (exitCode !== 0) {
+                console.warn(`[BrightnessService] brightnessctl -m завершился с кодом ${exitCode}`);
             }
         }
     }

@@ -117,6 +117,14 @@ Item {
         if (!pendingItem)
             return;
 
+        // Валидация интерфейса поверхности: должны быть реализованы enter()/exit()
+        if (typeof pendingItem.enter !== "function" || typeof pendingItem.exit !== "function") {
+            console.warn(`[SurfaceHost] Surface "${name}" не реализует интерфейс SurfaceBase (enter/exit). Пропускаю.`);
+            pendingItem.destroy();
+            pendingItem = null;
+            return;
+        }
+
         if (!currentItem) {
             currentItem = pendingItem;
             currentName = name;

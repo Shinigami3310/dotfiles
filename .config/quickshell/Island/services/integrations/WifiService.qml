@@ -2,6 +2,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import "../../core"
 
 QtObject {
     id: root
@@ -10,16 +11,10 @@ QtObject {
     property string connectingBssid: ""
     readonly property ListModel networkModel: ListModel {}
 
-    property int activeClients: 0
-    property bool isAwake: false
+    property ActivityTracker activityTracker: ActivityTracker {}
 
     property bool _isScanning: false
     property bool _isToggling: false
-
-    property Timer sleepTimer: Timer {
-        interval: 1000
-        onTriggered: root.isAwake = false
-    }
 
     property Timer syncTimer: Timer {
         interval: 5000
@@ -28,6 +23,18 @@ QtObject {
             root.checkStateProc.running = true;
             if (root.enabled) {
                 root.scan();
+            }
+        }
+    }
+
+    property Connections activityConnections: Connections {
+        target: root.activityTracker
+        function onAwakeChanged(awake: bool) {
+            if (awake) {
+                checkStateProc.running = true;
+                syncTimer.start();
+            } else {
+                syncTimer.stop();
             }
         }
     }
@@ -57,7 +64,7 @@ QtObject {
         }
         onExited: code => {
             root._isScanning = false;
-            if (code === 0 && root.isAwake) {
+            if (code === 0 && root.activityTracker.isAwake) {
                 root.updateModel(scanParser.lines);
             }
             scanParser.lines = [];
@@ -80,33 +87,11 @@ QtObject {
         }
     }
 
-    onIsAwakeChanged: {
-        if (isAwake) {
-            checkStateProc.running = true;
-            syncTimer.start();
-        } else {
-            syncTimer.stop();
-        }
-    }
-
     onEnabledChanged: {
-        if (enabled && isAwake) {
+        if (enabled && activityTracker.isAwake) {
             scan();
         } else if (!enabled) {
             networkModel.clear();
-        }
-    }
-
-    function retain() {
-        activeClients++;
-        sleepTimer.stop();
-        isAwake = true;
-    }
-
-    function release() {
-        activeClients = Math.max(0, activeClients - 1);
-        if (activeClients === 0) {
-            sleepTimer.restart();
         }
     }
 
@@ -168,43 +153,6 @@ QtObject {
 
         targets.sort((a, b) => (b.connected - a.connected) || (b.signal - a.signal));
 
-        const targetMap = {};
-        for (let i = 0; i < targets.length; i++) {
-            targetMap[targets[i].bssid] = targets[i];
-        }
-
-        for (let i = networkModel.count - 1; i >= 0; i--) {
-            if (!targetMap[networkModel.get(i).bssid]) {
-                networkModel.remove(i);
-            }
-        }
-
-        for (let i = 0; i < targets.length; i++) {
-            const t = targets[i];
-            let foundIdx = -1;
-
-            for (let j = 0; j < networkModel.count; j++) {
-                if (networkModel.get(j).bssid === t.bssid) {
-                    foundIdx = j;
-                    break;
-                }
-            }
-
-            if (foundIdx !== -1) {
-                const item = networkModel.get(foundIdx);
-                if (item.connected !== t.connected)
-                    networkModel.setProperty(foundIdx, "connected", t.connected);
-                if (item.signal !== t.signal)
-                    networkModel.setProperty(foundIdx, "signal", t.signal);
-                if (item.security !== t.security)
-                    networkModel.setProperty(foundIdx, "security", t.security);
-
-                if (foundIdx !== i) {
-                    networkModel.move(foundIdx, i, 1);
-                }
-            } else {
-                networkModel.insert(i, t);
-            }
-        }
+        ListModelDiff.sync(root.networkModel, targets, "bssid", ["connected", "signal", "security"]);
     }
 }

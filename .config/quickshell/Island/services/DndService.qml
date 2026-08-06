@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import "../theme"
 
 QtObject {
     id: root
@@ -9,11 +10,11 @@ QtObject {
 
     function toggle() {
         active = !active;
-        Quickshell.execDetached(["qs", "-c", "NotificationCenter", "ipc", "call", "notification-center", "toggleDnd"]);
+        Quickshell.execDetached(["qs", "-c", Paths.notificationCenterConfig, "ipc", "call", "notification-center", "toggleDnd"]);
     }
 
     property Process initCheck: Process {
-        command: ["qs", "-c", "NotificationCenter", "ipc", "call", "notification-center", "getDndState"]
+        command: ["qs", "-c", Paths.notificationCenterConfig, "ipc", "call", "notification-center", "getDndState"]
         running: true
 
         stdout: SplitParser {

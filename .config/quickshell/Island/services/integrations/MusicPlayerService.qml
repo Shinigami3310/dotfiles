@@ -53,6 +53,8 @@ QtObject {
 
         if (mpvProcess.running) {
             if (!mpvCommand.running) {
+                // socketPath — фиксированная константа, не пользовательский ввод,
+                // поэтому конкатенация безопасна.
                 mpvCommand.command = ["sh", "-c", `echo 'cycle pause' | socat - ${socketPath}`];
                 mpvCommand.running = true;
                 isPlaying = !isPlaying;

@@ -70,7 +70,6 @@ Item {
         delegate: AppItem {
             appName: model.name
             appIcon: model.icon
-            appExec: model.exec
             isCurrent: ListView.isCurrentItem
 
             onClicked: {

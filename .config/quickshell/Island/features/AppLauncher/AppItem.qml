@@ -6,7 +6,6 @@ Rectangle {
 
     property string appName: ""
     property string appIcon: ""
-    property string appExec: ""
     property bool isCurrent: false
 
     signal clicked

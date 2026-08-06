@@ -2,6 +2,8 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import "../../theme"
+import "../../core"
 
 QtObject {
     id: root
@@ -43,44 +45,89 @@ QtObject {
         let q = (query || "").toLowerCase();
 
         let targetApps = q === "" ? root.allApps : root.allApps.filter(app => app.name.toLowerCase().includes(q));
-        let targetIds = new Set(targetApps.map(app => app.id));
+        ListModelDiff.sync(root.filteredApps, targetApps, "id", []);
+    }
 
-        for (let i = root.filteredApps.count - 1; i >= 0; i--) {
-            if (!targetIds.has(root.filteredApps.get(i).id)) {
-                root.filteredApps.remove(i);
-            }
-        }
+    // Разбирает строку Exec из .desktop на массив argv,
+    // корректно обрабатывая одинарные/двойные кавычки и экранирование.
+    function parseExec(execString: string): var {
+        const args = [];
+        let current = "";
+        let inSingle = false;
+        let inDouble = false;
+        let hasToken = false;
 
-        for (let i = 0; i < targetApps.length; i++) {
-            let targetApp = targetApps[i];
-            let foundIdx = -1;
+        for (let i = 0; i < execString.length; i++) {
+            const c = execString[i];
 
-            for (let j = 0; j < root.filteredApps.count; j++) {
-                if (root.filteredApps.get(j).id === targetApp.id) {
-                    foundIdx = j;
-                    break;
+            if (inSingle) {
+                if (c === "'") {
+                    inSingle = false;
+                } else {
+                    current += c;
                 }
+                hasToken = true;
+                continue;
             }
 
-            if (foundIdx !== -1) {
-                if (foundIdx !== i) {
-                    root.filteredApps.move(foundIdx, i, 1);
+            if (inDouble) {
+                if (c === "\\") {
+                    i++;
+                    if (i < execString.length) {
+                        current += execString[i];
+                    }
+                } else if (c === '"') {
+                    inDouble = false;
+                } else {
+                    current += c;
+                }
+                hasToken = true;
+                continue;
+            }
+
+            if (c === "'") {
+                inSingle = true;
+                hasToken = true;
+            } else if (c === '"') {
+                inDouble = true;
+                hasToken = true;
+            } else if (c === "\\") {
+                i++;
+                if (i < execString.length) {
+                    current += execString[i];
+                    hasToken = true;
+                }
+            } else if (c === " " || c === "\t") {
+                if (hasToken) {
+                    args.push(current);
+                    current = "";
+                    hasToken = false;
                 }
             } else {
-                root.filteredApps.insert(i, targetApp);
+                current += c;
+                hasToken = true;
             }
         }
+
+        if (hasToken) {
+            args.push(current);
+        }
+
+        return args;
     }
 
     function launchApp(arg: var) {
-        let execCommand = arg.exec;
-        if (!execCommand)
+        if (!arg?.exec)
+            return;
+
+        let argv = parseExec(arg.exec);
+        if (argv.length === 0)
             return;
 
         if (arg.terminal) {
-            execCommand = `kitty -e ${execCommand}`;
+            argv = [Paths.defaultTerminal, "-e", ...argv];
         }
 
-        Quickshell.execDetached(["sh", "-c", execCommand]);
+        Quickshell.execDetached(argv);
     }
 }

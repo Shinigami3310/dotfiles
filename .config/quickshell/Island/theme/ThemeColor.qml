@@ -7,7 +7,7 @@ import Quickshell.Io
 QtObject {
     id: root
 
-    readonly property string palettePath: "/home/Rostislav/.config/quickshell/colors.json"
+    readonly property string palettePath: Paths.palettePath
 
     property var parsedColors: ({})
 

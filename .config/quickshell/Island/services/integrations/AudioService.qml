@@ -37,11 +37,15 @@ QtObject {
         resetInternalFlagTimer.restart();
     }
 
+    // Защита от эхо: после set-операции (toggleMute/setVolume) игнорируем
+    // собственные события от pactl в течение этого окна.
     property Timer resetInternalFlagTimer: Timer {
         interval: 500
         onTriggered: root._isInternalChange = false
     }
 
+    // Дебаунс событий pactl: pactl subscribe может прислать пачку событий,
+    // группируем их и читаем состояние не чаще, чем раз в 30 мс.
     property Timer debounceTimer: Timer {
         interval: 30
         onTriggered: volProc.running ? restart() : (volProc.running = true)
@@ -82,6 +86,12 @@ QtObject {
                     }
                     root.firstRun = false;
                 }
+            }
+        }
+
+        onExited: exitCode => {
+            if (exitCode !== 0) {
+                console.warn(`[AudioService] wpctl get-volume завершился с кодом ${exitCode}`);
             }
         }
     }

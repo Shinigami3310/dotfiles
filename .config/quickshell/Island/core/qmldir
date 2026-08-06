@@ -2,3 +2,5 @@ SurfaceCatalog SurfaceCatalog.qml
 Island Island.qml
 SurfaceHost SurfaceHost.qml
 SurfaceBase SurfaceBase.qml
+ListModelDiff ListModelDiff.qml
+ActivityTracker ActivityTracker.qml
