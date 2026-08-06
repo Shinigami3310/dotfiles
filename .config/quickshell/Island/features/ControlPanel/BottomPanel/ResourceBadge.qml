@@ -1,35 +1,40 @@
 import QtQuick
 import "../../../theme"
+import "../"
 
 Item {
     id: root
-
-    // Локальные константы из Config
-    readonly property real resourceBadgeWidth: 54
-    readonly property real resourceRowHeight: 48
 
     property string label: ""
     property string valueText: ""
     property real progress: 0.0
 
-    implicitWidth: resourceBadgeWidth
-    implicitHeight: resourceRowHeight
+    implicitWidth: ControlPanelConfig.badgeWidth
+    implicitHeight: ControlPanelConfig.badgeHeight
 
     Rectangle {
         anchors.fill: parent
-        radius: 10
+        radius: ControlPanelConfig.badgeRadius
         color: "transparent"
         border.color: ThemeColor.outline
         border.width: 1
+        clip: true
 
         Rectangle {
             anchors.bottom: parent.bottom
             anchors.left: parent.left
             anchors.right: parent.right
             height: parent.height * Math.max(0, Math.min(1, root.progress))
-            radius: 10
+            radius: ControlPanelConfig.badgeRadius
             color: ThemeColor.surface_container_highest
             opacity: 0.6
+
+            Behavior on height {
+                NumberAnimation {
+                    duration: Motion.expand
+                    easing.type: Easing.OutCubic
+                }
+            }
         }
 
         Column {
@@ -40,7 +45,7 @@ Item {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: root.label
                 font.family: Theme.font
-                font.pixelSize: 10
+                font.pixelSize: ControlPanelConfig.badgeLabelSize
                 color: ThemeColor.on_surface
             }
 
@@ -48,7 +53,7 @@ Item {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: root.valueText
                 font.family: Theme.font
-                font.pixelSize: 11
+                font.pixelSize: ControlPanelConfig.badgeValueSize
                 font.bold: true
                 color: ThemeColor.on_surface
             }

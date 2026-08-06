@@ -1,25 +1,29 @@
 import QtQuick
+import QtQuick.Effects
+import "./theme"
 
 Item {
     id: root
 
-    property string glyph: "⏻"
-    property string label: "Action"
-    property color accent: "#FFFFFF"
+    property url source: ""
+    property string label: ""
 
     signal activated
-    signal focusCleared
 
-    width: 112
-    height: 124
-    scale: activeFocus ? 1.08 : 1.0
-    transformOrigin: Item.Center
+    implicitWidth: 112
+    implicitHeight: 124
 
     activeFocusOnTab: true
 
+    readonly property bool hovered: hoverHandler.hovered
+    readonly property bool pressed: tapHandler.pressed
+    readonly property bool isActive: root.activeFocus || root.pressed || root.hovered
+
+    scale: pressed ? Configs.scalePressed : (hovered || root.activeFocus ? Configs.scaleHover : 1.0)
+
     Behavior on scale {
         NumberAnimation {
-            duration: 140
+            duration: Motion.fast
             easing.type: Easing.OutCubic
         }
     }
@@ -30,38 +34,60 @@ Item {
         width: 96
         height: 96
         radius: 26
-        color: root.activeFocus ? "#33FFFFFF" : "#18FFFFFF"
-        border.width: root.activeFocus ? 2 : 0
-        border.color: root.accent
         antialiasing: true
+
+        readonly property color baseColor: root.isActive ? ThemeColor.surface_container_high : ThemeColor.surface_container
+        color: Qt.alpha(baseColor, 0.65)
+
+        border.width: root.isActive ? 2 : 1
+        border.color: (root.pressed || root.activeFocus) ? ThemeColor.primary : ThemeColor.outline_variant
 
         Behavior on color {
             ColorAnimation {
-                duration: 140
+                duration: Motion.fast
             }
         }
 
         Behavior on border.color {
             ColorAnimation {
-                duration: 140
+                duration: Motion.fast
             }
         }
 
         Column {
             anchors.centerIn: parent
-            spacing: 6
+            spacing: 8
 
-            Text {
+            Item {
                 anchors.horizontalCenter: parent.horizontalCenter
-                text: root.glyph
-                color: root.activeFocus ? root.accent : "#FFFFFF"
-                font.pixelSize: 32
-                font.bold: true
-                renderType: Text.NativeRendering
+                implicitWidth: 32
+                implicitHeight: 32
 
-                Behavior on color {
-                    ColorAnimation {
-                        duration: 140
+                Image {
+                    id: iconImage
+                    anchors.fill: parent
+                    source: root.source
+                    visible: false
+                    asynchronous: true
+                    cache: true
+                    smooth: true
+                    fillMode: Image.PreserveAspectFit
+                    sourceSize: Qt.size(width, height)
+                }
+
+                MultiEffect {
+                    anchors.fill: iconImage
+                    source: iconImage
+                    colorization: 1.0
+                    colorizationColor: root.isActive ? ThemeColor.primary : ThemeColor.on_surface
+
+                    paddingRect: Qt.rect(0, 0, width, height)
+                    autoPaddingEnabled: false
+
+                    Behavior on colorizationColor {
+                        ColorAnimation {
+                            duration: Motion.fast
+                        }
                     }
                 }
             }
@@ -69,10 +95,16 @@ Item {
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: root.label
-                color: "#E6FFFFFF"
+                color: root.isActive ? ThemeColor.primary : ThemeColor.on_surface
                 font.pixelSize: 13
                 font.weight: Font.Medium
-                renderType: Text.NativeRendering
+                font.family: "JetBrains Mono"
+
+                Behavior on color {
+                    ColorAnimation {
+                        duration: Motion.fast
+                    }
+                }
             }
         }
     }
@@ -84,21 +116,14 @@ Item {
         }
     }
 
-    MouseArea {
-        anchors.fill: parent
-        hoverEnabled: true
-        cursorShape: Qt.PointingHandCursor
+    TapHandler {
+        id: tapHandler
+        acceptedButtons: Qt.LeftButton
+        onTapped: root.activated()
+    }
 
-        onEntered: {
-            root.forceActiveFocus();
-        }
-        onExited: {
-            if (root.activeFocus) {
-                root.focusCleared();
-            }
-        }
-        onClicked: {
-            root.activated();
-        }
+    HoverHandler {
+        id: hoverHandler
+        cursorShape: Qt.PointingHandCursor
     }
 }

@@ -1,13 +1,10 @@
 import QtQuick
 import QtQuick.Effects
 import "../../../theme"
+import "../"
 
 Item {
     id: root
-
-    // Локальные константы из Config
-    readonly property real controlButtonSize: 64
-    readonly property real controlImageSize: 28
 
     property string icon: ""
     property bool active: false
@@ -19,24 +16,20 @@ Item {
     signal clicked
     signal rightClicked
 
-    implicitWidth: controlButtonSize
-    implicitHeight: controlButtonSize
+    implicitWidth: ControlPanelConfig.buttonSize
+    implicitHeight: ControlPanelConfig.buttonSize
 
     Rectangle {
         id: bg
-        anchors.centerIn: parent
-        width: parent.width
-        height: parent.height
-        radius: 12
-
-        border.color: root.active ? ThemeColor.primary : ThemeColor.outline_variant
+        anchors.fill: parent
+        radius: ControlPanelConfig.buttonRadius
+        color: "transparent"
+        border.color: root.active || root.pressed ? ThemeColor.primary : ThemeColor.outline_variant
         border.width: 1
 
-        color: "transparent"
+        scale: root.pressed ? ControlPanelConfig.buttonPressedScale : (root.hovered ? ControlPanelConfig.buttonHoverScale : 1.0)
 
-        scale: pressed ? 0.95 : (hovered ? 1.05 : 1.0)
-
-        Behavior on color {
+        Behavior on border.color {
             ColorAnimation {
                 duration: Motion.standard
                 easing.type: Easing.OutCubic
@@ -53,8 +46,8 @@ Item {
         Image {
             id: iconImage
             anchors.centerIn: parent
-            width: controlImageSize
-            height: controlImageSize
+            width: ControlPanelConfig.buttonIconSize
+            height: ControlPanelConfig.buttonIconSize
             sourceSize: Qt.size(width * 2, height * 2)
             source: root.icon !== "" ? Qt.resolvedUrl("../../../assets/icons/" + root.icon) : ""
             fillMode: Image.PreserveAspectFit
@@ -67,7 +60,7 @@ Item {
             anchors.fill: iconImage
             source: iconImage
             colorization: 1.0
-            colorizationColor: (pressed || root.active || hovered) ? ThemeColor.primary : ThemeColor.on_surface
+            colorizationColor: (root.pressed || root.active) ? ThemeColor.primary : ThemeColor.on_surface
 
             Behavior on colorizationColor {
                 ColorAnimation {
@@ -77,20 +70,17 @@ Item {
         }
     }
 
-    // Хэндлер для отслеживания курсора и наведения
     HoverHandler {
         id: hoverHandler
         cursorShape: Qt.PointingHandCursor
     }
 
-    // Хэндлер клика ЛКМ
     TapHandler {
         id: leftTap
         acceptedButtons: Qt.LeftButton
         onTapped: root.clicked()
     }
 
-    // Хэндлер клика ПКМ (включается только при enableRightClick)
     TapHandler {
         id: rightTap
         enabled: root.enableRightClick

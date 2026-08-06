@@ -1,44 +1,37 @@
 import QtQuick
+import QtQuick.Layouts
 import QtQuick.Effects
 import "../../../theme"
+import "../"
 
 Item {
     id: root
 
-    // Локальная константа
-    readonly property real controlSliderHeight: 24
-    readonly property int iconSize: 24
     property string icon: ""
     property string mutedIcon: icon
     property real value: 0.0
     property bool muted: false
     property real step: 0.05
-
-    // Новое свойство для отключения интерактивности иконки
     property bool interactiveIcon: false
 
     signal sliderMoved(real newValue)
     signal iconClicked
 
-    implicitWidth: 300
-    implicitHeight: 36
+    implicitWidth: ControlPanelConfig.panelWidth
+    implicitHeight: ControlPanelConfig.sliderHeight
 
-    Row {
+    RowLayout {
         anchors.fill: parent
-        spacing: 12
+        spacing: ControlPanelConfig.rowSpacing
 
         Rectangle {
             id: iconBtn
-
-            width: 36
-            height: 36
-            radius: 10
-
-            // Цвета как в обновленном ControlButton
+            Layout.preferredWidth: ControlPanelConfig.sliderIconContainerSize
+            Layout.preferredHeight: ControlPanelConfig.sliderIconContainerSize
+            radius: ControlPanelConfig.sliderRadius
             color: "transparent"
 
-            // Анимация нажатия и наведения (только если интерактивно)
-            scale: (iconTap.pressed && root.interactiveIcon) ? 0.95 : ((iconHover.hovered && root.interactiveIcon) ? 1.05 : 1.0)
+            scale: (iconMouseArea.pressed && root.interactiveIcon) ? ControlPanelConfig.buttonPressedScale : ((iconMouseArea.containsMouse && root.interactiveIcon) ? ControlPanelConfig.buttonHoverScale : 1.0)
 
             Behavior on scale {
                 NumberAnimation {
@@ -47,10 +40,8 @@ Item {
                 }
             }
 
-            // Плавная смена иконки
-            property string currentIconString: root.muted ? root.mutedIcon : root.icon
-            property string targetIcon: currentIconString !== "" ? Qt.resolvedUrl("../../../assets/icons/" + currentIconString) : ""
-            property string displayedSource: targetIcon
+            property string targetIcon: (root.muted && root.mutedIcon !== "") ? root.mutedIcon : root.icon
+            property string displayedSource: targetIcon !== "" ? Qt.resolvedUrl("../../../assets/icons/" + targetIcon) : ""
             property real transitionOpacity: 1.0
 
             SequentialAnimation {
@@ -60,49 +51,44 @@ Item {
                     property: "transitionOpacity"
                     to: 0.0
                     duration: Motion.fast
-                    easing.type: Motion.easeStandard
                 }
                 ScriptAction {
-                    script: iconBtn.displayedSource = iconBtn.targetIcon
+                    script: iconBtn.displayedSource = Qt.resolvedUrl("../../../assets/icons/" + iconBtn.targetIcon)
                 }
                 NumberAnimation {
                     target: iconBtn
                     property: "transitionOpacity"
                     to: 1.0
                     duration: Motion.fast
-                    easing.type: Motion.easeStandard
                 }
             }
 
-            Connections {
-                target: iconBtn
-                function onTargetIconChanged() {
-                    if (iconBtn.transitionOpacity > 0) {
-                        iconSwitchAnimation.restart();
-                    } else {
-                        iconBtn.displayedSource = iconBtn.targetIcon;
-                    }
+            onTargetIconChanged: {
+                if (transitionOpacity > 0) {
+                    iconSwitchAnimation.restart();
+                } else {
+                    displayedSource = Qt.resolvedUrl("../../../assets/icons/" + targetIcon);
                 }
             }
 
             Image {
                 id: iconImage
                 anchors.centerIn: parent
-                width: iconSize
-                height: iconSize
+                width: ControlPanelConfig.sliderIconSize
+                height: ControlPanelConfig.sliderIconSize
                 source: iconBtn.displayedSource
+                sourceSize: Qt.size(width * 2, height * 2)
                 fillMode: Image.PreserveAspectFit
                 smooth: true
                 mipmap: true
                 visible: false
-                sourceSize: Qt.size(iconSize * 2, iconSize * 2) // Четкость без пикселей
             }
 
             MultiEffect {
                 anchors.fill: iconImage
                 source: iconImage
                 colorization: 1.0
-                colorizationColor: (iconHover.hovered && root.interactiveIcon) ? ThemeColor.primary : ThemeColor.on_surface
+                colorizationColor: (iconMouseArea.containsMouse && root.interactiveIcon) ? ThemeColor.primary : ThemeColor.on_surface
                 opacity: (root.muted ? 0.5 : 1.0) * iconBtn.transitionOpacity
 
                 Behavior on colorizationColor {
@@ -112,30 +98,23 @@ Item {
                 }
             }
 
-            HoverHandler {
-                id: iconHover
+            MouseArea {
+                id: iconMouseArea
+                anchors.fill: parent
                 enabled: root.interactiveIcon
+                hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
-            }
-
-            TapHandler {
-                id: iconTap
-                enabled: root.interactiveIcon
-                onTapped: root.iconClicked()
+                onClicked: root.iconClicked()
             }
         }
 
         Rectangle {
             id: track
-            anchors.verticalCenter: parent.verticalCenter
-            height: controlSliderHeight
-            // Расчет ширины трека с учетом иконки, текста процента и двух отступов spacing
-            width: parent.width - iconBtn.width - valueText.width - (parent.spacing * 2)
-            radius: 10
-
-            // Цвета трека приведены к новой схеме
+            height: ControlPanelConfig.sliderTrackHeight
+            Layout.fillWidth: true
+            radius: ControlPanelConfig.sliderRadius
             color: ThemeColor.surface_container_high
-            border.color: sliderMouse.containsMouse ? ThemeColor.primary : "transparent"
+            border.color: trackMouseArea.containsMouse ? ThemeColor.primary : "transparent"
             border.width: 1
             clip: true
 
@@ -153,7 +132,7 @@ Item {
                 color: root.muted ? "transparent" : ThemeColor.primary
 
                 Behavior on width {
-                    enabled: !sliderMouse.pressed
+                    enabled: !trackMouseArea.pressed
                     NumberAnimation {
                         duration: Motion.fast
                         easing.type: Motion.easeStandard
@@ -161,22 +140,22 @@ Item {
                 }
             }
 
-            // MouseArea отлично подходит для слайдера, так как легко перехватывает drag и колесо
+            function updateValueFromX(xPos) {
+                let val = Math.max(0.0, Math.min(1.0, xPos / track.width));
+                root.sliderMoved(val);
+            }
+
             MouseArea {
-                id: sliderMouse
+                id: trackMouseArea
                 anchors.fill: parent
                 hoverEnabled: true
-                preventStealing: true
+                cursorShape: Qt.PointingHandCursor
 
-                function updatePos(mouseX) {
-                    let val = Math.max(0.0, Math.min(1.0, mouseX / width));
-                    root.sliderMoved(val);
-                }
+                onPressed: mouse => track.updateValueFromX(mouse.x)
 
-                onPressed: mouse => updatePos(mouse.x)
                 onPositionChanged: mouse => {
                     if (pressed)
-                        updatePos(mouse.x);
+                        track.updateValueFromX(mouse.x);
                 }
 
                 onWheel: wheel => {
@@ -189,12 +168,11 @@ Item {
 
         Text {
             id: valueText
-            anchors.verticalCenter: parent.verticalCenter
-            width: 36
+            width: ControlPanelConfig.sliderTextWidth
             horizontalAlignment: Text.AlignRight
             text: Math.round((root.muted ? 0 : root.value) * 100) + "%"
             font.family: Theme.font
-            font.pixelSize: 11
+            font.pixelSize: ControlPanelConfig.sliderTextSize
             color: ThemeColor.on_surface
         }
     }

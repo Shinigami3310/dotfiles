@@ -23,9 +23,7 @@ PanelWindow {
 
     function open() {
         visible = true;
-        Qt.callLater(function () {
-            powerOffBtn.forceActiveFocus();
-        });
+        Qt.callLater(() => powerOffBtn.forceActiveFocus());
     }
 
     function close() {
@@ -33,33 +31,9 @@ PanelWindow {
         Qt.quit();
     }
 
-    function runDetached(command) {
+    function execAndClose(command) {
         Quickshell.execDetached(command);
-    }
-
-    function closeAndRun(command) {
-        runDetached(command);
         close();
-    }
-
-    function reboot() {
-        closeAndRun(["/usr/bin/systemctl", "reboot"]);
-    }
-
-    function suspend() {
-        closeAndRun(["/usr/bin/systemctl", "suspend"]);
-    }
-
-    function powerOff() {
-        closeAndRun(["/usr/bin/systemctl", "poweroff"]);
-    }
-
-    function hibernate() {
-        closeAndRun(["/usr/bin/systemctl", "hibernate"]);
-    }
-
-    function lockScreen() {
-        closeAndRun(["/usr/bin/hyprlock"]);
     }
 
     BackgroundEffect.blurRegion: Region {
@@ -72,60 +46,29 @@ PanelWindow {
         focus: true
 
         readonly property var buttons: [rebootBtn, suspendBtn, powerOffBtn, hibernateBtn, lockBtn]
-        property int lastIndex: 2 // Индекс кнопки по умолчанию (Power Off)
+        property int lastIndex: 2
 
-        // Навигация вперед
-        function focusNext() {
-            var currentIndex = -1;
-            for (var i = 0; i < buttons.length; i++) {
-                if (buttons[i].activeFocus) {
-                    currentIndex = i;
-                    break;
-                }
-            }
+        function moveFocus(step) {
+            const currentIndex = buttons.findIndex(btn => btn.activeFocus);
+            const targetIndex = currentIndex !== -1 ? Math.max(0, Math.min(buttons.length - 1, currentIndex + step)) : lastIndex;
 
-            if (currentIndex !== -1) {
-                // Если фокус уже на кнопке — сдвигаем право (без зацикливания)
-                if (currentIndex < buttons.length - 1) {
-                    buttons[currentIndex + 1].forceActiveFocus();
-                }
-            } else {
-                // Если мышь увели и фокус исчез — возобновляем с места остановки
-                buttons[lastIndex].forceActiveFocus();
-            }
-        }
-
-        // Навигация назад
-        function focusPrevious() {
-            var currentIndex = -1;
-            for (var i = 0; i < buttons.length; i++) {
-                if (buttons[i].activeFocus) {
-                    currentIndex = i;
-                    break;
-                }
-            }
-
-            if (currentIndex !== -1) {
-                // Если фокус на кнопке — сдвигаем влево (без зацикливания)
-                if (currentIndex > 0) {
-                    buttons[currentIndex - 1].forceActiveFocus();
-                }
-            } else {
-                // Если мышь увели и фокус исчез — возобновляем с места остановки
-                buttons[lastIndex].forceActiveFocus();
-            }
+            buttons[targetIndex].forceActiveFocus();
         }
 
         Keys.onPressed: function (event) {
-            if (event.key === Qt.Key_Escape) {
+            switch (event.key) {
+            case Qt.Key_Escape:
                 root.close();
                 event.accepted = true;
-            } else if (event.key === Qt.Key_Right || event.key === Qt.Key_Down) {
-                focusNext();
+                break;
+            case Qt.Key_Right:
+                contentRoot.moveFocus(1);
                 event.accepted = true;
-            } else if (event.key === Qt.Key_Left || event.key === Qt.Key_Up) {
-                focusPrevious();
+                break;
+            case Qt.Key_Left:
+                contentRoot.moveFocus(-1);
                 event.accepted = true;
+                break;
             }
         }
 
@@ -134,10 +77,9 @@ PanelWindow {
             color: "#22000000"
         }
 
-        MouseArea {
-            anchors.fill: parent
+        TapHandler {
             acceptedButtons: Qt.LeftButton
-            onClicked: root.close()
+            onTapped: root.close()
         }
 
         Item {
@@ -153,57 +95,47 @@ PanelWindow {
 
                 ActionButton {
                     id: rebootBtn
-                    glyph: "↻"
+                    source: "./icons/Reboot.png"
                     label: "Reboot"
-                    accent: "#FFCC80"
                     onActiveFocusChanged: if (activeFocus)
                         contentRoot.lastIndex = 0
-                    onFocusCleared: contentRoot.forceActiveFocus()
-                    onActivated: root.reboot()
+                    onActivated: root.execAndClose(["/usr/bin/systemctl", "reboot"])
                 }
 
                 ActionButton {
                     id: suspendBtn
-                    glyph: "⏾"
+                    source: "./icons/Suspend.png"
                     label: "Suspend"
-                    accent: "#90CAF9"
                     onActiveFocusChanged: if (activeFocus)
                         contentRoot.lastIndex = 1
-                    onFocusCleared: contentRoot.forceActiveFocus()
-                    onActivated: root.suspend()
+                    onActivated: root.execAndClose(["/usr/bin/systemctl", "suspend"])
                 }
 
                 ActionButton {
                     id: powerOffBtn
-                    glyph: "⏻"
+                    source: "./icons/Power.png"
                     label: "Power Off"
-                    accent: "#EF9A9A"
                     onActiveFocusChanged: if (activeFocus)
                         contentRoot.lastIndex = 2
-                    onFocusCleared: contentRoot.forceActiveFocus()
-                    onActivated: root.powerOff()
+                    onActivated: root.execAndClose(["/usr/bin/systemctl", "poweroff"])
                 }
 
                 ActionButton {
                     id: hibernateBtn
-                    glyph: "☾"
+                    source: "./icons/Hibernate.png"
                     label: "Hibernate"
-                    accent: "#CE93D8"
                     onActiveFocusChanged: if (activeFocus)
                         contentRoot.lastIndex = 3
-                    onFocusCleared: contentRoot.forceActiveFocus()
-                    onActivated: root.hibernate()
+                    onActivated: root.execAndClose(["/usr/bin/systemctl", "hibernate"])
                 }
 
                 ActionButton {
                     id: lockBtn
-                    glyph: "🔒"
+                    source: "./icons/Lock.png"
                     label: "Lock"
-                    accent: "#A5D6A7"
                     onActiveFocusChanged: if (activeFocus)
                         contentRoot.lastIndex = 4
-                    onFocusCleared: contentRoot.forceActiveFocus()
-                    onActivated: root.lockScreen()
+                    onActivated: root.execAndClose(["/usr/bin/hyprlock"])
                 }
             }
         }

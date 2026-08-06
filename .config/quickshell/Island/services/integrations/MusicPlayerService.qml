@@ -35,7 +35,16 @@ QtObject {
     function sleep() {
         active = false;
         isPlaying = false;
-        mpvProcess.running = false;
+
+        if (mpvProcess.running) {
+            _explicitStop = true;
+            mpvProcess.running = false;
+        }
+
+        isPlaylistMode = true;
+        tracks = [];
+        selectedFolder = "";
+        trackIndex = 0;
     }
 
     function playStop() {
@@ -43,9 +52,11 @@ QtObject {
             return;
 
         if (mpvProcess.running) {
-            mpvCommand.command = ["sh", "-c", `echo 'cycle pause' | socat - ${socketPath}`];
-            mpvCommand.running = true;
-            isPlaying = !isPlaying;
+            if (!mpvCommand.running) {
+                mpvCommand.command = ["sh", "-c", `echo 'cycle pause' | socat - ${socketPath}`];
+                mpvCommand.running = true;
+                isPlaying = !isPlaying;
+            }
         } else {
             _playCurrentTrack();
         }
@@ -65,6 +76,11 @@ QtObject {
     function confirmSelection() {
         if (!isPlaylistMode || !playlists[playlistIndex])
             return;
+
+        if (mpvProcess.running) {
+            _explicitStop = true;
+            mpvProcess.running = false;
+        }
 
         selectedFolder = `${musicDir}/${playlists[playlistIndex]}`;
         trackIndex = 0;
@@ -100,7 +116,7 @@ QtObject {
         const safePath = decodeURIComponent(tracks[trackIndex].filePath.replace(/^file:\/\//, ""));
 
         if (mpvProcess.running) {
-            root._explicitStop = true;   // Помечаем, что это принудительная остановка
+            root._explicitStop = true;
             mpvProcess.running = false;
         }
 
@@ -165,7 +181,7 @@ QtObject {
                 }
                 root.tracks = list;
 
-                if (list.length > 0 && root.trackIndex === 0 && !root.mpvProcess.running && !root.isPlaylistMode) {
+                if (list.length > 0 && root.trackIndex === 0 && !root.isPlaylistMode) {
                     root._playCurrentTrack();
                 }
             }

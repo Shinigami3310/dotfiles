@@ -25,14 +25,14 @@ Item {
         border.width: 1
     }
 
-    Column {
+    ColumnLayout {
         id: layout
         anchors.fill: parent
         anchors.margins: SelectorConfig.padding
         spacing: SelectorConfig.spacing
 
         RowLayout {
-            width: parent.width
+            Layout.fillWidth: true
             spacing: SelectorConfig.headerSpacing
 
             Image {
@@ -87,8 +87,9 @@ Item {
 
         Item {
             id: listContainer
-            width: parent.width
-            height: root.isServiceEnabled ? Math.max(Math.min(listView.contentHeight, SelectorConfig.maxListHeight), SelectorConfig.minListHeight) : 0
+            Layout.fillWidth: true
+            readonly property real targetHeight: Math.max(Math.min(listView.contentHeight, SelectorConfig.maxListHeight), SelectorConfig.minListHeight)
+            Layout.preferredHeight: root.isServiceEnabled ? targetHeight : 0
             opacity: root.isServiceEnabled ? 1.0 : 0.0
             visible: opacity > 0
             clip: true
@@ -109,7 +110,7 @@ Item {
             ListView {
                 id: listView
                 anchors.fill: parent
-                model: root.isServiceEnabled ? root.listModel : null
+                model: root.listModel
                 delegate: root.delegate
                 spacing: SelectorConfig.cardSpacing
                 boundsBehavior: Flickable.StopAtBounds

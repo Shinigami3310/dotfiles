@@ -1,27 +1,30 @@
 import QtQuick
+import QtQuick.Layouts
 import "../../../services/"
 import "../../../theme/"
+import "../"
 
 Item {
     id: root
-
-    // Локальная константа из Config
-    readonly property real resourceRowHeight: 48
 
     SystemStatsService {
         id: systemStatsService
     }
 
-    implicitHeight: resourceRowHeight
+    implicitHeight: ControlPanelConfig.badgeHeight
 
-    Row {
+    RowLayout {
         anchors.fill: parent
-        spacing: 7.5
+        spacing: 0
 
         ResourceBadge {
             label: "CPU"
             valueText: Math.round(systemStatsService.cpu * 100) + "%"
             progress: systemStatsService.cpu
+        }
+
+        Item {
+            Layout.fillWidth: true
         }
 
         ResourceBadge {
@@ -30,16 +33,27 @@ Item {
             progress: systemStatsService.ram
         }
 
+        Item {
+            Layout.fillWidth: true
+        }
         ResourceBadge {
             label: "GPU"
             valueText: Math.round(systemStatsService.gpu * 100) + "%"
             progress: systemStatsService.gpu
         }
 
+        Item {
+            Layout.fillWidth: true
+        }
+
         ResourceBadge {
             label: "DISK"
             valueText: Math.round(systemStatsService.disk * 100) + "%"
             progress: systemStatsService.disk
+        }
+
+        Item {
+            Layout.fillWidth: true
         }
 
         ResourceBadge {

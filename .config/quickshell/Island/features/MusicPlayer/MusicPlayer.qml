@@ -12,6 +12,8 @@ Item {
 
     property bool isClosing: true
 
+    focus: true
+
     Component.onCompleted: {
         MusicPlayerService.wakeUp();
         root.forceActiveFocus();
@@ -31,7 +33,7 @@ Item {
             MusicPlayerService.confirmSelection();
             event.accepted = true;
         } else if (event.key === Qt.Key_Escape) {
-            if (MusicPlayerService.isPlaylistMode) {
+            if (MusicPlayerService.isPlaylistMode && MusicPlayerService.tracks.length > 0) {
                 MusicPlayerService.cancelSelection();
             } else {
                 root.closeRequested();

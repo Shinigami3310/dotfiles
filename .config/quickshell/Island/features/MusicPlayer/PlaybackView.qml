@@ -10,6 +10,16 @@ Item {
 
     signal closeRequested
 
+    // Исправление 1: Прячем PlaybackView, если мы в режиме плейлиста
+    opacity: MusicPlayerService.isPlaylistMode ? 0.0 : 1.0
+    visible: opacity > 0
+
+    Behavior on opacity {
+        NumberAnimation {
+            duration: Motion.standard
+        }
+    }
+
     ColumnLayout {
         anchors.fill: parent
         spacing: 8
