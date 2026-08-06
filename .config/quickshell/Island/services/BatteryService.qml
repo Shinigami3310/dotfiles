@@ -27,6 +27,19 @@ QtObject {
         }
     }
 
+    // Fallback: периодический опрос состояния батареи.
+    // udevadm monitor не всегда доставляет события при подключении зарядки,
+    // поэтому гарантируем обновление isCharging/percent даже без событий.
+    property Timer pollTimer: Timer {
+        interval: 5000
+        repeat: true
+        running: true
+        onTriggered: {
+            if (!batProc.running)
+                batProc.running = true;
+        }
+    }
+
     property Process batProc: Process {
         command: ["sh", "-c", "b=$(ls -d /sys/class/power_supply/BAT* 2>/dev/null | head -n 1); [ -n \"$b\" ] && echo \"$(cat $b/capacity 2>/dev/null):$(cat $b/status 2>/dev/null)\" || echo '100:Full'"]
         running: true

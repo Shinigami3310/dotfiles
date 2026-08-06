@@ -9,12 +9,18 @@ QtObject {
 
     property bool enabled: false
     property string connectingMac: ""
+    property int activeClients: 0
+    property bool isAwake: false
     readonly property ListModel deviceModel: ListModel {}
 
-    property ActivityTracker activityTracker: ActivityTracker {}
     property ListModelDiff listModelDiff: ListModelDiff {}
 
     property bool _isToggling: false
+
+    property Timer sleepTimer: Timer {
+        interval: 1000
+        onTriggered: root.isAwake = false
+    }
 
     property Timer updateThrottleTimer: Timer {
         interval: 500
@@ -63,7 +69,7 @@ QtObject {
             onRead: err => console.error(`[Bluetooth] Scan Error: ${err.trim()}`)
         }
         onExited: exitCode => {
-            if (root.activityTracker.isAwake && root.enabled && !root._isToggling) {
+            if (root.isAwake && root.enabled && !root._isToggling) {
                 retryScanTimer.start();
             }
         }
@@ -108,7 +114,7 @@ QtObject {
             }
         }
         onExited: exitCode => {
-            if (exitCode === 0 && root.activityTracker.isAwake) {
+            if (exitCode === 0 && root.isAwake) {
                 root.updateModel(scanParser.lines);
             }
             scanParser.lines = [];
@@ -120,7 +126,7 @@ QtObject {
         command: ["bluetoothctl", "power", targetState]
         onExited: () => {
             root._isToggling = false;
-            if (targetState === "on" && root.activityTracker.isAwake) {
+            if (targetState === "on" && root.isAwake) {
                 startScan();
             }
             checkStateProc.running = true;
@@ -137,23 +143,20 @@ QtObject {
         }
     }
 
-    property Connections activityConnections: Connections {
-        target: root.activityTracker
-        function onAwakeChanged(awake: bool) {
-            if (awake) {
-                checkStateProc.running = true;
-                stateCheckTimer.start();
-                if (enabled && !_isToggling)
-                    startScan();
-            } else {
-                stateCheckTimer.stop();
-                stopScan();
-            }
+    onIsAwakeChanged: {
+        if (isAwake) {
+            checkStateProc.running = true;
+            stateCheckTimer.start();
+            if (enabled && !_isToggling)
+                startScan();
+        } else {
+            stateCheckTimer.stop();
+            stopScan();
         }
     }
 
     onEnabledChanged: {
-        if (enabled && activityTracker.isAwake && !_isToggling) {
+        if (enabled && isAwake && !_isToggling) {
             startScan();
         } else if (!enabled) {
             stopScan();
@@ -162,11 +165,15 @@ QtObject {
     }
 
     function retain() {
-        activityTracker.retain();
+        activeClients++;
+        sleepTimer.stop();
+        isAwake = true;
     }
 
     function release() {
-        activityTracker.release();
+        activeClients = Math.max(0, activeClients - 1);
+        if (activeClients === 0)
+            sleepTimer.restart();
     }
 
     function toggle() {

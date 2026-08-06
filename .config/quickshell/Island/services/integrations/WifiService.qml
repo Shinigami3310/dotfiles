@@ -11,11 +11,18 @@ QtObject {
     property string connectingBssid: ""
     readonly property ListModel networkModel: ListModel {}
 
-    property ActivityTracker activityTracker: ActivityTracker {}
+    property int activeClients: 0
+    property bool isAwake: false
+
     property ListModelDiff listModelDiff: ListModelDiff {}
 
     property bool _isScanning: false
     property bool _isToggling: false
+
+    property Timer sleepTimer: Timer {
+        interval: 1000
+        onTriggered: root.isAwake = false
+    }
 
     property Timer syncTimer: Timer {
         interval: 5000
@@ -24,18 +31,6 @@ QtObject {
             root.checkStateProc.running = true;
             if (root.enabled) {
                 root.scan();
-            }
-        }
-    }
-
-    property Connections activityConnections: Connections {
-        target: root.activityTracker
-        function onAwakeChanged(awake: bool) {
-            if (awake) {
-                checkStateProc.running = true;
-                syncTimer.start();
-            } else {
-                syncTimer.stop();
             }
         }
     }
@@ -65,7 +60,7 @@ QtObject {
         }
         onExited: code => {
             root._isScanning = false;
-            if (code === 0 && root.activityTracker.isAwake) {
+            if (code === 0 && root.isAwake) {
                 root.updateModel(scanParser.lines);
             }
             scanParser.lines = [];
@@ -88,11 +83,33 @@ QtObject {
         }
     }
 
+    onIsAwakeChanged: {
+        if (isAwake) {
+            checkStateProc.running = true;
+            syncTimer.start();
+        } else {
+            syncTimer.stop();
+        }
+    }
+
     onEnabledChanged: {
-        if (enabled && activityTracker.isAwake) {
+        if (enabled && isAwake) {
             scan();
         } else if (!enabled) {
             networkModel.clear();
+        }
+    }
+
+    function retain() {
+        activeClients++;
+        sleepTimer.stop();
+        isAwake = true;
+    }
+
+    function release() {
+        activeClients = Math.max(0, activeClients - 1);
+        if (activeClients === 0) {
+            sleepTimer.restart();
         }
     }
 

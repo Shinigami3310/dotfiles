@@ -34,7 +34,6 @@
 | `SurfaceCatalog.qml` | Реестр `Component` по имени. Единственное место регистрации новых поверхностей. |
 | `Island.qml` | Визуальный контейнер (скруглённый прямоугольник) с анимированным ресайзом. |
 | `ListModelDiff.qml` | Утилита синхронизации `ListModel` с массивом по ключу (remove/move/insert/update property). Устраняет дублирование в Wifi/Bluetooth/App сервисах. |
-| `ActivityTracker.qml` | Трекер активности с подсчётом клиентов (`retain/release`), авто-засыпанием и сигналом `awakeChanged`. Устраняет дублирование в Wifi/Bluetooth сервисах. |
 
 ### 2. Поверхности (`surfaces/`)
 
@@ -130,12 +129,11 @@ colors.json изменён
 ## Ключевые решения рефакторинга
 
 1. **`ListModelDiff`** — единственная реализация sync-логики ListModel (Wifi/Bluetooth/App). Убрано тройное дублирование.
-2. **`ActivityTracker`** — единая retain/release модель активности для селекторов. Убрано дублирование `sleepTimer`/`isAwake`.
-3. **`Paths`** — устранены абсолютные пути и хардкод пользователя (`/home/Rostislav/...`), внешние конфиги и терминал конфигурируемы.
-4. **Безопасный запуск приложений** — `AppService.launchApp` разбирает `Exec` на argv (без `sh -c`-инъекций).
-5. **Валидация поверхностей** — `SurfaceHost.open()` проверяет наличие `enter/exit` до перехода (предотвращает runtime-краши).
-6. **Обработка ошибок** — `onExited` с `console.warn` при ненулевых кодах в Audio/Brightness/SystemStats.
-7. **`SystemStatsService`** — разбит монолитный `while true` bash-цикл на событийную модель: разовый init (disk/gpu/temp-path) + периодический опрос CPU/RAM/Temp отдельными процессами.
+2. **`Paths`** — устранены абсолютные пути и хардкод пользователя (`/home/Rostislav/...`), внешние конфиги и терминал конфигурируемы.
+3. **Безопасный запуск приложений** — `AppService.launchApp` разбирает `Exec` на argv (без `sh -c`-инъекций).
+4. **Валидация поверхностей** — `SurfaceHost.open()` проверяет наличие `enter/exit` до перехода (предотвращает runtime-краши).
+5. **Обработка ошибок** — `onExited` с `console.warn` при ненулевых кодах в Audio/Brightness/SystemStats.
+6. **`SystemStatsService`** — разбит монолитный `while true` bash-цикл на событийную модель: разовый init (disk/gpu/temp-path) + периодический опрос CPU/RAM/Temp отдельными процессами.
 
 ---
 
@@ -150,7 +148,7 @@ services + services/integrations
    ▼
 системные утилиты (wpctl, nmcli, bluetoothctl…)
 
-core (SurfaceHost/ListModelDiff/ActivityTracker)
+core (SurfaceHost/ListModelDiff)
    ▲ управляет навигацией и переиспользуемыми утилитами
    │
 UI (surfaces) — наследует SurfaceBase

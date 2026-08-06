@@ -63,7 +63,6 @@ core/                     — ядро навигации
   SurfaceBase.qml         — базовый класс поверхности (фокус, Esc, правый клик)
   SurfaceCatalog.qml      — реестр поверхностей (компоненты по имени)
   ListModelDiff.qml       — хелпер синхронизации ListModel (DRY)
-  ActivityTracker.qml     — трекер активности retain/release (DRY)
 surfaces/                 — тонкие обёртки: SurfaceBase + конкретная фича
 features/                 — UI-компоненты (Bar, ControlPanel, MusicPlayer, Selectors, Sliders…)
 services/                 — синглтон-сервисы состояния
