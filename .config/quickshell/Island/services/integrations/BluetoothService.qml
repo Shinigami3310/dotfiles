@@ -38,20 +38,6 @@ QtObject {
         onTriggered: checkStateProc.running = true
     }
 
-    // Периодический опрос состояний устройств.
-    // continuousScanProc даёт события только для новых/вновь найденных устройств,
-    // поэтому для уже известных устройств (в т.ч. реально подключённых) нужно
-    // принудительно перечитывать состояние, иначе connected будет устаревшим.
-    property Timer stateScanTimer: Timer {
-        interval: 3000
-        repeat: true
-        onTriggered: {
-            if (root.isAwake && root.enabled && !root._isToggling && !root.connectingMac) {
-                root.scan();
-            }
-        }
-    }
-
     property Timer retryScanTimer: Timer {
         interval: 1000
         onTriggered: startScan()
@@ -91,20 +77,15 @@ QtObject {
 
     property Process scanProc: Process {
         command: ["bash", "-c", `
-            # Точное состояние connected определяется ТОЛЬКО через bluetoothctl info:
-            #   - "Connected: yes" — физическое соединение установлено (надёжно);
-            #   - НЕ требуем "ServicesResolved: yes" — на многих устройствах профили
-            #     не резолвятся даже при рабочем соединении (ложно-отрицательный);
-            #   - "bluetoothctl devices Connected" НЕ используется — BlueZ при
-            #     авто-reconnect добавляет устройство в этот список даже если
-            #     профильный коннект не удался (ложно-положительный).
             p=$(bluetoothctl devices Paired | awk '{print $2}')
             devs=$(bluetoothctl devices | awk '{print $2}')
             c=""
             for mac in $devs; do
                 info=$(bluetoothctl info "$mac" | sed 's/\x1b\\[[0-9;]*m//g')
                 if echo "$info" | grep -q "Connected: yes"; then
-                    c="$c $mac"
+                    if echo "$info" | grep -q "ServicesResolved: yes"; then
+                        c="$c $mac"
+                    fi
                 fi
             done
             bluetoothctl devices | awk -v c_list="$c" -v p_list="$p" '
@@ -159,13 +140,6 @@ QtObject {
         onExited: () => {
             root.connectingMac = "";
             startScan();
-            // Принудительный скан состояний сразу после попытки коннекта,
-            // чтобы connected-пометка обновилась немедленно (без ожидания событий).
-            stateScanTimer.restart();
-            if (!scanProc.running) {
-                scanParser.lines = [];
-                scanProc.running = true;
-            }
         }
     }
 
@@ -173,26 +147,18 @@ QtObject {
         if (isAwake) {
             checkStateProc.running = true;
             stateCheckTimer.start();
-            stateScanTimer.start();
             if (enabled && !_isToggling)
                 startScan();
         } else {
             stateCheckTimer.stop();
-            stateScanTimer.stop();
             stopScan();
         }
     }
 
     onEnabledChanged: {
-        if (enabled) {
-            // При включении BT сразу же проверяем состояние известных устройств —
-            // они могли быть уже подключены (авто-reconnect), а событий сканирования
-            // для них не будет.
-            updateThrottleTimer.restart();
-            if (isAwake && !_isToggling) {
-                startScan();
-            }
-        } else {
+        if (enabled && isAwake && !_isToggling) {
+            startScan();
+        } else if (!enabled) {
             stopScan();
             deviceModel.clear();
         }
