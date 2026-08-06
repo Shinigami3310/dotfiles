@@ -77,17 +77,12 @@ QtObject {
 
     property Process scanProc: Process {
         command: ["bash", "-c", `
+            # Connected устройства определяем через bluetoothctl devices Connected —
+            # это более надёжно, чем двойная проверка Connected+ServicesResolved
+            # через bluetoothctl info (ServicesResolved часто не устанавливается
+            # на реальных устройствах даже при успешном подключении).
+            c=$(bluetoothctl devices Connected | awk '{print $2}')
             p=$(bluetoothctl devices Paired | awk '{print $2}')
-            devs=$(bluetoothctl devices | awk '{print $2}')
-            c=""
-            for mac in $devs; do
-                info=$(bluetoothctl info "$mac" | sed 's/\x1b\\[[0-9;]*m//g')
-                if echo "$info" | grep -q "Connected: yes"; then
-                    if echo "$info" | grep -q "ServicesResolved: yes"; then
-                        c="$c $mac"
-                    fi
-                fi
-            done
             bluetoothctl devices | awk -v c_list="$c" -v p_list="$p" '
             BEGIN {
                 split(c_list, c_arr, " ");
