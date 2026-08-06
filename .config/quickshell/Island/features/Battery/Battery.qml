@@ -21,13 +21,25 @@ Item {
         to: 100
         duration: BatteryConfig.chargeAnimDuration
         loops: Animation.Infinite
-        running: batteryService.isCharging
     }
 
     Connections {
         target: batteryService
+        function onIsChargingChanged() {
+            if (batteryService.isCharging) {
+                // Перезапускаем анимацию с текущего процента при каждом включении зарядки
+                chargeAnim.from = batteryService.percent;
+                chargeAnimVal = batteryService.percent;
+                chargeAnim.restart();
+            } else {
+                chargeAnim.stop();
+                chargeAnimVal = 0;
+            }
+        }
         function onPercentChanged() {
             if (batteryService.isCharging) {
+                chargeAnim.from = batteryService.percent;
+                chargeAnimVal = batteryService.percent;
                 chargeAnim.restart();
             }
         }

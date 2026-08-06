@@ -12,6 +12,7 @@ QtObject {
     readonly property ListModel networkModel: ListModel {}
 
     property ActivityTracker activityTracker: ActivityTracker {}
+    property ListModelDiff listModelDiff: ListModelDiff {}
 
     property bool _isScanning: false
     property bool _isToggling: false
@@ -153,6 +154,6 @@ QtObject {
 
         targets.sort((a, b) => (b.connected - a.connected) || (b.signal - a.signal));
 
-        ListModelDiff.sync(root.networkModel, targets, "bssid", ["connected", "signal", "security"]);
+        root.listModelDiff.sync(root.networkModel, targets, "bssid", ["connected", "signal", "security"]);
     }
 }

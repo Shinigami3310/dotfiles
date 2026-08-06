@@ -83,13 +83,17 @@ PanelWindow {
     Connections {
         target: BrightnessService
         function onSurfaceRequested(name: string) {
-            host.open(name);
+            // Не открываем OSD, если активна controlPanel (у неё свои слайдеры)
+            if (host.currentName !== "controlPanel")
+                host.open(name);
         }
     }
     Connections {
         target: AudioService
         function onSurfaceRequested(name: string) {
-            host.open(name);
+            // Не открываем OSD, если активна controlPanel (у неё свои слайдеры)
+            if (host.currentName !== "controlPanel")
+                host.open(name);
         }
     }
 }

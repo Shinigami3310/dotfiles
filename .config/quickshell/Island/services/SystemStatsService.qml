@@ -66,8 +66,9 @@ QtObject {
     }
 
     // Чтение CPU из /proc/stat. QML хранит предыдущие значения для расчёта дельты.
+    // Выводим: <общее время> <idle время> (все поля /proc/stat).
     property Process cpuProc: Process {
-        command: ["bash", "-c", "read -r _ user nice system idle iowait irq softirq steal _ _ < /proc/stat; echo \"$((user+nice+system+irq+softirq+steal)) $((idle+iowait))\""]
+        command: ["bash", "-c", "read -r _ user nice system idle iowait irq softirq steal _ _ < /proc/stat; echo \"$((user+nice+system+idle+iowait+irq+softirq+steal)) $((idle+iowait))\""]
         stdout: SplitParser {
             onRead: data => {
                 const parts = data.trim().split(/\s+/);

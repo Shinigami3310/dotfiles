@@ -12,6 +12,7 @@ QtObject {
     readonly property ListModel deviceModel: ListModel {}
 
     property ActivityTracker activityTracker: ActivityTracker {}
+    property ListModelDiff listModelDiff: ListModelDiff {}
 
     property bool _isToggling: false
 
@@ -216,6 +217,6 @@ QtObject {
                     name: parts.slice(3).join('|') || "Unknown Device"
                 })).sort((a, b) => b.connected - a.connected || b.paired - a.paired || a.name.localeCompare(b.name));
 
-        ListModelDiff.sync(root.deviceModel, targets, "mac", ["connected", "paired", "name"]);
+        root.listModelDiff.sync(root.deviceModel, targets, "mac", ["connected", "paired", "name"]);
     }
 }
