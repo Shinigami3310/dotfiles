@@ -4,3 +4,7 @@ wallpaper_dir = "~/Pictures/Wallpaper"
 [templates.quickshell_json]
 input_path = "~/.config/matugen/templates/colors.json"
 output_path = "~/.config/quickshell/colors.json"
+
+[templates.kitty]
+input_path = "~/.config/matugen/templates/kitty.conf"
+output_path = "~/.config/kitty/colors.conf"
