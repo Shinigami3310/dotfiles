@@ -107,10 +107,16 @@ QtObject {
         blockLoading: true
         watchChanges: true
 
-        // Единственный путь обновления — onFileChanged (hot-reload).
-        // onLoadedChanged не используется, чтобы не парсить JSON дважды.
+        // Первичная загрузка палитры при старте.
+        onLoadedChanged: {
+            if (loaded) {
+                root.updateColors();
+            }
+        }
+
+        // Hot-reload при изменении файла. watchChanges сам перечитывает
+        // содержимое, поэтому reload() не нужен — иначе парсинг выполнится дважды.
         onFileChanged: {
-            paletteFile.reload();
             root.updateColors();
         }
     }
