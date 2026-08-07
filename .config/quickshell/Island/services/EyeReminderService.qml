@@ -1,6 +1,7 @@
 pragma Singleton
 import QtQuick
 import "../theme"
+import "../core"
 
 QtObject {
     id: root
@@ -12,7 +13,7 @@ QtObject {
         interval: 10 * 60 * 1000
         repeat: true
         running: root.active
-        onTriggered: root.surfaceRequested("eyeReminder")
+        onTriggered: root.surfaceRequested(SurfaceNames.eyeReminder)
     }
 
     function toggle() {

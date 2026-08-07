@@ -2,6 +2,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import "../core"
 
 QtObject {
     id: root
@@ -82,7 +83,7 @@ QtObject {
                     root.muted = newMuted;
 
                     if (!root._isInternalChange && !root.firstRun) {
-                        root.surfaceRequested("volumeSlider");
+                        root.surfaceRequested(SurfaceNames.volumeSlider);
                     }
                     root.firstRun = false;
                 }

@@ -1,5 +1,6 @@
 import QtQuick
 import "../../../services"
+import "../../../core"
 
 ControlButton {
     id: root
@@ -11,5 +12,5 @@ ControlButton {
     enableRightClick: true
 
     onClicked: BluetoothService.toggle()
-    onRightClicked: root.surfaceRequested("bluetoothSelector")
+    onRightClicked: root.surfaceRequested(SurfaceNames.bluetoothSelector)
 }

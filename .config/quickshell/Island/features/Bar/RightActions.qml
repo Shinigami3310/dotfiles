@@ -1,6 +1,7 @@
 import QtQuick
 import "../../services"
 import "../../theme"
+import "../../core"
 
 Row {
     id: root
@@ -23,12 +24,12 @@ Row {
 
     Icon {
         iconName: "Settings.png"
-        onClicked: root.surfaceRequested("controlPanel")
+        onClicked: root.surfaceRequested(SurfaceNames.controlPanel)
     }
 
     Icon {
         iconName: "Battery.png"
-        onClicked: root.surfaceRequested("batteryProfile")
+        onClicked: root.surfaceRequested(SurfaceNames.batteryProfile)
     }
 
     Icon {

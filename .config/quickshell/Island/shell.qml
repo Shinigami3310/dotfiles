@@ -5,13 +5,11 @@ import Quickshell.Wayland
 import "core"
 import "theme"
 import "services"
-import "services"
 
 PanelWindow {
     id: root
 
-    readonly property list<string> nonFocusSurfaces: ["eyeReminder", "brightnessSlider", "volumeSlider", "strip", "homeClock"]
-    readonly property bool requiresFocus: host.currentName !== host.initialSurfaceName && !nonFocusSurfaces.includes(host.currentName)
+    readonly property bool requiresFocus: host.currentName !== host.initialSurfaceName && !SurfaceNames.nonFocusSurfaces.includes(host.currentName)
     readonly property bool isFullscreen: modeController.isFullscreen
 
     anchors {
@@ -56,7 +54,7 @@ PanelWindow {
 
         SurfaceHost {
             id: host
-            initialSurfaceName: root.isFullscreen ? "strip" : "homeClock"
+            initialSurfaceName: root.isFullscreen ? SurfaceNames.strip : SurfaceNames.homeClock
             surfaces: catalog
         }
     }
@@ -84,7 +82,7 @@ PanelWindow {
         target: BrightnessService
         function onSurfaceRequested(name: string) {
             // Не открываем OSD, если активна controlPanel (у неё свои слайдеры)
-            if (host.currentName !== "controlPanel")
+            if (host.currentName !== SurfaceNames.controlPanel)
                 host.open(name);
         }
     }
@@ -92,7 +90,7 @@ PanelWindow {
         target: AudioService
         function onSurfaceRequested(name: string) {
             // Не открываем OSD, если активна controlPanel (у неё свои слайдеры)
-            if (host.currentName !== "controlPanel")
+            if (host.currentName !== SurfaceNames.controlPanel)
                 host.open(name);
         }
     }

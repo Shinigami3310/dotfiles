@@ -1,5 +1,6 @@
 import QtQuick
 import "../../theme"
+import "../../core"
 
 Item {
     id: root
@@ -14,6 +15,6 @@ Item {
     }
     TapHandler {
         acceptedButtons: Qt.LeftButton
-        onTapped: root.surfaceRequested("homeClock")
+        onTapped: root.surfaceRequested(SurfaceNames.homeClock)
     }
 }

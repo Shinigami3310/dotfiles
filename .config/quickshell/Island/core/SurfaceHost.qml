@@ -16,8 +16,6 @@ Item {
     property string pendingName: ""
     property Item pendingItem: null
 
-    signal surfaceChanged(string name)
-
     implicitWidth: currentItem?.implicitWidth ?? 0
     implicitHeight: currentItem?.implicitHeight ?? 0
 
@@ -83,7 +81,6 @@ Item {
 
         onStopped: {
             root.busy = false;
-            root.surfaceChanged(root.currentName);
         }
     }
 
@@ -105,9 +102,7 @@ Item {
         }
 
         pendingName = name;
-        const component = spec.component ?? spec;
-
-        pendingItem = component.createObject(root, {
+        pendingItem = spec.createObject(root, {
             surfaceName: name,
             active: false,
             visible: false,
@@ -133,7 +128,6 @@ Item {
             currentItem.visible = true;
             currentItem.opacity = 1;
             currentItem.enter();
-            surfaceChanged(currentName);
             return;
         }
 

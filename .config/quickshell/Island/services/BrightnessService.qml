@@ -2,6 +2,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import "../core"
 
 QtObject {
     id: root
@@ -62,7 +63,7 @@ QtObject {
                     if (!isNaN(cur) && cur !== root.current) {
                         root.current = cur;
                         if (!root._isInternalChange && !root.firstRun) {
-                            root.surfaceRequested("brightnessSlider");
+                            root.surfaceRequested(SurfaceNames.brightnessSlider);
                         }
                         root.firstRun = false;
                     }

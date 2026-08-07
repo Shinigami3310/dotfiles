@@ -1,3 +1,4 @@
+singleton SurfaceNames SurfaceNames.qml
 SurfaceCatalog SurfaceCatalog.qml
 Island Island.qml
 SurfaceHost SurfaceHost.qml

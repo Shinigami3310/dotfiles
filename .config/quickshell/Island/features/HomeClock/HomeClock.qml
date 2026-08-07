@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import "../../theme"
+import "../../core"
 
 Item {
     id: root
@@ -32,7 +33,7 @@ Item {
 
     TapHandler {
         acceptedButtons: Qt.LeftButton
-        onTapped: root.surfaceRequested("bar")
+        onTapped: root.surfaceRequested(SurfaceNames.bar)
     }
     HoverHandler {
         cursorShape: Qt.PointingHandCursor

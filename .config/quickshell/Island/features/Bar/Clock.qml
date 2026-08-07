@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import "../../theme"
+import "../../core"
 
 Item {
     id: root
@@ -50,7 +51,7 @@ Item {
     }
 
     TapHandler {
-        onTapped: root.surfaceRequested("calendar")
+        onTapped: root.surfaceRequested(SurfaceNames.calendar)
     }
     HoverHandler {
         cursorShape: Qt.PointingHandCursor
