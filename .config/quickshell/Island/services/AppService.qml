@@ -2,8 +2,8 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
-import "../../theme"
-import "../../core"
+import "../theme"
+import "../core"
 
 QtObject {
     id: root

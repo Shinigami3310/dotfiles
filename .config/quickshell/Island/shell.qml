@@ -5,7 +5,7 @@ import Quickshell.Wayland
 import "core"
 import "theme"
 import "services"
-import "services/integrations"
+import "services"
 
 PanelWindow {
     id: root

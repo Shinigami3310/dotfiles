@@ -1,6 +1,5 @@
 import QtQuick
 import "../../services"
-import "../../services/integrations"
 import "../../theme"
 
 Row {

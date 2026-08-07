@@ -1,7 +1,7 @@
 pragma Singleton
 import QtQuick
 import Quickshell
-import "../../theme"
+import "../theme"
 
 QtObject {
     id: root

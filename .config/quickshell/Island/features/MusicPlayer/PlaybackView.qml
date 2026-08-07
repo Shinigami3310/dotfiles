@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import "../../theme"
-import "../../services/integrations"
+import "../../services"
 
 Item {
     id: root

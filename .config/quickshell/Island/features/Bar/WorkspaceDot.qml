@@ -1,6 +1,6 @@
 import QtQuick
 import "../../theme"
-import "../../services/integrations/"
+import "../../services/"
 
 Rectangle {
     id: root
