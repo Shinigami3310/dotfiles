@@ -10,30 +10,30 @@ Row {
     signal closeRequested
 
     Icon {
-        source: "../../assets/icons/Eye.png"
+        iconName: "Eye.png"
         active: EyeReminderService.active
         onClicked: EyeReminderService.toggle()
     }
 
     Icon {
-        source: "../../assets/icons/Pomodoro.png"
+        iconName: "Pomodoro.png"
         active: PomodoroService.active
         onClicked: PomodoroService.toggle()
     }
 
     Icon {
-        source: "../../assets/icons/Settings.png"
+        iconName: "Settings.png"
         onClicked: root.surfaceRequested("controlPanel")
     }
 
     Icon {
-        source: "../../assets/icons/Battery.png"
+        iconName: "Battery.png"
         onClicked: root.surfaceRequested("batteryProfile")
     }
 
     Icon {
         id: powerIcon
-        source: "../../assets/icons/Power.png"
+        iconName: "Power.png"
         onClicked: {
             PowerService.openMenu();
             root.closeRequested();

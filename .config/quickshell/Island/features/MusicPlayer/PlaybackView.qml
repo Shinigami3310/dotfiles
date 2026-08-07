@@ -76,7 +76,7 @@ Item {
             Layout.alignment: Qt.AlignVCenter
 
             IconButton {
-                source: "../../assets/icons/Power.png"
+                iconName: "Power.png"
                 onClicked: {
                     MusicPlayerService.sleep();
                     root.closeRequested();
@@ -89,17 +89,17 @@ Item {
                 spacing: 20
 
                 IconButton {
-                    source: "../../assets/icons/Previous.png"
+                    iconName: "Previous.png"
                     onClicked: MusicPlayerService.previous()
                 }
 
                 IconButton {
-                    source: MusicPlayerService.isPlaying ? "../../assets/icons/Stop.png" : "../../assets/icons/Play.png"
+                    iconName: MusicPlayerService.isPlaying ? "Stop.png" : "Play.png"
                     onClicked: MusicPlayerService.playStop()
                 }
 
                 IconButton {
-                    source: "../../assets/icons/Next.png"
+                    iconName: "Next.png"
                     onClicked: MusicPlayerService.next()
                 }
             }
@@ -107,7 +107,7 @@ Item {
             HSpacer {}
 
             IconButton {
-                source: "../../assets/icons/Playlist.png"
+                iconName: "Playlist.png"
                 onClicked: MusicPlayerService.togglePlaylistMode()
             }
         }

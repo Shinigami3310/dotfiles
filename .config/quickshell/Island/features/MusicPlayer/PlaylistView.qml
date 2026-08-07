@@ -23,7 +23,7 @@ Rectangle {
         spacing: 12
 
         IconButton {
-            source: "../../assets/icons/PreviousPlaylist.png"
+            iconName: "PreviousPlaylist.png"
             onClicked: MusicPlayerService.previous()
         }
 
@@ -42,7 +42,7 @@ Rectangle {
         }
 
         IconButton {
-            source: "../../assets/icons/NextPlaylist.png"
+            iconName: "NextPlaylist.png"
             onClicked: MusicPlayerService.next()
         }
     }

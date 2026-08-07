@@ -13,7 +13,7 @@ OsdSliderPanel {
     }
 
     slider.value: BrightnessService.level
-    slider.iconSource: Qt.resolvedUrl("../../assets/icons/Brightness.png")
+    slider.iconName: "Brightness.png"
     slider.interactiveIcon: false
 
     slider.onSliderMoved: requestedValue => BrightnessService.setLevel(requestedValue)

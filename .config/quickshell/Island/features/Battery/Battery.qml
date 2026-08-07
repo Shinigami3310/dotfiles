@@ -125,15 +125,15 @@ Item {
 
             ProfileButton {
                 profileId: "power-saver"
-                iconSource: "../../assets/icons/Eco.png"
+                iconSource: "Eco.png"
             }
             ProfileButton {
                 profileId: "balanced"
-                iconSource: "../../assets/icons/Balance.png"
+                iconSource: "Balance.png"
             }
             ProfileButton {
                 profileId: "performance"
-                iconSource: "../../assets/icons/Turbo.png"
+                iconSource: "Turbo.png"
             }
         }
     }

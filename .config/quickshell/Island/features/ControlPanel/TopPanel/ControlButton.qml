@@ -8,7 +8,7 @@ import "../"
 IconButton {
     id: root
 
-    property alias icon: root.source
+    property alias icon: root.iconName
 
     showBackground: true
     bgRadius: ControlPanelConfig.buttonRadius

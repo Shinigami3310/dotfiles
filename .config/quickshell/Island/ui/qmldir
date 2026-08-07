@@ -3,3 +3,6 @@ IconButton IconButton.qml
 Slider Slider.qml
 ToggleSwitch ToggleSwitch.qml
 HSpacer HSpacer.qml
+SliderIcon Slider/SliderIcon.qml
+SliderTrack Slider/SliderTrack.qml
+SliderValueText Slider/SliderValueText.qml

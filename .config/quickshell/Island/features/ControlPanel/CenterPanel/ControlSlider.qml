@@ -7,7 +7,8 @@ import "../"
 Slider {
     id: root
 
-    property alias icon: root.iconSource
+    property alias icon: root.iconName
+    property alias mutedIcon: root.mutedIconName
 
     trackWidth: 0
     trackHeight: ControlPanelConfig.sliderTrackHeight

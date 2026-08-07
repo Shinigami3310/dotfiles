@@ -9,7 +9,7 @@ IconButton {
     id: root
 
     required property string profileId
-    property alias iconSource: root.source
+    property alias iconSource: root.iconName
 
     showBackground: true
     bgRadius: BatteryConfig.profileBtnRadius

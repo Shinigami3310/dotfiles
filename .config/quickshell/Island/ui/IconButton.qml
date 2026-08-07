@@ -7,9 +7,12 @@ import "../theme"
 // features/Battery/ProfileButton.
 // - showBackground: рисует скруглённый фон-подложку (для ControlButton/ProfileButton).
 // - enableRightClick: включает правый клик (для ControlButton).
+// - iconName: имя файла в assets/icons/ — резолвится через Paths.icon(),
+//   поэтому не зависит от относительного пути вызывающего файла.
 Item {
     id: root
 
+    property string iconName: ""
     property url source: ""
     property bool active: false
     property bool showBackground: false
@@ -59,7 +62,7 @@ Item {
         anchors.centerIn: parent
         width: root.showBackground ? UiConfig.iconButtonIconSize : UiConfig.iconButtonSize
         height: root.showBackground ? UiConfig.iconButtonIconSize : UiConfig.iconButtonSize
-        source: root.source
+        source: root.source !== "" ? root.source : (root.iconName !== "" ? Paths.icon(root.iconName) : "")
         sourceSize: Qt.size(width * 2, height * 2)
         fillMode: Image.PreserveAspectFit
         smooth: true
