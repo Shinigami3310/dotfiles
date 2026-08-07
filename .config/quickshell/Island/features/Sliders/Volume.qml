@@ -17,10 +17,11 @@ OsdSliderPanel {
 
     slider.value: AudioService.muted ? 0.0 : AudioService.volume
     slider.iconSource: Qt.resolvedUrl("../../assets/icons/" + (AudioService.muted ? "VolumeMute.png" : "Volume.png"))
-    slider.iconOpacity: AudioService.muted ? 0.4 : 1.0
+    slider.mutedIcon: Qt.resolvedUrl("../../assets/icons/VolumeMute.png")
+    slider.muted: AudioService.muted
     slider.interactiveIcon: true
 
-    slider.onRequestValueChange: requestedValue => AudioService.setVolume(requestedValue)
+    slider.onSliderMoved: requestedValue => AudioService.setVolume(requestedValue)
     slider.onIconClicked: {
         AudioService.toggleMute();
         root.bumpIdle();

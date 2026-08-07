@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import "../../theme"
 import "../../services"
+import "../../ui"
 
 Item {
     id: root
@@ -82,9 +83,7 @@ Item {
                 }
             }
 
-            Item {
-                Layout.fillWidth: true
-            }
+            HSpacer {}
 
             RowLayout {
                 spacing: 20
@@ -105,9 +104,7 @@ Item {
                 }
             }
 
-            Item {
-                Layout.fillWidth: true
-            }
+            HSpacer {}
 
             IconButton {
                 source: "../../assets/icons/Playlist.png"

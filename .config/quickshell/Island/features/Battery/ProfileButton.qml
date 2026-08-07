@@ -1,87 +1,23 @@
 import QtQuick
-import QtQuick.Effects
-import "../../services"
+import "../../ui"
 import "../../theme"
+import "../../services"
 
-Rectangle {
+// Тонкая обёртка над единым ui/IconButton для профиля питания.
+// Показывает фон-заливку и активную рамку.
+IconButton {
     id: root
 
     required property string profileId
-    required property url iconSource
+    property alias iconSource: root.source
+
+    showBackground: true
+    bgRadius: BatteryConfig.profileBtnRadius
+    bgColor: hovered ? ThemeColor.surface_container_high : ThemeColor.surface_container
+    bgBorderColor: isActive ? ThemeColor.primary : "transparent"
+    bgBorderWidth: isActive ? BatteryConfig.profileActiveBorderWidth : 0
 
     readonly property bool isActive: BatteryService.activeProfile === profileId
-    readonly property bool hovered: hoverHandler.hovered
-    readonly property bool pressed: tapHandler.pressed
 
-    implicitWidth: BatteryConfig.profileBtnSize
-    implicitHeight: BatteryConfig.profileBtnSize
-    radius: BatteryConfig.profileBtnRadius
-
-    color: hovered ? ThemeColor.surface_container_high : ThemeColor.surface_container
-
-    border {
-        color: isActive ? ThemeColor.primary : "transparent"
-        width: isActive ? BatteryConfig.profileActiveBorderWidth : 0
-    }
-
-    scale: pressed ? Configs.scalePressed : (hovered ? Configs.scaleHover : 1.0)
-
-    Behavior on color {
-        ColorAnimation {
-            duration: Motion.fast
-        }
-    }
-    Behavior on border.color {
-        ColorAnimation {
-            duration: Motion.fast
-        }
-    }
-    Behavior on scale {
-        NumberAnimation {
-            duration: Motion.fast
-        }
-    }
-
-    HoverHandler {
-        id: hoverHandler
-        cursorShape: Qt.PointingHandCursor
-    }
-
-    TapHandler {
-        id: tapHandler
-        onTapped: BatteryService.setProfile(root.profileId)
-    }
-
-    Item {
-        anchors.centerIn: parent
-        width: BatteryConfig.profileIconSize
-        height: BatteryConfig.profileIconSize
-
-        Image {
-            id: iconImage
-            anchors.fill: parent
-            source: root.iconSource
-            visible: false
-            asynchronous: true
-            smooth: true
-            fillMode: Image.PreserveAspectFit
-            sourceSize: Qt.size(width, height)
-        }
-
-        MultiEffect {
-            anchors.fill: iconImage
-            source: iconImage
-            colorization: 1.0
-            colorizationColor: (root.isActive || root.pressed) ? ThemeColor.primary : ThemeColor.on_surface
-
-            paddingRect: Qt.rect(0, 0, width, height)
-            autoPaddingEnabled: false
-
-            Behavior on colorizationColor {
-                ColorAnimation {
-                    duration: Motion.fast
-                }
-            }
-        }
-    }
+    onClicked: BatteryService.setProfile(root.profileId)
 }

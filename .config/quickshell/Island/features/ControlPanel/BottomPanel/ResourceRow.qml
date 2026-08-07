@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import "../../../services/"
 import "../../../theme/"
+import "../../../ui"
 import "../"
 
 // Ряд метрик ресурсов. Удерживает синглтон SystemStatsService «в awake»:
@@ -25,9 +26,7 @@ Item {
             progress: SystemStatsService.cpu
         }
 
-        Item {
-            Layout.fillWidth: true
-        }
+        HSpacer {}
 
         ResourceBadge {
             label: "RAM"
@@ -35,18 +34,15 @@ Item {
             progress: SystemStatsService.ram
         }
 
-        Item {
-            Layout.fillWidth: true
-        }
+        HSpacer {}
+
         ResourceBadge {
             label: "GPU"
             valueText: Math.round(SystemStatsService.gpu * 100) + "%"
             progress: SystemStatsService.gpu
         }
 
-        Item {
-            Layout.fillWidth: true
-        }
+        HSpacer {}
 
         ResourceBadge {
             label: "DISK"
@@ -54,9 +50,7 @@ Item {
             progress: SystemStatsService.disk
         }
 
-        Item {
-            Layout.fillWidth: true
-        }
+        HSpacer {}
 
         ResourceBadge {
             label: "TEMP"

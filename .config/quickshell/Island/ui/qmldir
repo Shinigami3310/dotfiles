@@ -1,0 +1,5 @@
+singleton UiConfig UiConfig.qml
+IconButton IconButton.qml
+Slider Slider.qml
+ToggleSwitch ToggleSwitch.qml
+HSpacer HSpacer.qml

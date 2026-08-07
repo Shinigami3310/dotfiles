@@ -1,12 +1,14 @@
 import QtQuick
+import "../../ui"
 import "../../theme"
 
+// OSD-панель: оборачивает ui/Slider и закрывается по таймауту бездействия.
 Item {
     id: root
 
-    readonly property int paddingX: 20
-    readonly property int paddingY: 12
-    readonly property int idleTimeout: 2500
+    readonly property int paddingX: UiConfig.osdPaddingX
+    readonly property int paddingY: UiConfig.osdPaddingY
+    readonly property int idleTimeout: UiConfig.osdIdleTimeout
 
     property bool active: true
     property alias slider: innerSlider
@@ -36,6 +38,7 @@ Item {
     Slider {
         id: innerSlider
         anchors.centerIn: parent
-        onInteracted: root.bumpIdle()
+        onSliderMoved: root.bumpIdle()
+        onIconClicked: root.bumpIdle()
     }
 }
