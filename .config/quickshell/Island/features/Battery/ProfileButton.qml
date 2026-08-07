@@ -8,9 +8,8 @@ Rectangle {
 
     required property string profileId
     required property url iconSource
-    property BatteryService service: null
 
-    readonly property bool isActive: service?.activeProfile === profileId
+    readonly property bool isActive: BatteryService.activeProfile === profileId
     readonly property bool hovered: hoverHandler.hovered
     readonly property bool pressed: tapHandler.pressed
 
@@ -50,7 +49,7 @@ Rectangle {
 
     TapHandler {
         id: tapHandler
-        onTapped: root.service?.setProfile(root.profileId)
+        onTapped: BatteryService.setProfile(root.profileId)
     }
 
     Item {

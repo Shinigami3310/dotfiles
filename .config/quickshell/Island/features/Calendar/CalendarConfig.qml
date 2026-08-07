@@ -2,6 +2,8 @@ pragma Singleton
 import QtQuick
 
 QtObject {
+    readonly property string locale: "en_US"
+
     readonly property int paddingX: 20
     readonly property int paddingY: 16
     readonly property int layoutSpacing: 10

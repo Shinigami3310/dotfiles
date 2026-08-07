@@ -2,34 +2,36 @@ import QtQuick
 import "../../services"
 import "../../theme"
 
+// Поверхность профиля батареи. Удерживает синглтон BatteryService «в awake»:
+// пока поверхность открыта, мониторинг udev и опрос активны; при выгрузке
+// поверхности (release) сервис засыпает и не тратит ресурсы.
 Item {
     id: root
+
+    Component.onCompleted: BatteryService.retain()
+    Component.onDestruction: BatteryService.release()
 
     implicitWidth: layout.implicitWidth + BatteryConfig.layoutPadding
     implicitHeight: layout.implicitHeight + BatteryConfig.layoutPadding
 
-    BatteryService {
-        id: batteryService
-    }
-
     property real chargeAnimVal: 0
-    readonly property real displayPercent: batteryService.isCharging ? chargeAnimVal : batteryService.percent
+    readonly property real displayPercent: BatteryService.isCharging ? chargeAnimVal : BatteryService.percent
 
     NumberAnimation on chargeAnimVal {
         id: chargeAnim
-        from: batteryService.percent
+        from: BatteryService.percent
         to: 100
         duration: BatteryConfig.chargeAnimDuration
         loops: Animation.Infinite
     }
 
     Connections {
-        target: batteryService
+        target: BatteryService
         function onIsChargingChanged() {
-            if (batteryService.isCharging) {
+            if (BatteryService.isCharging) {
                 // Перезапускаем анимацию с текущего процента при каждом включении зарядки
-                chargeAnim.from = batteryService.percent;
-                chargeAnimVal = batteryService.percent;
+                chargeAnim.from = BatteryService.percent;
+                chargeAnimVal = BatteryService.percent;
                 chargeAnim.restart();
             } else {
                 chargeAnim.stop();
@@ -37,9 +39,9 @@ Item {
             }
         }
         function onPercentChanged() {
-            if (batteryService.isCharging) {
-                chargeAnim.from = batteryService.percent;
-                chargeAnimVal = batteryService.percent;
+            if (BatteryService.isCharging) {
+                chargeAnim.from = BatteryService.percent;
+                chargeAnimVal = BatteryService.percent;
                 chargeAnim.restart();
             }
         }
@@ -82,7 +84,7 @@ Item {
 
                         width: Math.max(0, (parent.width - (BatteryConfig.innerMargin * 2)) * (root.displayPercent / 100))
                         radius: BatteryConfig.indicatorRadius
-                        color: batteryService.isCharging ? ThemeColor.primary : ThemeColor.secondary
+                        color: BatteryService.isCharging ? ThemeColor.primary : ThemeColor.secondary
 
                         Behavior on color {
                             ColorAnimation {
@@ -106,7 +108,7 @@ Item {
 
             Text {
                 anchors.verticalCenter: parent.verticalCenter
-                text: `${batteryService.percent}%`
+                text: `${BatteryService.percent}%`
                 font {
                     family: Theme.font
                     pixelSize: BatteryConfig.textSize
@@ -124,17 +126,14 @@ Item {
             ProfileButton {
                 profileId: "power-saver"
                 iconSource: "../../assets/icons/Eco.png"
-                service: batteryService
             }
             ProfileButton {
                 profileId: "balanced"
                 iconSource: "../../assets/icons/Balance.png"
-                service: batteryService
             }
             ProfileButton {
                 profileId: "performance"
                 iconSource: "../../assets/icons/Turbo.png"
-                service: batteryService
             }
         }
     }

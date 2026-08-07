@@ -1,3 +1,4 @@
+pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
@@ -8,6 +9,10 @@ QtObject {
     property int percent: 0
     property bool isCharging: false
     property string activeProfile: "balanced"
+    property bool hasBattery: false
+
+    property int _activeClients: 0
+    property bool isAwake: false
 
     function setProfile(profileName: string) {
         if (activeProfile !== profileName) {
@@ -16,9 +21,23 @@ QtObject {
         }
     }
 
+    // Сервис «засыпает», когда ни один UI (поверхность BatteryProfile)
+    // его не использует: мониторинг udev и периодический опрос отключаются.
+    function retain() {
+        _activeClients++;
+        isAwake = true;
+    }
+
+    function release() {
+        _activeClients = Math.max(0, _activeClients - 1);
+        if (_activeClients === 0) {
+            isAwake = false;
+        }
+    }
+
     property Process eventListener: Process {
         command: ["udevadm", "monitor", "-s", "power_supply"]
-        running: true
+        running: false
         stdout: SplitParser {
             onRead: _ => {
                 if (!batProc.running)
@@ -33,7 +52,7 @@ QtObject {
     property Timer pollTimer: Timer {
         interval: 5000
         repeat: true
-        running: true
+        running: false
         onTriggered: {
             if (!batProc.running)
                 batProc.running = true;
@@ -41,28 +60,55 @@ QtObject {
     }
 
     property Process batProc: Process {
-        command: ["sh", "-c", "b=$(ls -d /sys/class/power_supply/BAT* 2>/dev/null | head -n 1); [ -n \"$b\" ] && echo \"$(cat $b/capacity 2>/dev/null):$(cat $b/status 2>/dev/null)\" || echo '100:Full'"]
-        running: true
+        command: ["sh", "-c", "b=$(ls -d /sys/class/power_supply/BAT* 2>/dev/null | head -n 1); [ -n \"$b\" ] && echo \"$(cat $b/capacity 2>/dev/null):$(cat $b/status 2>/dev/null)\" || echo ':None'"]
+        running: false
         stdout: SplitParser {
             onRead: data => {
                 let parts = data.trim().split(":");
                 if (parts.length === 2) {
-                    root.percent = parseInt(parts[0], 10) || 100;
+                    if (parts[1] === "None") {
+                        root.hasBattery = false;
+                        return;
+                    }
+                    root.hasBattery = true;
+                    root.percent = parseInt(parts[0], 10) || 0;
                     root.isCharging = ["Charging", "Full"].includes(parts[1]);
                 }
+            }
+        }
+        onExited: exitCode => {
+            if (exitCode !== 0) {
+                console.warn(`[BatteryService] чтение батареи завершилось с кодом ${exitCode}`);
             }
         }
     }
 
     property Process profileProc: Process {
         command: ["powerprofilesctl", "get"]
-        running: true
+        running: false
         stdout: SplitParser {
             onRead: data => {
                 let trimmed = data.trim();
                 if (trimmed)
                     root.activeProfile = trimmed;
             }
+        }
+    }
+
+    onIsAwakeChanged: {
+        // Первичная загрузка состояния при пробуждении.
+        if (isAwake) {
+            eventListener.running = true;
+            pollTimer.start();
+            if (!batProc.running)
+                batProc.running = true;
+            if (!profileProc.running)
+                profileProc.running = true;
+        } else {
+            eventListener.running = false;
+            pollTimer.stop();
+            if (batProc.running)
+                batProc.running = false;
         }
     }
 }

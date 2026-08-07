@@ -4,12 +4,14 @@ import "../../../services/"
 import "../../../theme/"
 import "../"
 
+// Ряд метрик ресурсов. Удерживает синглтон SystemStatsService «в awake»:
+// пока панель открыта, идёт периодический опрос CPU/RAM/Temp; при выгрузке
+// панели (release) опрос останавливается и не тратит ресурсы в простое.
 Item {
     id: root
 
-    SystemStatsService {
-        id: systemStatsService
-    }
+    Component.onCompleted: SystemStatsService.retain()
+    Component.onDestruction: SystemStatsService.release()
 
     implicitHeight: ControlPanelConfig.badgeHeight
 
@@ -19,8 +21,8 @@ Item {
 
         ResourceBadge {
             label: "CPU"
-            valueText: Math.round(systemStatsService.cpu * 100) + "%"
-            progress: systemStatsService.cpu
+            valueText: Math.round(SystemStatsService.cpu * 100) + "%"
+            progress: SystemStatsService.cpu
         }
 
         Item {
@@ -29,8 +31,8 @@ Item {
 
         ResourceBadge {
             label: "RAM"
-            valueText: Math.round(systemStatsService.ram * 100) + "%"
-            progress: systemStatsService.ram
+            valueText: Math.round(SystemStatsService.ram * 100) + "%"
+            progress: SystemStatsService.ram
         }
 
         Item {
@@ -38,8 +40,8 @@ Item {
         }
         ResourceBadge {
             label: "GPU"
-            valueText: Math.round(systemStatsService.gpu * 100) + "%"
-            progress: systemStatsService.gpu
+            valueText: Math.round(SystemStatsService.gpu * 100) + "%"
+            progress: SystemStatsService.gpu
         }
 
         Item {
@@ -48,8 +50,8 @@ Item {
 
         ResourceBadge {
             label: "DISK"
-            valueText: Math.round(systemStatsService.disk * 100) + "%"
-            progress: systemStatsService.disk
+            valueText: Math.round(SystemStatsService.disk * 100) + "%"
+            progress: SystemStatsService.disk
         }
 
         Item {
@@ -58,8 +60,8 @@ Item {
 
         ResourceBadge {
             label: "TEMP"
-            valueText: Math.round(systemStatsService.temp) + "°C"
-            progress: systemStatsService.temp / 100.0
+            valueText: Math.round(SystemStatsService.temp) + "°C"
+            progress: SystemStatsService.temp / 100.0
         }
     }
 }

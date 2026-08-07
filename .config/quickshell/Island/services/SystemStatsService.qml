@@ -1,7 +1,12 @@
+pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
 
+// Синглтон мониторинга ресурсов. Периодический опрос (CPU/RAM/Temp) идёт
+// ТОЛЬКО пока поверхность ControlPanel «держится» за сервис через retain().
+// При выгрузке поверхности (release, счётчик клиентов = 0) все процессы и таймер
+// останавливаются, чтобы не тратить ресурсы в простое.
 QtObject {
     id: root
 
@@ -14,6 +19,44 @@ QtObject {
     property string tempPath: ""
     property int _prevTotal: 0
     property int _prevIdle: 0
+    property int _activeClients: 0
+    property bool isAwake: false
+    property bool _initialized: false
+
+    function retain() {
+        _activeClients++;
+        isAwake = true;
+    }
+
+    function release() {
+        _activeClients = Math.max(0, _activeClients - 1);
+        if (_activeClients === 0) {
+            isAwake = false;
+        }
+    }
+
+    function _stopProcesses() {
+        for (let i = 0; i < _procs.length; i++) {
+            if (_procs[i].running)
+                _procs[i].running = false;
+        }
+    }
+
+    readonly property var _procs: [initProc, cpuProc, ramProc, tempProc]
+
+    onIsAwakeChanged: {
+        if (isAwake) {
+            if (_initialized) {
+                statsTimer.start();
+            } else if (!initProc.running) {
+                // Разовый сбор тяжёлых метрик (Disk, GPU, путь сенсора)
+                initProc.running = true;
+            }
+        } else {
+            statsTimer.stop();
+            _stopProcesses();
+        }
+    }
 
     // Единократная инициализация тяжёлых метрик (Disk, GPU, поиск сенсора температуры).
     // По завершении запускает statsTimer.
@@ -38,7 +81,7 @@ QtObject {
 
             echo "$disk|$gpu|$temp_path"
         `]
-        running: true
+        running: false
         stdout: SplitParser {
             onRead: data => {
                 const parts = data.trim().split("|");
@@ -54,6 +97,7 @@ QtObject {
                     if (tPath)
                         root.tempPath = tPath;
                 }
+                root._initialized = true;
                 root.statsTimer.start();
             }
         }
@@ -61,6 +105,7 @@ QtObject {
             if (exitCode !== 0)
                 console.warn(`[SystemStats] init-процесс завершился с кодом ${exitCode}`);
             // Гарантируем запуск периодического опроса даже если init не дал вывода
+            root._initialized = true;
             root.statsTimer.start();
         }
     }
@@ -69,6 +114,7 @@ QtObject {
     // Выводим: <общее время> <idle время> (все поля /proc/stat).
     property Process cpuProc: Process {
         command: ["bash", "-c", "read -r _ user nice system idle iowait irq softirq steal _ _ < /proc/stat; echo \"$((user+nice+system+idle+iowait+irq+softirq+steal)) $((idle+iowait))\""]
+        running: false
         stdout: SplitParser {
             onRead: data => {
                 const parts = data.trim().split(/\s+/);
@@ -93,6 +139,7 @@ QtObject {
     // Чтение RAM (MemTotal и MemAvailable) из /proc/meminfo.
     property Process ramProc: Process {
         command: ["bash", "-c", "awk '/MemTotal:/ {t=$2} /MemAvailable:/ {a=$2} END {print t, a}' /proc/meminfo"]
+        running: false
         stdout: SplitParser {
             onRead: data => {
                 const parts = data.trim().split(/\s+/);
@@ -111,6 +158,7 @@ QtObject {
     // Команда устанавливается динамически в statsTimer.onTriggered.
     property Process tempProc: Process {
         command: []
+        running: false
         stdout: SplitParser {
             onRead: data => {
                 const tmp = parseInt(data.trim(), 10);
@@ -136,6 +184,4 @@ QtObject {
             }
         }
     }
-
-    Component.onCompleted: initProc.running = true
 }

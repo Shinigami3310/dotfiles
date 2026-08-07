@@ -8,10 +8,6 @@ Item {
     implicitWidth: layout.implicitWidth + (CalendarConfig.paddingX * 2)
     implicitHeight: layout.implicitHeight + (CalendarConfig.paddingY * 2)
 
-    CalendarService {
-        id: calendarService
-    }
-
     SequentialAnimation {
         id: monthTransitionAnim
         property int delta: 0
@@ -34,7 +30,7 @@ Item {
         }
 
         ScriptAction {
-            script: calendarService.changeMonth(monthTransitionAnim.delta)
+            script: CalendarService.changeMonth(monthTransitionAnim.delta)
         }
 
         ParallelAnimation {
@@ -84,7 +80,7 @@ Item {
                 id: monthTitleText
                 anchors.centerIn: parent
                 horizontalAlignment: Text.AlignHCenter
-                text: calendarService.monthTitle(calendarService.viewYear, calendarService.viewMonth)
+                text: CalendarService.monthTitle(CalendarService.viewYear, CalendarService.viewMonth)
                 renderType: Text.NativeRendering
                 font {
                     family: Theme.font
@@ -139,16 +135,16 @@ Item {
                     delegate: DayCell {
                         required property int index
 
-                        readonly property int dayNum: index - calendarService.firstWeekdayOffset + 1
-                        readonly property bool validDay: dayNum >= 1 && dayNum <= calendarService.daysInMonth
+                        readonly property int dayNum: index - CalendarService.firstWeekdayOffset + 1
+                        readonly property bool validDay: dayNum >= 1 && dayNum <= CalendarService.daysInMonth
 
                         dayNumber: dayNum
                         inMonth: validDay
-                        selected: validDay && calendarService.selectedDateKey === calendarService.dayKey(calendarService.viewYear, calendarService.viewMonth, dayNum)
-                        isToday: validDay && calendarService.isToday(calendarService.viewYear, calendarService.viewMonth, dayNum)
-                        isPast: validDay && calendarService.isPast(calendarService.viewYear, calendarService.viewMonth, dayNum)
+                        selected: validDay && CalendarService.selectedDateKey === CalendarService.dayKey(CalendarService.viewYear, CalendarService.viewMonth, dayNum)
+                        isToday: validDay && CalendarService.isToday(CalendarService.viewYear, CalendarService.viewMonth, dayNum)
+                        isPast: validDay && CalendarService.isPast(CalendarService.viewYear, CalendarService.viewMonth, dayNum)
 
-                        onClicked: calendarService.selectDay(dayNum)
+                        onClicked: CalendarService.selectDay(dayNum)
                     }
                 }
             }

@@ -35,13 +35,8 @@ Row {
     Icon {
         id: powerIcon
         source: "../../assets/icons/Power.png"
-
-        PowerService {
-            id: powerService
-        }
-
         onClicked: {
-            powerService.openMenu();
+            PowerService.openMenu();
             root.closeRequested();
         }
     }
