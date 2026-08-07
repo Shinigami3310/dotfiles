@@ -9,8 +9,6 @@ QtObject {
     readonly property real buttonSize: 64
     readonly property real buttonIconSize: 28
     readonly property real buttonRadius: 12
-    readonly property real buttonHoverScale: 1.05
-    readonly property real buttonPressedScale: 0.95
 
     readonly property real sliderHeight: 36
     readonly property real sliderTrackHeight: 24

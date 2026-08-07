@@ -33,9 +33,12 @@ Rectangle {
         }
     }
 
+    // contentContainer: берём размер первого ребёнка (поверхности).
+    // Guard на children.length — на случай пустого контейнера во время
+    // cross-fade переходов в SurfaceHost.
     Item {
         id: contentContainer
-        implicitWidth: children[0].implicitWidth
-        implicitHeight: children[0].implicitHeight
+        implicitWidth: children.length > 0 ? children[0].implicitWidth : 0
+        implicitHeight: children.length > 0 ? children[0].implicitHeight : 0
     }
 }

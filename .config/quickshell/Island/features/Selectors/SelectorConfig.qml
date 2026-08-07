@@ -33,8 +33,6 @@ QtObject {
 
     readonly property real switchWidth: 44
     readonly property real switchHeight: 24
-    readonly property real switchHoverScale: 1.05
-    readonly property real switchPressedScale: 0.95
     readonly property real switchBorderWidth: 1
     readonly property real switchHandleMargin: 3
 }
