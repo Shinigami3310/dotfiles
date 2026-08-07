@@ -59,7 +59,7 @@ RowLayout {
 
     SliderTrack {
         id: track
-        Layout.preferredWidth: root.trackWidth > 0 ? root.trackWidth : undefined
+        Layout.preferredWidth: root.trackWidth > 0 ? root.trackWidth : 0
         Layout.fillWidth: root.trackWidth <= 0
         Layout.alignment: Qt.AlignVCenter
         value: root.visualValue

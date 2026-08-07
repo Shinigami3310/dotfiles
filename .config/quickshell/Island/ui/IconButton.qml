@@ -13,7 +13,7 @@ Item {
     id: root
 
     property string iconName: ""
-    property url source: ""
+    property string source: ""
     property bool active: false
     property bool showBackground: false
     property bool enableRightClick: false
