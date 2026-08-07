@@ -9,6 +9,7 @@ QtObject {
     readonly property int layoutSpacing: 10
 
     readonly property int headerHeight: 28
+    readonly property int headerWidth: (gridColumns * cellSize) + ((gridColumns - 1) * gridColumnSpacing)
     readonly property int headerNavMargin: 24
     readonly property int titleTextSize: 14
 

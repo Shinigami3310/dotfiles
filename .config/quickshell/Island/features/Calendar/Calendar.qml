@@ -8,97 +8,14 @@ Item {
     implicitWidth: layout.implicitWidth + (CalendarConfig.paddingX * 2)
     implicitHeight: layout.implicitHeight + (CalendarConfig.paddingY * 2)
 
-    SequentialAnimation {
-        id: monthTransitionAnim
-        property int delta: 0
-
-        ParallelAnimation {
-            NumberAnimation {
-                target: monthFade
-                property: "opacity"
-                to: 0
-                duration: Motion.morph
-                easing.type: Easing.InOutQuad
-            }
-            NumberAnimation {
-                target: monthTitleText
-                property: "opacity"
-                to: 0
-                duration: Motion.morph
-                easing.type: Easing.InOutQuad
-            }
-        }
-
-        ScriptAction {
-            script: CalendarService.changeMonth(monthTransitionAnim.delta)
-        }
-
-        ParallelAnimation {
-            NumberAnimation {
-                target: monthFade
-                property: "opacity"
-                to: 1
-                duration: Motion.morph
-                easing.type: Easing.InOutQuad
-            }
-            NumberAnimation {
-                target: monthTitleText
-                property: "opacity"
-                to: 1
-                duration: Motion.morph
-                easing.type: Easing.InOutQuad
-            }
-        }
-    }
-
-    function requestMonthChange(delta) {
-        if (!monthTransitionAnim.running) {
-            monthTransitionAnim.delta = delta;
-            monthTransitionAnim.start();
-        }
-    }
-
     Column {
         id: layout
         anchors.centerIn: parent
         spacing: CalendarConfig.layoutSpacing
 
-        Item {
-            width: dayGrid.implicitWidth
-            height: CalendarConfig.headerHeight
-
-            NavButton {
-                anchors {
-                    left: parent.left
-                    verticalCenter: parent.verticalCenter
-                }
-                text: "‹"
-                onClicked: root.requestMonthChange(-1)
-            }
-
-            Text {
-                id: monthTitleText
-                anchors.centerIn: parent
-                horizontalAlignment: Text.AlignHCenter
-                text: CalendarService.monthTitle(CalendarService.viewYear, CalendarService.viewMonth)
-                renderType: Text.NativeRendering
-                font {
-                    family: Theme.font
-                    pixelSize: CalendarConfig.titleTextSize
-                    weight: Font.Normal
-                }
-                color: ThemeColor.on_surface
-                elide: Text.ElideRight
-            }
-
-            NavButton {
-                anchors {
-                    right: parent.right
-                    verticalCenter: parent.verticalCenter
-                }
-                text: "›"
-                onClicked: root.requestMonthChange(1)
-            }
+        MonthHeader {
+            id: header
+            onMonthChanged: monthFadeAnim.restart()
         }
 
         Row {
@@ -123,6 +40,15 @@ Item {
             id: monthFade
             implicitWidth: dayGrid.implicitWidth
             implicitHeight: dayGrid.implicitHeight
+
+            // Fade-анимация грида при смене месяца (запускается из MonthHeader).
+            NumberAnimation on opacity {
+                id: monthFadeAnim
+                from: 0
+                to: 1
+                duration: Motion.morph
+                easing.type: Easing.InOutQuad
+            }
 
             Grid {
                 id: dayGrid
