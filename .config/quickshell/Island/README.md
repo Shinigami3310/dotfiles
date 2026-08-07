@@ -62,11 +62,12 @@ core/                     — ядро навигации
   SurfaceHost.qml         — менеджер поверхностей (открыть/назад/закрыть, история, анимации)
   SurfaceBase.qml         — базовый класс поверхности (фокус, Esc, правый клик)
   SurfaceCatalog.qml      — реестр поверхностей (компоненты по имени)
+  SurfaceNames.qml        — единый реестр имён поверхностей
   ListModelDiff.qml       — хелпер синхронизации ListModel (DRY)
+ui/                       — переиспользуемые примитивы: IconButton, Slider, ToggleSwitch, HSpacer
 surfaces/                 — тонкие обёртки: SurfaceBase + конкретная фича
 features/                 — UI-компоненты (Bar, ControlPanel, MusicPlayer, Selectors, Sliders…)
-services/                 — синглтон-сервисы состояния
-services/integrations/    — синглтон-интеграции с системными утилитами
+services/                 — единый каталог синглтон-сервисов состояния и системных утилит
 theme/                    — синглтоны: Theme, ThemeColor, Motion, Configs, Paths
 assets/icons/             — статические иконки
 ```
@@ -106,8 +107,8 @@ assets/icons/             — статические иконки
 
 ## Как добавить новый сервис
 
-1. Создайте `services/integrations/MyService.qml` с `pragma Singleton`.
-2. Зарегистрируйте в `services/integrations/qmldir`.
+1. Создайте `services/MyService.qml` с `pragma Singleton` (или обычный `QtObject`, если нужен инстанс — как `ModeController`).
+2. Зарегистрируйте в `services/qmldir`.
 3. Используйте из UI напрямую (например `MyService.toggle()`), связи с поверхностями — через сигнал `surfaceRequested`, который слушает `shell.qml`.
 
 ---
