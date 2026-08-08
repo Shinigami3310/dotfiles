@@ -8,14 +8,8 @@ Item {
 
     signal surfaceRequested(string name)
 
-    readonly property int paddingX: 12
-    readonly property int paddingY: 8
-    readonly property int spacing: 8
-    readonly property int dateSize: 10
-    readonly property int timeSize: 18
-
-    implicitWidth: contentColumn.implicitWidth + (paddingX * 2)
-    implicitHeight: contentColumn.implicitHeight + (paddingY * 2)
+    implicitWidth: contentColumn.implicitWidth + (BarConfig.clockPaddingX * 2)
+    implicitHeight: contentColumn.implicitHeight + (BarConfig.clockPaddingY * 2)
 
     SystemClock {
         id: clock
@@ -25,7 +19,7 @@ Item {
     Column {
         id: contentColumn
         anchors.centerIn: parent
-        spacing: spacing
+        spacing: BarConfig.clockSpacing
 
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
@@ -33,7 +27,7 @@ Item {
             color: ThemeColor.on_surface
             font {
                 family: Theme.font
-                pixelSize: root.timeSize
+                pixelSize: BarConfig.clockTimeSize
                 weight: Font.Normal
             }
         }
@@ -44,7 +38,7 @@ Item {
             color: ThemeColor.on_surface
             font {
                 family: Theme.font
-                pixelSize: root.dateSize
+                pixelSize: BarConfig.clockDateSize
                 weight: Font.Normal
             }
         }

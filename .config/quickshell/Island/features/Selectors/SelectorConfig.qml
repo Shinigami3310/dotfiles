@@ -22,17 +22,10 @@ QtObject {
     readonly property real cardContentMargin: 12
     readonly property real cardContentSpacing: 8
     readonly property real cardTextSize: 13
-    readonly property real cardHoverScale: 1.0
-    readonly property real cardPressedScale: 0.9
     readonly property int pulseDuration: 600
     readonly property real pulseMinOpacity: 0.4
 
     readonly property real inputContainerHeight: 28
     readonly property real inputRadius: 6
     readonly property real inputPadding: 8
-
-    readonly property real switchWidth: 44
-    readonly property real switchHeight: 24
-    readonly property real switchBorderWidth: 1
-    readonly property real switchHandleMargin: 3
 }

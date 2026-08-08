@@ -14,7 +14,7 @@ Rectangle {
     height: AppLauncherConfig.itemHeight
     radius: AppLauncherConfig.itemRadius
 
-    color: isCurrent || hoverHandler.hovered ? ThemeColor.surface_container_high : "transparent"
+    color: isCurrent || hoverHandler.hovered ? ThemeColor.surface_container_high : ThemeColor.transparent
     border {
         width: isCurrent ? AppLauncherConfig.itemActiveBorderWidth : 0
         color: ThemeColor.primary

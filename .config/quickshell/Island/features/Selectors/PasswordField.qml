@@ -16,7 +16,7 @@ Rectangle {
     color: ThemeColor.surface_container_highest
     visible: root.active
     opacity: root.active ? 1.0 : 0.0
-    border.color: pwdInput.activeFocus ? ThemeColor.primary : "transparent"
+    border.color: pwdInput.activeFocus ? ThemeColor.primary : ThemeColor.transparent
     border.width: 1
 
     Behavior on opacity {

@@ -23,7 +23,7 @@ Item {
 
     ColumnLayout {
         anchors.fill: parent
-        spacing: 8
+        spacing: MusicPlayerConfig.playbackSpacing
 
         Item {
             id: trackTextContainer
@@ -34,7 +34,7 @@ Item {
             Row {
                 id: marqueeRow
                 anchors.verticalCenter: parent.verticalCenter
-                spacing: 40
+                spacing: MusicPlayerConfig.marqueeSpacing
 
                 readonly property bool overflows: text1.implicitWidth > trackTextContainer.width
                 property real marqueeX: 0
@@ -46,7 +46,7 @@ Item {
                     text: MusicPlayerService.currentTrackDisplay
                     font {
                         family: Theme.font
-                        pixelSize: 18
+                        pixelSize: MusicPlayerConfig.trackTextSize
                         weight: Font.Bold
                     }
                     color: ThemeColor.primary
@@ -61,11 +61,11 @@ Item {
                 }
 
                 NumberAnimation on marqueeX {
-                    running: marqueeRow.overflows && !MusicPlayerService.isPlaylistMode && root.visible && !root.isClosing
+                    running: marqueeRow.overflows && text1.implicitWidth > 0 && !MusicPlayerService.isPlaylistMode && root.visible && !root.isClosing
                     loops: Animation.Infinite
                     from: 0
                     to: -(text1.implicitWidth + marqueeRow.spacing)
-                    duration: Math.max(3000, text1.implicitWidth * 30)
+                    duration: Math.max(MusicPlayerConfig.marqueeMinDuration, text1.implicitWidth * MusicPlayerConfig.marqueeDurationPerPixel)
                     easing.type: Easing.Linear
                 }
             }

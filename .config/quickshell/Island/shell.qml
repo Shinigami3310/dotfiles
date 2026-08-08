@@ -19,7 +19,7 @@ PanelWindow {
         bottom: true
     }
 
-    color: "transparent"
+    color: ThemeColor.transparent
     exclusionMode: ExclusionMode.Ignore
 
     WlrLayershell.layer: WlrLayer.Overlay
@@ -59,10 +59,17 @@ PanelWindow {
         }
     }
 
-    function requestSurface(name) {
+    function requestSurface(name: string) {
         if (!root.isFullscreen) {
             host.open(name);
         }
+    }
+
+    // OSD-поверхности (яркость/громкость) не открываем, если активна
+    // controlPanel — у неё свои слайдеры.
+    function openOsd(name: string) {
+        if (host.currentName !== SurfaceNames.controlPanel)
+            host.open(name);
     }
 
     IpcHandler {
@@ -81,17 +88,13 @@ PanelWindow {
     Connections {
         target: BrightnessService
         function onSurfaceRequested(name: string) {
-            // Не открываем OSD, если активна controlPanel (у неё свои слайдеры)
-            if (host.currentName !== SurfaceNames.controlPanel)
-                host.open(name);
+            root.openOsd(name);
         }
     }
     Connections {
         target: AudioService
         function onSurfaceRequested(name: string) {
-            // Не открываем OSD, если активна controlPanel (у неё свои слайдеры)
-            if (host.currentName !== SurfaceNames.controlPanel)
-                host.open(name);
+            root.openOsd(name);
         }
     }
 }

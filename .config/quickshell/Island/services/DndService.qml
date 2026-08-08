@@ -23,5 +23,10 @@ QtObject {
                 root.active = (data.trim() === "true");
             }
         }
+
+        onExited: exitCode => {
+            if (exitCode !== 0)
+                console.warn(`[DndService] getDndState завершился с кодом ${exitCode}`);
+        }
     }
 }

@@ -18,7 +18,7 @@ Rectangle {
     height: trackHeight
     radius: height / 2
     color: ThemeColor.surface_container_high
-    border.color: trackMouse.containsMouse ? ThemeColor.primary : "transparent"
+    border.color: trackMouse.containsMouse ? ThemeColor.primary : ThemeColor.transparent
     border.width: 1
     clip: true
 
@@ -33,7 +33,7 @@ Rectangle {
         height: parent.height
         width: parent.width * (root.muted ? 0 : root.value)
         radius: parent.radius
-        color: root.muted ? "transparent" : ThemeColor.primary
+        color: root.muted ? ThemeColor.transparent : ThemeColor.primary
 
         Behavior on width {
             enabled: !trackMouse.pressed

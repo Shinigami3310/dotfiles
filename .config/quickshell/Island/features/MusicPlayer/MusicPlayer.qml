@@ -5,8 +5,8 @@ import "../../services"
 Item {
     id: root
 
-    implicitWidth: 360
-    implicitHeight: 100
+    implicitWidth: MusicPlayerConfig.surfaceWidth
+    implicitHeight: MusicPlayerConfig.surfaceHeight
 
     signal closeRequested
 
@@ -45,7 +45,7 @@ Item {
     PlaybackView {
         id: playbackView
         anchors.fill: parent
-        anchors.margins: 14
+        anchors.margins: MusicPlayerConfig.surfaceMargin
         isClosing: root.isClosing
         onCloseRequested: root.closeRequested()
     }

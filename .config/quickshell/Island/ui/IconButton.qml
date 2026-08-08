@@ -9,7 +9,7 @@ import "../theme"
 // - enableRightClick: включает правый клик (для ControlButton).
 // - iconName: имя файла в assets/icons/ — резолвится через Paths.icon(),
 //   поэтому не зависит от относительного пути вызывающего файла.
-Item {
+Pressable {
     id: root
 
     property string iconName: ""
@@ -18,27 +18,17 @@ Item {
     property bool showBackground: false
     property bool enableRightClick: false
     property real bgRadius: UiConfig.iconButtonRadius
-    property color bgColor: "transparent"
+    property color bgColor: ThemeColor.transparent
     property color bgBorderColor: (root.active || root.pressed) ? ThemeColor.primary : ThemeColor.outline_variant
     property real bgBorderWidth: 1
 
-    signal clicked
     signal rightClicked
+
+    // Учитываем и правый клик в pressed (для подсветки рамки).
+    property bool pressed: tapHandler.pressed || rightTap.pressed
 
     implicitWidth: showBackground ? UiConfig.iconButtonBgSize : UiConfig.iconButtonSize
     implicitHeight: showBackground ? UiConfig.iconButtonBgSize : UiConfig.iconButtonSize
-
-    readonly property bool hovered: hoverHandler.hovered
-    readonly property bool pressed: leftTap.pressed || rightTap.pressed
-
-    scale: pressed ? Theme.scalePressed : (hovered ? Theme.scaleHover : 1.0)
-
-    Behavior on scale {
-        NumberAnimation {
-            duration: Motion.fast
-            easing.type: Easing.OutBack
-        }
-    }
 
     Rectangle {
         id: bg
@@ -86,17 +76,6 @@ Item {
                 duration: Motion.fast
             }
         }
-    }
-
-    HoverHandler {
-        id: hoverHandler
-        cursorShape: Qt.PointingHandCursor
-    }
-
-    TapHandler {
-        id: leftTap
-        acceptedButtons: Qt.LeftButton
-        onTapped: root.clicked()
     }
 
     TapHandler {

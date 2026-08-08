@@ -10,6 +10,7 @@ singleton MusicPlayerService MusicPlayerService.qml
 singleton NightModeService NightModeService.qml
 singleton PomodoroService PomodoroService.qml
 singleton PowerService PowerService.qml
+singleton ServiceConfig ServiceConfig.qml
 singleton SystemStatsService SystemStatsService.qml
 singleton WifiService WifiService.qml
 singleton WorkspaceService WorkspaceService.qml

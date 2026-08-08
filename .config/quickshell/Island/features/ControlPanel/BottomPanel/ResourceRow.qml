@@ -11,8 +11,7 @@ import "../"
 Item {
     id: root
 
-    Component.onCompleted: SystemStatsService.retain()
-    Component.onDestruction: SystemStatsService.release()
+    ServiceClient { service: SystemStatsService }
 
     implicitHeight: ControlPanelConfig.badgeHeight
 

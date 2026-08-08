@@ -42,7 +42,7 @@ QtObject {
         }
     }
 
-    readonly property var _procs: [initProc, cpuProc, ramProc, tempProc]
+    readonly property list<Process> _procs: [initProc, cpuProc, ramProc, tempProc]
 
     onIsAwakeChanged: {
         if (isAwake) {
@@ -170,7 +170,7 @@ QtObject {
 
     // Периодический опрос метрик (кроме disk/gpu — они считаются разово в initProc).
     property Timer statsTimer: Timer {
-        interval: 2000
+        interval: ServiceConfig.statsPollMs
         repeat: true
         running: false
         onTriggered: {

@@ -14,7 +14,7 @@ IconButton {
     showBackground: true
     bgRadius: BatteryConfig.profileBtnRadius
     bgColor: hovered ? ThemeColor.surface_container_high : ThemeColor.surface_container
-    bgBorderColor: isActive ? ThemeColor.primary : "transparent"
+    bgBorderColor: isActive ? ThemeColor.primary : ThemeColor.transparent
     bgBorderWidth: isActive ? BatteryConfig.profileActiveBorderWidth : 0
 
     readonly property bool isActive: BatteryService.activeProfile === profileId

@@ -18,6 +18,9 @@ QtObject {
     readonly property string defaultTerminal: "kitty"
     readonly property string pomodoroIcon: assetsDir + "PomodoroService.png"
 
+    // Каталоги .desktop-файлов для AppService.
+    readonly property list<string> appDirs: [homeDir + "/.local/share/applications", "/usr/share/applications"]
+
     // Единый способ получить URL иконки из assets/icons.
     // Используется ui/IconButton и ui/Slider/SliderIcon, чтобы не зависеть
     // от относительных путей вызывающих файлов.

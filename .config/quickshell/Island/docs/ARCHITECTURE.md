@@ -42,6 +42,8 @@
 | Компонент | Назначение |
 |---|---|
 | `ui/IconButton` | Единая иконка-кнопка (Image + MultiEffect + Tap/Hover). Параметры: `iconName`, `active`, `showBackground`, `enableRightClick`. |
+| `ui/Pressable` | Базовый интерактивный элемент (hover/pressed/scale) — общий для `IconButton`, `ToggleSwitch`, `WorkspaceDot`, `DayCell`, `NavButton`. |
+| `ui/ServiceClient` | Удерживает синглтон-сервис «в awake» на время жизни компонента (retain/release). |
 | `ui/Slider` | Композиция `SliderIcon` (fade-переключение иконки), `SliderTrack` (drag/wheel/клик), `SliderValueText` (процент). |
 | `ui/ToggleSwitch` | Переключатель. |
 | `ui/HSpacer` | Распорка `Layout.fillWidth` — заменяет повторяющиеся `Item { Layout.fillWidth: true }`. |
@@ -88,6 +90,7 @@ UI-компоненты. Композиция из `ui/`-примитивов и
 | `CalendarService` | чистая логика календаря (`SystemClock`) |
 | `WorkspaceService` | `Quickshell.Hyprland` |
 | `EyeReminderService` | чистый `Timer` |
+| `ServiceConfig` | Тайминги и константы сервисов (централизованы) |
 
 **Засыпание на простое:** `SystemStatsService` и `BatteryService` держат процессы/таймеры активными только пока `retain()` удерживает сервис (при открытой используемой поверхности); при `release()` останавливаются.
 

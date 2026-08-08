@@ -41,7 +41,7 @@ Item {
         }
     }
 
-    function requestMonthChange(delta) {
+    function requestMonthChange(delta: int) {
         if (!monthTransitionAnim.running) {
             monthTransitionAnim.delta = delta;
             monthTransitionAnim.start();

@@ -20,8 +20,8 @@ Rectangle {
 
     RowLayout {
         anchors.fill: parent
-        anchors.margins: 14
-        spacing: 12
+        anchors.margins: MusicPlayerConfig.playlistMargin
+        spacing: MusicPlayerConfig.playlistSpacing
 
         IconButton {
             iconName: "PreviousPlaylist.png"
@@ -32,7 +32,7 @@ Rectangle {
             text: MusicPlayerService.currentPlaylistName
             font {
                 family: Theme.font
-                pixelSize: 18
+                pixelSize: MusicPlayerConfig.playlistTextSize
                 weight: Font.Bold
             }
             color: ThemeColor.primary

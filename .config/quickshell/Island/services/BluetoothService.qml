@@ -10,7 +10,7 @@ QtObject {
 
     property bool enabled: false
     property string connectingMac: ""
-    property int activeClients: 0
+    property int _activeClients: 0
     property bool isAwake: false
     readonly property ListModel deviceModel: ListModel {}
 
@@ -19,28 +19,28 @@ QtObject {
     property bool _isToggling: false
 
     property Timer sleepTimer: Timer {
-        interval: 1000
+        interval: ServiceConfig.bluetoothSleepMs
         onTriggered: root.isAwake = false
     }
 
     property Timer updateThrottleTimer: Timer {
-        interval: 500
+        interval: ServiceConfig.bluetoothThrottleMs
         onTriggered: {
             if (!scanProc.running) {
-                scanParser.lines = [];
+                scanParser._lines = [];
                 scanProc.running = true;
             }
         }
     }
 
     property Timer stateCheckTimer: Timer {
-        interval: 5000
+        interval: ServiceConfig.bluetoothStateCheckMs
         repeat: true
         onTriggered: checkStateProc.running = true
     }
 
     property Timer retryScanTimer: Timer {
-        interval: 1000
+        interval: ServiceConfig.bluetoothRetryMs
         onTriggered: startScan()
     }
 
@@ -55,6 +55,10 @@ QtObject {
                     root.enabled = newState;
                 }
             }
+        }
+        onExited: exitCode => {
+            if (exitCode !== 0)
+                console.warn(`[BluetoothService] bluetoothctl show завершился с кодом ${exitCode}`);
         }
     }
 
@@ -81,17 +85,19 @@ QtObject {
         command: ["bash", Paths.scriptsDir + "bt_scan.sh"]
         stdout: SplitParser {
             id: scanParser
-            property var lines: []
+            property list<string> _lines: []
             onRead: data => {
                 if (data.trim())
-                    scanParser.lines.push(data.trim());
+                    scanParser._lines.push(data.trim());
             }
         }
         onExited: exitCode => {
             if (exitCode === 0 && root.isAwake) {
-                root.updateModel(scanParser.lines);
+                root.updateModel(scanParser._lines);
+            } else if (exitCode !== 0) {
+                console.warn(`[BluetoothService] bt_scan.sh завершился с кодом ${exitCode}`);
             }
-            scanParser.lines = [];
+            scanParser._lines = [];
         }
     }
 
@@ -139,14 +145,14 @@ QtObject {
     }
 
     function retain() {
-        activeClients++;
+        _activeClients++;
         sleepTimer.stop();
         isAwake = true;
     }
 
     function release() {
-        activeClients = Math.max(0, activeClients - 1);
-        if (activeClients === 0)
+        _activeClients = Math.max(0, _activeClients - 1);
+        if (_activeClients === 0)
             sleepTimer.restart();
     }
 

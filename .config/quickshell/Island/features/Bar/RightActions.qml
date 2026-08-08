@@ -6,7 +6,7 @@ import "../../ui"
 
 Row {
     id: root
-    spacing: 8
+    spacing: BarConfig.rightActionsSpacing
 
     signal surfaceRequested(string newName)
     signal closeRequested

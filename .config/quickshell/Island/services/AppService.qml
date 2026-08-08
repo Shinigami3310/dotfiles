@@ -13,12 +13,19 @@ QtObject {
     readonly property list<string> blackList: ["Avahi SSH Server Browser", "Avahi VNC Server Browser", "Avahi Zeroconf Browser", "mpv Media Player"]
 
     property var _rawAppsBuffer: []
+    property string _pendingQuery: ""
 
     property ListModelDiff listModelDiff: ListModelDiff {}
 
+    // Дебаунс фильтрации: не пересчитываем список на каждое нажатие клавиши.
+    property Timer filterDebounce: Timer {
+        interval: 100
+        onTriggered: root._applyFilter()
+    }
+
     property Process appFetcher: Process {
         // Парсер .desktop вынесен в services/scripts/desktop_scan.awk
-        command: ["sh", "-c", `find "$HOME/.local/share/applications" /usr/share/applications -type f -name "*.desktop" -print0 2>/dev/null | xargs -0 gawk -f "${Paths.scriptsDir}desktop_scan.awk"`]
+        command: ["sh", "-c", `find ${Paths.appDirs.join(" ")} -type f -name "*.desktop" -print0 2>/dev/null | xargs -0 gawk -f "${Paths.scriptsDir}desktop_scan.awk"`]
         running: true
 
         stdout: SplitParser {
@@ -36,16 +43,24 @@ QtObject {
             }
         }
 
-        onExited: {
+        onExited: exitCode => {
+            if (exitCode !== 0) {
+                console.warn(`[AppService] desktop_scan завершился с кодом ${exitCode}`);
+            }
             root._rawAppsBuffer.sort((a, b) => a.name.localeCompare(b.name));
             root.allApps = root._rawAppsBuffer.filter(app => !blackList.includes(app.id) && !blackList.includes(app.name));
-            root.filter("");
+            root._applyFilter();
             root._rawAppsBuffer = [];
         }
     }
 
     function filter(query: string) {
-        let q = (query || "").toLowerCase();
+        root._pendingQuery = query || "";
+        filterDebounce.restart();
+    }
+
+    function _applyFilter() {
+        let q = root._pendingQuery.toLowerCase();
 
         let targetApps = q === "" ? root.allApps : root.allApps.filter(app => app.name.toLowerCase().includes(q));
         root.listModelDiff.sync(root.filteredApps, targetApps, "id", []);

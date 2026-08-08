@@ -1,0 +1,4 @@
+singleton MusicPlayerConfig MusicPlayerConfig.qml
+MusicPlayer MusicPlayer.qml
+PlaybackView PlaybackView.qml
+PlaylistView PlaylistView.qml

@@ -4,7 +4,7 @@ import "../../theme"
 
 Row {
     id: root
-    spacing: 12
+    spacing: BarConfig.workspacesSpacing
 
     Repeater {
         model: 5

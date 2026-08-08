@@ -41,14 +41,14 @@ QtObject {
     // Защита от эхо: после set-операции (toggleMute/setVolume) игнорируем
     // собственные события от pactl в течение этого окна.
     property Timer resetInternalFlagTimer: Timer {
-        interval: 500
+        interval: ServiceConfig.audioResetFlagMs
         onTriggered: root._isInternalChange = false
     }
 
     // Дебаунс событий pactl: pactl subscribe может прислать пачку событий,
     // группируем их и читаем состояние не чаще, чем раз в 30 мс.
     property Timer debounceTimer: Timer {
-        interval: 30
+        interval: ServiceConfig.audioDebounceMs
         onTriggered: volProc.running ? restart() : (volProc.running = true)
     }
 

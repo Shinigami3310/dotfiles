@@ -12,6 +12,9 @@ QtObject {
 
     readonly property string palettePath: Paths.palettePath
 
+    // Прозрачный цвет — единый токен вместо хардкода "transparent".
+    readonly property color transparent: "transparent"
+
     // Дефолтная палитра (Material 3 light) — fallback при отсутствии/ошибке файла.
     readonly property var defaultColors: ({
             "primary": "#6750a4",

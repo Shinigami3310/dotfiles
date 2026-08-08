@@ -21,7 +21,7 @@ QtObject {
     readonly property string musicDir: StandardPaths.standardLocations(StandardPaths.MusicLocation)[0]
     readonly property string currentPlaylistName: playlists[playlistIndex] ?? "No playlists"
     readonly property string currentTrackDisplay: tracks[trackIndex]?.cleanName ?? "No track"
-    readonly property string socketPath: "/tmp/qsh-mpv.sock"
+    readonly property string socketPath: ServiceConfig.mpvSocketPath
 
     property bool _explicitStop: false
 
@@ -95,7 +95,7 @@ QtObject {
         }
     }
 
-    function _navigate(step) {
+    function _navigate(step: int) {
         const list = isPlaylistMode ? playlists : tracks;
         if (!list.length)
             return;
@@ -137,6 +137,8 @@ QtObject {
             if (root.isPlaying && exitCode === 0) {
                 root.next();
             } else {
+                if (exitCode !== 0)
+                    console.warn(`[MusicPlayerService] mpv завершился с кодом ${exitCode}`);
                 root.isPlaying = false;
             }
         }

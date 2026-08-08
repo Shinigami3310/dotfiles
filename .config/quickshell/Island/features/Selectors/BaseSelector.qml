@@ -10,7 +10,7 @@ Item {
     property string title: "Selector"
     property string iconSource: ""
     property bool isServiceEnabled: false
-    property var listModel: null
+    property ListModel listModel: null
     property Component delegate: null
 
     signal toggleRequested

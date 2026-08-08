@@ -63,12 +63,12 @@ core/                     — ядро навигации
   SurfaceBase.qml         — базовый класс поверхности (фокус, Esc, правый клик)
   SurfaceCatalog.qml      — реестр поверхностей (компоненты по имени)
   SurfaceNames.qml        — единый реестр имён поверхностей
-  ListModelDiff.qml       — хелпер синхронизации ListModel (DRY)
-ui/                       — переиспользуемые примитивы: IconButton, Slider, ToggleSwitch, HSpacer
+ui/                       — переиспользуемые примитивы: IconButton, Slider, ToggleSwitch, HSpacer, Pressable, ServiceClient
 surfaces/                 — тонкие обёртки: SurfaceBase + конкретная фича
 features/                 — UI-компоненты (Bar, ControlPanel, MusicPlayer, Selectors, Sliders…)
 services/                 — единый каталог синглтон-сервисов состояния и системных утилит
-theme/                    — синглтоны: Theme, ThemeColor, Motion, Configs, Paths
+  helpers/ListModelDiff.qml — хелпер синхронизации ListModel (DRY)
+theme/                    — синглтоны: Theme, ThemeColor, Motion, Paths
 assets/icons/             — статические иконки
 ```
 
@@ -118,8 +118,9 @@ assets/icons/             — статические иконки
 Основные настройки вынесены в синглтоны:
 
 - `theme/Paths.qml` — пути (домашняя директория, палитра, ассеты, внешние конфиги, терминал).
-- `theme/Configs.qml` — масштабы hover/pressed.
+- `theme/Theme.qml` — шрифт и масштабы hover/pressed.
 - `theme/Motion.qml` — тайминги анимаций.
+- `services/ServiceConfig.qml` — тайминги и константы сервисов.
 - Конфиги фич: `AppLauncherConfig`, `ControlPanelConfig`, `SelectorConfig`, `CalendarConfig`, `BatteryConfig`.
 
 ---

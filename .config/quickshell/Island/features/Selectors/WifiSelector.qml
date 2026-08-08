@@ -1,5 +1,6 @@
 import QtQuick
 import "../../services"
+import "../../ui"
 
 BaseSelector {
     id: root
@@ -9,8 +10,7 @@ BaseSelector {
     isServiceEnabled: WifiService.enabled
     listModel: WifiService.networkModel
 
-    Component.onCompleted: WifiService.retain()
-    Component.onDestruction: WifiService.release()
+    ServiceClient { service: WifiService }
 
     onToggleRequested: WifiService.toggle()
 

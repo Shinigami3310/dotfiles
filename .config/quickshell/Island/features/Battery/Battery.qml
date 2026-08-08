@@ -1,6 +1,7 @@
 import QtQuick
 import "../../services"
 import "../../theme"
+import "../../ui"
 
 // Поверхность профиля батареи. Удерживает синглтон BatteryService «в awake»:
 // пока поверхность открыта, мониторинг udev и опрос активны; при выгрузке
@@ -8,8 +9,7 @@ import "../../theme"
 Item {
     id: root
 
-    Component.onCompleted: BatteryService.retain()
-    Component.onDestruction: BatteryService.release()
+    ServiceClient { service: BatteryService }
 
     implicitWidth: layout.implicitWidth + BatteryConfig.layoutPadding
     implicitHeight: layout.implicitHeight + BatteryConfig.layoutPadding

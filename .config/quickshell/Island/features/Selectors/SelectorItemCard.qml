@@ -23,11 +23,11 @@ Rectangle {
     radius: SelectorConfig.cardRadius
 
     color: isConnected ? ThemeColor.primary : ThemeColor.surface_container_low
-    border.color: (hovered && !isConnected) ? ThemeColor.primary : "transparent"
+    border.color: (hovered && !isConnected) ? ThemeColor.primary : ThemeColor.transparent
     border.width: SelectorConfig.cardBorderWidth
     clip: true
 
-    scale: pressed ? SelectorConfig.cardPressedScale : (hovered ? SelectorConfig.cardHoverScale : 0.95)
+    scale: pressed ? Theme.scalePressed : (hovered ? Theme.scaleHover : 1.0)
 
     Behavior on scale {
         NumberAnimation {

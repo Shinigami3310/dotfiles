@@ -1,8 +1,10 @@
 import QtQuick
 import "../../theme"
 import "../../services/"
+import "../../ui"
 
-Rectangle {
+// Точка рабочего стола: активная/занятая/пустая.
+Pressable {
     id: root
 
     required property int index
@@ -12,46 +14,32 @@ Rectangle {
     readonly property bool isActive: WorkspaceService.isActive(workspaceId)
     readonly property bool isOccupied: WorkspaceService.isOccupied(workspaceId)
 
-    readonly property bool hovered: hoverHandler.hovered
-    readonly property bool pressed: tapHandler.pressed
+    hoverScale: 1.2
 
-    width: 16
-    height: 16
-    radius: width / 2
+    width: BarConfig.dotSize
+    height: BarConfig.dotSize
 
-    scale: pressed ? Theme.scalePressed : (hovered ? 1.2 : 1.0)
-    color: isActive ? ThemeColor.primary : (isOccupied ? ThemeColor.on_surface : "transparent")
+    Rectangle {
+        anchors.fill: parent
+        radius: width / 2
+        color: root.isActive ? ThemeColor.primary : (root.isOccupied ? ThemeColor.on_surface : ThemeColor.transparent)
 
-    border {
-        width: 2
-        color: isActive ? ThemeColor.primary : ThemeColor.on_surface
-    }
-
-    Behavior on scale {
-        NumberAnimation {
-            duration: Motion.fast
-            easing.type: Motion.easeStandard
+        border {
+            width: BarConfig.dotBorderWidth
+            color: root.isActive ? ThemeColor.primary : ThemeColor.on_surface
         }
-    }
-    Behavior on color {
-        ColorAnimation {
-            duration: Motion.fast
+
+        Behavior on color {
+            ColorAnimation {
+                duration: Motion.fast
+            }
         }
-    }
-    Behavior on border.color {
-        ColorAnimation {
-            duration: Motion.fast
+        Behavior on border.color {
+            ColorAnimation {
+                duration: Motion.fast
+            }
         }
     }
 
-    TapHandler {
-        id: tapHandler
-        acceptedButtons: Qt.LeftButton
-        onTapped: WorkspaceService.activateWorkspace(workspaceId)
-    }
-
-    HoverHandler {
-        id: hoverHandler
-        cursorShape: Qt.PointingHandCursor
-    }
+    onClicked: WorkspaceService.activateWorkspace(workspaceId)
 }

@@ -11,7 +11,7 @@ QtObject {
     property string connectingBssid: ""
     readonly property ListModel networkModel: ListModel {}
 
-    property int activeClients: 0
+    property int _activeClients: 0
     property bool isAwake: false
 
     property ListModelDiff listModelDiff: ListModelDiff {}
@@ -20,12 +20,12 @@ QtObject {
     property bool _isToggling: false
 
     property Timer sleepTimer: Timer {
-        interval: 1000
+        interval: ServiceConfig.wifiSleepMs
         onTriggered: root.isAwake = false
     }
 
     property Timer syncTimer: Timer {
-        interval: 5000
+        interval: ServiceConfig.wifiSyncMs
         repeat: true
         onTriggered: {
             root.checkStateProc.running = true;
@@ -44,26 +44,32 @@ QtObject {
                 }
             }
         }
+        onExited: exitCode => {
+            if (exitCode !== 0)
+                console.warn(`[WifiService] nmcli radio wifi завершился с кодом ${exitCode}`);
+        }
     }
 
     property Process scanProc: Process {
         command: ["nmcli", "-t", "-f", "SSID,BSSID,SECURITY,IN-USE,SIGNAL", "dev", "wifi", "list"]
         stdout: SplitParser {
             id: scanParser
-            property var lines: []
+            property list<string> _lines: []
             onRead: data => {
                 let trimmed = data.trim();
                 if (trimmed !== "") {
-                    lines.push(trimmed);
+                    _lines.push(trimmed);
                 }
             }
         }
         onExited: code => {
             root._isScanning = false;
             if (code === 0 && root.isAwake) {
-                root.updateModel(scanParser.lines);
+                root.updateModel(scanParser._lines);
+            } else if (code !== 0) {
+                console.warn(`[WifiService] nmcli wifi list завершился с кодом ${code}`);
             }
-            scanParser.lines = [];
+            scanParser._lines = [];
         }
     }
 
@@ -101,14 +107,14 @@ QtObject {
     }
 
     function retain() {
-        activeClients++;
+        _activeClients++;
         sleepTimer.stop();
         isAwake = true;
     }
 
     function release() {
-        activeClients = Math.max(0, activeClients - 1);
-        if (activeClients === 0) {
+        _activeClients = Math.max(0, _activeClients - 1);
+        if (_activeClients === 0) {
             sleepTimer.restart();
         }
     }
@@ -118,7 +124,7 @@ QtObject {
             return;
         _isScanning = true;
 
-        scanParser.lines = [];
+        scanParser._lines = [];
 
         scanProc.running = false;
         scanProc.running = true;

@@ -12,6 +12,6 @@ IconButton {
 
     showBackground: true
     bgRadius: ControlPanelConfig.buttonRadius
-    bgColor: "transparent"
+    bgColor: ThemeColor.transparent
     bgBorderColor: (root.active || root.pressed) ? ThemeColor.primary : ThemeColor.outline_variant
 }

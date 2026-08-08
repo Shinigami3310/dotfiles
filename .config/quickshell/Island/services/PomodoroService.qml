@@ -9,10 +9,10 @@ QtObject {
     property bool active: false
     property bool isWorking: true
     property int currentCycle: 1
-    property int remainingTime: pomodoroWorkTime
+    property int remainingTime: ServiceConfig.pomodoroWorkSec
 
-    readonly property int pomodoroWorkTime: 25 * 60
-    readonly property int pomodoroBreakTime: 5 * 60
+    readonly property int pomodoroWorkTime: ServiceConfig.pomodoroWorkSec
+    readonly property int pomodoroBreakTime: ServiceConfig.pomodoroBreakSec
 
     readonly property Timer timer: Timer {
         interval: 1000
@@ -42,7 +42,7 @@ QtObject {
     function handleTimerComplete() {
         if (isWorking) {
             isWorking = false;
-            if (currentCycle >= 4) {
+            if (currentCycle >= ServiceConfig.pomodoroLongBreakAfterCycles) {
                 sendCliNotification("Session done!", "Take a long break.");
                 resetToInactive();
             } else {

@@ -19,7 +19,7 @@ Item {
             rightMargin: BatteryConfig.terminalWidth + 1
         }
         radius: BatteryConfig.frameRadius
-        color: "transparent"
+        color: ThemeColor.transparent
         border {
             color: ThemeColor.on_surface
             width: BatteryConfig.borderWidth

@@ -19,7 +19,7 @@ QtObject {
 
     Component.onCompleted: fetchTimer.restart()
 
-    function setLevel(value) {
+    function setLevel(value: real) {
         _isInternalChange = true;
         setTimer.targetPercent = Math.round(value * 100);
         setTimer.restart();
@@ -29,7 +29,7 @@ QtObject {
     // Защита от эхо: после setLevel() игнорируем собственные события
     // от udevadm в течение этого окна.
     property Timer resetInternalFlagTimer: Timer {
-        interval: 600
+        interval: ServiceConfig.brightnessResetFlagMs
         onTriggered: root._isInternalChange = false
     }
 
@@ -43,7 +43,7 @@ QtObject {
 
     // Дебаунс событий udevadm: группируем пачку событий в одно чтение.
     property Timer fetchTimer: Timer {
-        interval: 50
+        interval: ServiceConfig.brightnessDebounceMs
         onTriggered: fetcher.running ? restart() : (fetcher.running = true)
     }
 
@@ -79,7 +79,7 @@ QtObject {
     }
 
     property Timer setTimer: Timer {
-        interval: 20
+        interval: ServiceConfig.brightnessSetDebounceMs
         property int targetPercent: 0
         onTriggered: {
             if (setter.running) {

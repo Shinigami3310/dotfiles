@@ -1,6 +1,8 @@
 singleton UiConfig UiConfig.qml
 AnimatedList AnimatedList.qml
 IconButton IconButton.qml
+Pressable Pressable.qml
+ServiceClient ServiceClient.qml
 Slider Slider.qml
 ToggleSwitch ToggleSwitch.qml
 HSpacer HSpacer.qml

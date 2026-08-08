@@ -1,12 +1,12 @@
 import QtQuick
 import "../../../services"
 import "../../../core"
+import "../../../ui"
 
 ControlButton {
     id: root
     signal surfaceRequested(string newName)
-    Component.onCompleted: WifiService.retain()
-    Component.onDestruction: WifiService.release()
+    ServiceClient { service: WifiService }
     icon: "Wifi.png"
     active: WifiService.enabled
     enableRightClick: true

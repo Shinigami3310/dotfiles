@@ -50,7 +50,7 @@ QtObject {
     // udevadm monitor не всегда доставляет события при подключении зарядки,
     // поэтому гарантируем обновление isCharging/percent даже без событий.
     property Timer pollTimer: Timer {
-        interval: 5000
+        interval: ServiceConfig.batteryPollMs
         repeat: true
         running: false
         onTriggered: {

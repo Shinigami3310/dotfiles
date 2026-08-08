@@ -2,7 +2,7 @@ import QtQuick
 import "../theme"
 
 // Переключатель (перенесён из features/Selectors/Switch).
-Item {
+Pressable {
     id: root
 
     property bool checked: false
@@ -10,18 +10,6 @@ Item {
 
     implicitWidth: UiConfig.switchWidth
     implicitHeight: UiConfig.switchHeight
-
-    readonly property bool hovered: hoverHandler.hovered
-    readonly property bool pressed: tapHandler.pressed
-
-    scale: pressed ? Theme.scalePressed : (hovered ? Theme.scaleHover : 1.0)
-
-    Behavior on scale {
-        NumberAnimation {
-            duration: Motion.fast
-            easing.type: Easing.OutBack
-        }
-    }
 
     Rectangle {
         id: bg
@@ -61,13 +49,5 @@ Item {
         }
     }
 
-    HoverHandler {
-        id: hoverHandler
-        cursorShape: Qt.PointingHandCursor
-    }
-
-    TapHandler {
-        id: tapHandler
-        onTapped: root.toggled()
-    }
+    onClicked: root.toggled()
 }

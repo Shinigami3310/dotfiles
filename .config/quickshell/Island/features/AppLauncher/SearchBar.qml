@@ -23,7 +23,7 @@ FocusScope {
         radius: AppLauncherConfig.searchBarRadius
         color: ThemeColor.surface
         border {
-            color: input.activeFocus ? ThemeColor.primary : "transparent"
+            color: input.activeFocus ? ThemeColor.primary : ThemeColor.transparent
             width: AppLauncherConfig.searchBarBorderWidth
         }
 
