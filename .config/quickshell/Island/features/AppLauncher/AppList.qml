@@ -1,6 +1,8 @@
 import QtQuick
-import "../../theme"
+import "../../ui"
 
+// Список приложений: анимированный ListView (ui/AnimatedList) с клавиатурной
+// навигацией и авто-выбором первого элемента.
 Item {
     id: root
 
@@ -24,46 +26,15 @@ Item {
         }
     }
 
-    ListView {
+    AnimatedList {
         id: listView
         anchors.fill: parent
-        boundsBehavior: Flickable.StopAtBounds
         spacing: AppLauncherConfig.listSpacing
+        addOffset: AppLauncherConfig.listAnimOffsetY
 
         onCountChanged: {
             if (count > 0 && currentIndex === -1) {
                 currentIndex = 0;
-            }
-        }
-
-        add: Transition {
-            NumberAnimation {
-                property: "opacity"
-                from: 0
-                to: 1
-                duration: Motion.morph
-            }
-            NumberAnimation {
-                property: "y"
-                from: AppLauncherConfig.listAnimOffsetY
-                duration: Motion.morph
-                easing.type: Easing.OutQuart
-            }
-        }
-
-        remove: Transition {
-            NumberAnimation {
-                property: "opacity"
-                to: 0
-                duration: Motion.morph
-            }
-        }
-
-        displaced: Transition {
-            NumberAnimation {
-                properties: "x,y"
-                duration: Motion.morph
-                easing.type: Easing.OutQuart
             }
         }
 

@@ -1,4 +1,5 @@
 singleton UiConfig UiConfig.qml
+AnimatedList AnimatedList.qml
 IconButton IconButton.qml
 Slider Slider.qml
 ToggleSwitch ToggleSwitch.qml

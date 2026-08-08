@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
 import "../../theme"
+import "../../ui"
 
 Item {
     id: root
@@ -107,28 +108,12 @@ Item {
                 }
             }
 
-            ListView {
+            AnimatedList {
                 id: listView
                 anchors.fill: parent
                 model: root.listModel
                 delegate: root.delegate
                 spacing: SelectorConfig.cardSpacing
-                boundsBehavior: Flickable.StopAtBounds
-
-                move: Transition {
-                    NumberAnimation {
-                        properties: "x,y"
-                        duration: Motion.standard
-                        easing.type: Easing.OutQuart
-                    }
-                }
-                displaced: Transition {
-                    NumberAnimation {
-                        properties: "x,y"
-                        duration: Motion.standard
-                        easing.type: Easing.OutQuart
-                    }
-                }
             }
         }
     }
