@@ -15,7 +15,6 @@ Item {
 
         MonthHeader {
             id: header
-            onMonthChanged: monthFadeAnim.restart()
         }
 
         Row {
@@ -40,15 +39,7 @@ Item {
             id: monthFade
             implicitWidth: dayGrid.implicitWidth
             implicitHeight: dayGrid.implicitHeight
-
-            // Fade-анимация грида при смене месяца (запускается из MonthHeader).
-            NumberAnimation on opacity {
-                id: monthFadeAnim
-                from: 0
-                to: 1
-                duration: Motion.morph
-                easing.type: Easing.InOutQuad
-            }
+            opacity: header.transitionOpacity
 
             Grid {
                 id: dayGrid

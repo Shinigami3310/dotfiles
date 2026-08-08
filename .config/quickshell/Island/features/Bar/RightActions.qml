@@ -2,6 +2,7 @@ import QtQuick
 import "../../services"
 import "../../theme"
 import "../../core"
+import "../../ui"
 
 Row {
     id: root
@@ -10,29 +11,29 @@ Row {
     signal surfaceRequested(string newName)
     signal closeRequested
 
-    Icon {
+    IconButton {
         iconName: "Eye.png"
         active: EyeReminderService.active
         onClicked: EyeReminderService.toggle()
     }
 
-    Icon {
+    IconButton {
         iconName: "Pomodoro.png"
         active: PomodoroService.active
         onClicked: PomodoroService.toggle()
     }
 
-    Icon {
+    IconButton {
         iconName: "Settings.png"
         onClicked: root.surfaceRequested(SurfaceNames.controlPanel)
     }
 
-    Icon {
+    IconButton {
         iconName: "Battery.png"
         onClicked: root.surfaceRequested(SurfaceNames.batteryProfile)
     }
 
-    Icon {
+    IconButton {
         id: powerIcon
         iconName: "Power.png"
         onClicked: {

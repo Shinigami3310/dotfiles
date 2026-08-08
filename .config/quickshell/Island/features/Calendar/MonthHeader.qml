@@ -8,6 +8,7 @@ Item {
     id: root
 
     signal monthChanged
+    property alias transitionOpacity: monthTitleText.opacity
 
     width: CalendarConfig.headerWidth
     height: CalendarConfig.headerHeight

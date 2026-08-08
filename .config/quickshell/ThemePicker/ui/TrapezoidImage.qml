@@ -29,7 +29,9 @@ Item {
 
     ShaderEffect {
         anchors.fill: parent
-        source: wallpaper                 // → uniform sampler2D source
+        // Qt6 ShaderEffect не имеет встроенного `source` (как в Qt5): объявляем алиас —
+        // Image рендерится в текстуру → привязывается к `uniform sampler2D source`.
+        property alias source: wallpaper
         property real topInset: root.topInset   // → uniform float topInset
         fragmentShader: "shaders/trapezoidClip.frag"
         z: 2

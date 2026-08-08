@@ -79,7 +79,7 @@ Item {
                 Layout.fillWidth: true
             }
 
-            Switch {
+            ToggleSwitch {
                 checked: root.isServiceEnabled
                 onToggled: root.toggleRequested()
                 Layout.alignment: Qt.AlignVCenter
