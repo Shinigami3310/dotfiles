@@ -1,5 +1,6 @@
 #!/bin/bash
-# Сканирование Bluetooth-устройств: список + connected/paired статусы.
+# bluetoothctl не даёт сводного списка со статусами — собираем его сами,
+# чтобы UI не дёргал bluetoothctl по разу на устройство.
 # Вызывается из BluetoothService.scanProc.
 set -e
 

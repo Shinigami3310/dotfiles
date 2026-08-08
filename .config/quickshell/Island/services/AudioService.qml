@@ -38,8 +38,8 @@ QtObject {
         resetInternalFlagTimer.restart();
     }
 
-    // Защита от эхо: после set-операции (toggleMute/setVolume) игнорируем
-    // собственные события от pactl в течение этого окна.
+    // pactl/wpctl асинхронны: собственное изменение громкости возвращается
+    // обратно как событие. Игнорируем его, иначе OSD мигнёт от собственного действия.
     property Timer resetInternalFlagTimer: Timer {
         interval: ServiceConfig.audioResetFlagMs
         onTriggered: root._isInternalChange = false

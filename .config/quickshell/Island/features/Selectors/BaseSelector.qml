@@ -45,7 +45,9 @@ Item {
                 fillMode: Image.PreserveAspectFit
                 smooth: true
                 mipmap: true
-                visible: false // Скрыто для MultiEffect
+                // MultiEffect требует исходник, но сам Image не должен рендериться
+                // дважды (сырым и через эффект) — иначе будет двоение иконки.
+                visible: false
             }
 
             MultiEffect {

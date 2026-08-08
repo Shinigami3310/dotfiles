@@ -112,7 +112,8 @@ Item {
         if (!pendingItem)
             return;
 
-        // Валидация интерфейса поверхности: должны быть реализованы enter()/exit()
+        // Поверхность без enter/exit сломает cross-fade: объект создастся,
+        // но анимация перехода никогда не запустится — валидируем до вставки.
         if (typeof pendingItem.enter !== "function" || typeof pendingItem.exit !== "function") {
             console.warn(`[SurfaceHost] Surface "${name}" не реализует интерфейс SurfaceBase (enter/exit). Пропускаю.`);
             pendingItem.destroy();

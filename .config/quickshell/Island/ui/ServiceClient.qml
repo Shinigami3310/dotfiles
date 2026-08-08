@@ -1,9 +1,8 @@
 import QtQuick
 
-// Удерживает синглтон-сервис «в awake» на время жизни компонента.
-// Заменяет дублирующийся паттерн:
-//   Component.onCompleted: XService.retain()
-//   Component.onDestruction: XService.release()
+// Удерживает синглтон-сервис «в awake», пока компонент жив. Без этого
+// ресурсоёмкие сервисы (Battery/SystemStats) продолжали бы опрашивать
+// систему даже когда их UI закрыт — это разряжает батарею впустую.
 Item {
     required property QtObject service
 

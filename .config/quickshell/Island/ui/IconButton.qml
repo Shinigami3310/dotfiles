@@ -2,13 +2,14 @@ import QtQuick
 import QtQuick.Effects
 import "../theme"
 
-// Единая иконка-кнопка. Заменяет дубликаты: features/Bar/Icon,
-// features/MusicPlayer/IconButton, features/ControlPanel/TopPanel/ControlButton,
-// features/Battery/ProfileButton.
-// - showBackground: рисует скруглённый фон-подложку (для ControlButton/ProfileButton).
-// - enableRightClick: включает правый клик (для ControlButton).
-// - iconName: имя файла в assets/icons/ — резолвится через Paths.icon(),
-//   поэтому не зависит от относительного пути вызывающего файла.
+// Единая иконка-кнопка. Все иконки-кнопки проекта (Bar/Icon,
+// MusicPlayer/IconButton, ControlButton, ProfileButton) используют этот
+// компонент, чтобы hover/pressed/цвет был консистентным.
+// - showBackground: фон-подложка нужен кнопкам «на панели» (ControlButton/ProfileButton),
+//   чтобы они читались на фоне — иначе иконка «теряется».
+// - enableRightClick: правый клик открывает селектор (Wi-Fi/Bluetooth).
+// - iconName: резолвится через Paths.icon() от базового каталога проекта,
+//   поэтому не зависит от того, из какой папки вызывается компонент.
 Pressable {
     id: root
 
@@ -24,8 +25,9 @@ Pressable {
 
     signal rightClicked
 
-    // Учитываем и правый клик в pressed (для подсветки рамки).
-    property bool pressed: tapHandler.pressed || rightTap.pressed
+    // Правый клик тоже подсвечивает кнопку — иначе рамка «мигает»
+    // при открытии селектора правой кнопкой.
+    property bool pressed: rightTap.pressed || rightTap.pressed
 
     implicitWidth: showBackground ? UiConfig.iconButtonBgSize : UiConfig.iconButtonSize
     implicitHeight: showBackground ? UiConfig.iconButtonBgSize : UiConfig.iconButtonSize

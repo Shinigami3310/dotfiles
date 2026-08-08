@@ -33,9 +33,9 @@ Rectangle {
         }
     }
 
-    // contentContainer: берём размер первого ребёнка (поверхности).
-    // Guard на children.length — на случай пустого контейнера во время
-    // cross-fade переходов в SurfaceHost.
+    // Во время cross-fade в SurfaceHost контейнер временно пуст (старая
+    // поверхность уничтожена, новая ещё создаётся). Без guard'а implicitWidth
+    // станет 0 и окно «схлопнется» на один кадр.
     Item {
         id: contentContainer
         implicitWidth: children.length > 0 ? children[0].implicitWidth : 0

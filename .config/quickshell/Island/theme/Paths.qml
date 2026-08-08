@@ -21,9 +21,9 @@ QtObject {
     // Каталоги .desktop-файлов для AppService.
     readonly property list<string> appDirs: [homeDir + "/.local/share/applications", "/usr/share/applications"]
 
-    // Единый способ получить URL иконки из assets/icons.
-    // Используется ui/IconButton и ui/Slider/SliderIcon, чтобы не зависеть
-    // от относительных путей вызывающих файлов.
+    // Иконки резолвятся через единый путь, а не относительный — иначе
+    // компонент из другой папки (например ui/ и features/) получит
+    // разный базовый каталог и сломается.
     function icon(name: string): string {
         return assetsDir + "icons/" + name;
     }

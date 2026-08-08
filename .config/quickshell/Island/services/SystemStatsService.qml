@@ -110,8 +110,8 @@ QtObject {
         }
     }
 
-    // Чтение CPU из /proc/stat. QML хранит предыдущие значения для расчёта дельты.
-    // Выводим: <общее время> <idle время> (все поля /proc/stat).
+    // /proc/stat даёт накопленные счётчики, а не мгновенную загрузку.
+    // Считаем дельту между опросами, иначе CPU всегда будет ~100% на старте.
     property Process cpuProc: Process {
         command: ["bash", "-c", "read -r _ user nice system idle iowait irq softirq steal _ _ < /proc/stat; echo \"$((user+nice+system+idle+iowait+irq+softirq+steal)) $((idle+iowait))\""]
         running: false
@@ -136,7 +136,8 @@ QtObject {
         }
     }
 
-    // Чтение RAM (MemTotal и MemAvailable) из /proc/meminfo.
+    // MemAvailable учитывает кэш/буферы, которые ядро может освободить —
+    // это точнее, чем просто MemFree, для оценки реально занятой памяти.
     property Process ramProc: Process {
         command: ["bash", "-c", "awk '/MemTotal:/ {t=$2} /MemAvailable:/ {a=$2} END {print t, a}' /proc/meminfo"]
         running: false
@@ -154,8 +155,8 @@ QtObject {
         }
     }
 
-    // Чтение температуры из сохранённого пути сенсора.
-    // Команда устанавливается динамически в statsTimer.onTriggered.
+    // Путь сенсора определяется разово в initProc (он может отличаться
+    // между машинами), поэтому команда подставляется динамически.
     property Process tempProc: Process {
         command: []
         running: false
@@ -168,7 +169,8 @@ QtObject {
         }
     }
 
-    // Периодический опрос метрик (кроме disk/gpu — они считаются разово в initProc).
+    // Disk/GPU считаются разово (они редко меняются), а CPU/RAM/Temp
+    // опрашиваем периодически — это баланс между свежестью и нагрузкой.
     property Timer statsTimer: Timer {
         interval: ServiceConfig.statsPollMs
         repeat: true

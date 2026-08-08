@@ -2,12 +2,10 @@ import QtQuick
 import QtQuick.Layouts
 import "../theme"
 
-// Единый слайдер. Композиция атомарных компонентов ui/Slider/:
-// SliderIcon (иконка с fade), SliderTrack (трек с drag/wheel), SliderValueText.
-// Заменяет дубликаты: features/Sliders/Slider и ControlPanel/CenterPanel/ControlSlider.
-// - muted/mutedIcon: для громкости (иконка и fill гаснут при mute).
-// - interactiveIcon: иконка кликабельна (toggle mute).
-// - trackWidth: ширина трека; если 0 — трек растягивается (Layout.fillWidth).
+// Единый слайдер. Композиция атомарных компонентов, а не монолит —
+// чтобы фичи (ControlPanel/OSD) могли переиспользовать одинаковое поведение
+// с разными размерами, не дублируя drag/wheel-логику.
+// - trackWidth: если 0 — трек растягивается (для панели управления).
 RowLayout {
     id: root
 

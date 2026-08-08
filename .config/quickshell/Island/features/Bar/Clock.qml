@@ -8,6 +8,8 @@ Item {
 
     signal surfaceRequested(string name)
 
+    // Часы кликабельны и открывают календарь — это самый естественный
+    // «якорь» для перехода к датам. Курсор-рука даёт понять, что кликабельно.
     implicitWidth: contentColumn.implicitWidth + (BarConfig.clockPaddingX * 2)
     implicitHeight: contentColumn.implicitHeight + (BarConfig.clockPaddingY * 2)
 

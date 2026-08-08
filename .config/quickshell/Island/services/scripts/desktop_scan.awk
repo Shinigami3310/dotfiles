@@ -1,5 +1,6 @@
 #!/usr/bin/gawk -f
-# Парсер .desktop-файлов: извлекает id, Name, Icon, Exec, Terminal.
+# .desktop-файлы могут иметь локализованные Name[xx] — берём общий Name,
+# иначе в списке приложений появятся дубли на разных языках.
 # Вызывается из AppService через find | xargs gawk -f.
 function getval() {
     val = substr($0, index($0, "=") + 1);

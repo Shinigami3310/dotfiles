@@ -2,7 +2,8 @@ import QtQuick
 import QtQuick.Effects
 import "../../theme"
 
-// Иконка слайдера: Image + MultiEffect с fade-переключением при смене иконки.
+// Иконка слайдера. Fade-переключение нужно, чтобы резкая смена иконки
+// (например Volume → VolumeMute) не «мигала» — плавность скрывает подмену.
 Item {
     id: root
 

@@ -1,7 +1,8 @@
 import QtQuick
 import "../../theme"
 
-// Трек слайдера: подложка, fill-прямоугольник и интерактивность (клик/драг/колесо).
+// Трек слайдера. preventStealing нужен, чтобы drag не перехватывался
+// родительским Flickable/ListView — иначе ползунок «дёргается».
 Rectangle {
     id: root
 

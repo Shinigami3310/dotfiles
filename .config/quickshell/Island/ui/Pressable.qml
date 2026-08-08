@@ -1,9 +1,9 @@
 import QtQuick
 import "../theme"
 
-// Базовый интерактивный элемент: hover/pressed/scale-анимация.
-// Заменяет дублирующийся паттерн в IconButton, ToggleSwitch, WorkspaceDot,
-// DayCell, NavButton.
+// Базовый интерактивный элемент. Наследуют все кликабельные компоненты,
+// чтобы hover/pressed/scale-анимация была единой — иначе каждый компонент
+// определяет свою и визуально «разъезжается».
 Item {
     id: root
 

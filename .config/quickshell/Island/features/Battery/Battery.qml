@@ -29,7 +29,8 @@ Item {
         target: BatteryService
         function onIsChargingChanged() {
             if (BatteryService.isCharging) {
-                // Перезапускаем анимацию с текущего процента при каждом включении зарядки
+                // Анимация стартует от реального процента, а не от 0 —
+                // иначе при включении зарядки на 80% шкала «прыгнет» вниз.
                 chargeAnim.from = BatteryService.percent;
                 chargeAnimVal = BatteryService.percent;
                 chargeAnim.restart();

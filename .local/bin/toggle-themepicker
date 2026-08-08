@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+
+if pgrep -f "ThemePicker" >/dev/null; then
+  pkill -f "ThemePicker"
+else
+  qs -c ThemePicker
+fi

@@ -1,7 +1,8 @@
 import QtQuick
 import "../theme"
 
-// Переключатель (перенесён из features/Selectors/Switch).
+// Переключатель. Наследует Pressable, чтобы hover/pressed/scale-анимация
+// была единой с остальными интерактивными элементами.
 Pressable {
     id: root
 

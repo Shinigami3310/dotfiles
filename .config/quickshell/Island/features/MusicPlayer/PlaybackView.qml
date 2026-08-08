@@ -11,7 +11,8 @@ Item {
 
     signal closeRequested
 
-    // Исправление 1: Прячем PlaybackView, если мы в режиме плейлиста
+    // В режиме плейлиста скрываем панель управления, чтобы не перекрывать
+    // выбор трека — иначе два интерактивных слоя конфликтуют по фокусу.
     opacity: MusicPlayerService.isPlaylistMode ? 0.0 : 1.0
     visible: opacity > 0
 

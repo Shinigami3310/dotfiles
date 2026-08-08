@@ -66,8 +66,9 @@ QtObject {
         root.listModelDiff.sync(root.filteredApps, targetApps, "id", []);
     }
 
-    // Разбирает строку Exec из .desktop на массив argv,
-    // корректно обрабатывая одинарные/двойные кавычки и экранирование.
+    // Exec из .desktop — это не просто команда, а строка с кавычками и
+    // экранированием. Передаём её в execDetached как argv-массив, а не через
+    // sh -c, чтобы исключить shell-инъекции из имени файла/аргументов.
     function parseExec(execString: string): var {
         const args = [];
         let current = "";

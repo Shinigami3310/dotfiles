@@ -8,6 +8,8 @@ Item {
 
     signal surfaceRequested(string name)
 
+    // Стартовая «заглушка» при запуске shell. Показываем только время
+    // — это привычный и ненавязчивый виджет, не требующий действий.
     readonly property int paddingX: 40
     readonly property int paddingY: 12
 

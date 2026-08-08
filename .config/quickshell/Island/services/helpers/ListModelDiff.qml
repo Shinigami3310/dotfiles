@@ -13,16 +13,16 @@ QtObject {
             targetMap.set(targets[i][keyField], targets[i]);
         }
 
-        // Удаляем элементы, отсутствующие в целевой модели (с конца, чтобы
-        // индексы не сдвигались).
+        // Идём с конца, чтобы remove не сдвигал индексы ещё не проверенных
+        // элементов — иначе пропустим часть записей.
         for (let i = model.count - 1; i >= 0; i--) {
             if (!targetMap.has(model.get(i)[keyField])) {
                 model.remove(i);
             }
         }
 
-        // Индексная карта текущей модели для O(1) поиска.
-        // Строится ПОСЛЕ удаления, чтобы индексы были актуальны.
+        // Карта ключ→индекс даёт O(1) поиск вместо O(n) на каждый элемент.
+        // Строим после удаления, иначе индексы будут указывать не туда.
         const modelMap = new Map();
         for (let i = 0; i < model.count; i++) {
             modelMap.set(model.get(i)[keyField], i);
@@ -43,10 +43,10 @@ QtObject {
                     }
                 }
 
-                // Перемещаем в правильную позицию.
+                // move сдвигает индексы всех элементов между foundIdx и i —
+                // перестраиваем карту, чтобы последующие поиски были верны.
                 if (foundIdx !== i) {
                     model.move(foundIdx, i, 1);
-                    // После move индексы сдвигаются — перестраиваем карту.
                     modelMap.clear();
                     for (let j = 0; j < model.count; j++) {
                         modelMap.set(model.get(j)[keyField], j);
@@ -54,7 +54,7 @@ QtObject {
                 }
             } else {
                 model.insert(i, target);
-                // После insert индексы сдвигаются — перестраиваем карту.
+                // insert сдвигает индексы всех элементов после i — перестраиваем.
                 modelMap.clear();
                 for (let j = 0; j < model.count; j++) {
                     modelMap.set(model.get(j)[keyField], j);

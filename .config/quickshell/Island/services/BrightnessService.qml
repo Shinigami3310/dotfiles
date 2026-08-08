@@ -26,8 +26,8 @@ QtObject {
         resetInternalFlagTimer.restart();
     }
 
-    // Защита от эхо: после setLevel() игнорируем собственные события
-    // от udevadm в течение этого окна.
+    // udevadm асинхронен: собственное изменение яркости возвращается
+    // как событие. Игнорируем его, иначе OSD мигнёт от собственного действия.
     property Timer resetInternalFlagTimer: Timer {
         interval: ServiceConfig.brightnessResetFlagMs
         onTriggered: root._isInternalChange = false
@@ -41,7 +41,8 @@ QtObject {
         }
     }
 
-    // Дебаунс событий udevadm: группируем пачку событий в одно чтение.
+    // udevadm шлёт пачку событий на одно изменение — группируем их
+    // в одно чтение, иначе каждый чих сенсора запускает процесс.
     property Timer fetchTimer: Timer {
         interval: ServiceConfig.brightnessDebounceMs
         onTriggered: fetcher.running ? restart() : (fetcher.running = true)

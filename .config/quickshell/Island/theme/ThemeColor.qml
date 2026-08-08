@@ -48,7 +48,7 @@ QtObject {
             "inverse_primary": "#d0bcff"
         })
 
-    property var parsedColors: defaultColors
+    property var parsedColors: ({})
 
     readonly property color primary: parsedColors.primary || defaultColors.primary
     readonly property color on_primary: parsedColors.on_primary || defaultColors.on_primary
@@ -85,10 +85,11 @@ QtObject {
     readonly property color inverse_on_surface: parsedColors.inverse_on_surface || defaultColors.inverse_on_surface
     readonly property color inverse_primary: parsedColors.inverse_primary || defaultColors.inverse_primary
 
-    // Единая точка обновления палитры: парсит JSON и валидирует структуру.
-    // При ошибке оставляет предыдущую палитру (или дефолтную) и логирует warn.
+    // При битом/неполном colors.json оставляем предыдущую палитру, а не
+    // сбрасываем в прозрачный — иначе интерфейс станет невидимым.
     function updateColors() {
         let fileContent = typeof paletteFile.text === "function" ? paletteFile.text() : paletteFile.text;
+        console.log(fileContent);
         if (!fileContent)
             return;
 
@@ -96,6 +97,7 @@ QtObject {
             let json = JSON.parse(fileContent);
             if (json && typeof json.colors === "object" && json.colors !== null) {
                 root.parsedColors = json.colors;
+                console.log(parsedColors.primary, json.colors.primary);
             } else {
                 console.warn("[ThemeColor] colors.json не содержит поля 'colors' — оставляю текущую палитру.");
             }
@@ -110,16 +112,18 @@ QtObject {
         blockLoading: true
         watchChanges: true
 
-        // Первичная загрузка палитры при старте.
+        // onLoadedChanged срабатывает один раз при старте — это точка
+        // первичной инициализации, до неё parsedColors ещё дефолтный.
         onLoadedChanged: {
             if (loaded) {
                 root.updateColors();
             }
         }
 
-        // Hot-reload при изменении файла. watchChanges сам перечитывает
-        // содержимое, поэтому reload() не нужен — иначе парсинг выполнится дважды.
+        // watchChanges уже перечитал файл к моменту onFileChanged — повторный
+        // reload() привёл бы к двойному парсингу и лишней перерисовке.
         onFileChanged: {
+            paletteFile.reload();
             root.updateColors();
         }
     }

@@ -11,6 +11,9 @@ FocusScope {
     signal backRequested
     signal closeRequested
 
+    // Только активная поверхность с навигацией назад получает клавиатуру.
+    // Без этого OSD (brightnessSlider) перехватывал бы Esc, хотя закрывать
+    // его должен клик мимо, а не клавиша.
     readonly property bool requiresKeyboard: active && canGoBack
 
     focus: requiresKeyboard
