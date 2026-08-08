@@ -14,3 +14,4 @@ singleton SystemStatsService SystemStatsService.qml
 singleton WifiService WifiService.qml
 singleton WorkspaceService WorkspaceService.qml
 ModeController ModeController.qml
+ListModelDiff helpers/ListModelDiff.qml

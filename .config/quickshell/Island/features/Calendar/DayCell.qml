@@ -18,7 +18,7 @@ Item {
     width: CalendarConfig.cellSize
     height: CalendarConfig.cellSize
 
-    scale: pressed ? Configs.scalePressed : (hovered ? Configs.scaleHover : 1.0)
+    scale: pressed ? Theme.scalePressed : (hovered ? Theme.scaleHover : 1.0)
     opacity: isPast ? CalendarConfig.pastDayOpacity : 1.0
 
     Behavior on scale {

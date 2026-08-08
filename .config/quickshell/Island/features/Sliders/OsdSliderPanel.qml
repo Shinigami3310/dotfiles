@@ -1,5 +1,5 @@
 import QtQuick
-import "../../ui"
+import "../../ui" as Ui
 import "../../theme"
 
 // OSD-панель: оборачивает ui/Slider и закрывается по таймауту бездействия.
@@ -35,7 +35,7 @@ Item {
             bumpIdle();
     }
 
-    Slider {
+    Ui.Slider {
         id: innerSlider
         anchors.centerIn: parent
         onSliderMoved: root.bumpIdle()

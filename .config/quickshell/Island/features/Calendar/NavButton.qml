@@ -13,7 +13,7 @@ Item {
     readonly property bool hovered: hoverHandler.hovered
     readonly property bool pressed: tapHandler.pressed
 
-    scale: pressed ? Configs.scalePressed : (hovered ? CalendarConfig.navBtnHoverScale : 1.0)
+    scale: pressed ? Theme.scalePressed : (hovered ? CalendarConfig.navBtnHoverScale : 1.0)
 
     Behavior on scale {
         NumberAnimation {

@@ -19,7 +19,7 @@ Rectangle {
     height: 16
     radius: width / 2
 
-    scale: pressed ? Configs.scalePressed : (hovered ? 1.2 : 1.0)
+    scale: pressed ? Theme.scalePressed : (hovered ? 1.2 : 1.0)
     color: isActive ? ThemeColor.primary : (isOccupied ? ThemeColor.on_surface : "transparent")
 
     border {

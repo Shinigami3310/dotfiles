@@ -31,7 +31,7 @@ Item {
     readonly property bool hovered: hoverHandler.hovered
     readonly property bool pressed: leftTap.pressed || rightTap.pressed
 
-    scale: pressed ? Configs.scalePressed : (hovered ? Configs.scaleHover : 1.0)
+    scale: pressed ? Theme.scalePressed : (hovered ? Theme.scaleHover : 1.0)
 
     Behavior on scale {
         NumberAnimation {
