@@ -34,7 +34,6 @@
 | `SurfaceCatalog.qml` | Реестр `Component` по имени. Единственное место регистрации новых поверхностей. |
 | `SurfaceNames.qml` | Синглтон-реестр имён поверхностей и списка `nonFocusSurfaces`. Сервисы и фичи не хардкодят строки. |
 | `Island.qml` | Визуальный контейнер (скруглённый прямоугольник) с анимированным ресайзом. |
-| `ListModelDiff.qml` | Утилита синхронизации `ListModel` с массивом по ключу (remove/move/insert/update property). Устраняет дублирование в Wifi/Bluetooth/App сервисах. |
 
 ### 2. Переиспользуемые примитивы (`ui/`)
 
@@ -46,6 +45,7 @@
 | `ui/Slider` | Композиция `SliderIcon` (fade-переключение иконки), `SliderTrack` (drag/wheel/клик), `SliderValueText` (процент). |
 | `ui/ToggleSwitch` | Переключатель. |
 | `ui/HSpacer` | Распорка `Layout.fillWidth` — заменяет повторяющиеся `Item { Layout.fillWidth: true }`. |
+| `ui/AnimatedList` | Анимированный `ListView` (add/remove/displaced-переходы) — общий для `BaseSelector` и `AppList`. |
 | `ui/UiConfig` | Синглтон размеров/масштабов примитивов. |
 
 ### 3. Поверхности (`surfaces/`)
@@ -93,14 +93,15 @@ UI-компоненты. Композиция из `ui/`-примитивов и
 
 Сервисы, инициирующие показ OSD/поверхности, эмитят сигнал `surfaceRequested`, который ловит `shell.qml` и вызывает `host.open()`. Имена поверхностей берутся из `SurfaceNames`.
 
+Под-папки: `services/helpers/` — утилиты сервисов (`ListModelDiff`); `services/scripts/` — вынесенные inline bash/awk скрипты (путь — `Paths.scriptsDir`).
+
 ### 6. Тема (`theme/`)
 
 Синглтоны:
 - `ThemeColor` — Material 3 токены из `~/.config/quickshell/colors.json` (`FileView` + hot-reload). Дефолтная палитра + `try/catch` — при отсутствии/битом файле интерфейс не становится прозрачным.
-- `Theme` — шрифт.
+- `Theme` — шрифт и единые масштабы hover/pressed (бывший `Configs`).
 - `Motion` — тайминги анимаций.
-- `Configs` — единые масштабы hover/pressed.
-- `Paths` — централизованные пути (home, палитра, ассеты, внешние конфиги, терминал) + `Paths.icon(name)` для ассетов.
+- `Paths` — централизованные пути (home, палитра, ассеты, скрипты, внешние конфиги, терминал) + `Paths.icon(name)`/`Paths.scriptsDir`.
 
 ---
 
@@ -168,8 +169,8 @@ services (все синглтоны, один qmldir)
    ▼
 системные утилиты (wpctl, nmcli, bluetoothctl…)
 
-core (SurfaceHost/SurfaceNames/ListModelDiff)
-   ▲ управляет навигацией и переиспользуемыми утилитами
+core (SurfaceHost/SurfaceNames)
+   ▲ управляет навигацией
    │
 UI (surfaces) — наследует SurfaceBase
 ```
