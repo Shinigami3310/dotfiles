@@ -32,7 +32,6 @@ PanelWindow {
 
     function close() {
         visible = false;
-        Qt.quit();
     }
 
     // Плавный fade-out, затем действие (применить тему или просто закрыть)
@@ -55,6 +54,8 @@ PanelWindow {
             if (applyTheme)
                 ThemeApplier.apply(WallpaperService.wallpapers[carousel.currentIndex]);
             root.close();
+            if (!applyTheme)
+                Qt.quit();
         }
     }
 
@@ -89,13 +90,34 @@ PanelWindow {
             bevel: height * Configs.bevelRatio
         }
 
-        Keys.onLeftPressed: {
-            if (carousel.currentIndex > 0)
-                carousel.currentIndex--;
+        // Задержка автоповтора: при зажатой клавише листаем медленнее
+        property bool _navLocked: false
+
+        function navigate(step) {
+            if (contentRoot._navLocked)
+                return;
+            const next = carousel.currentIndex + step;
+            if (next < 0 || next >= carousel.model.length)
+                return;
+            carousel.currentIndex = next;
+            contentRoot._navLocked = true;
+            navTimer.start();
         }
-        Keys.onRightPressed: {
-            if (carousel.currentIndex < carousel.model.length - 1)
-                carousel.currentIndex++;
+
+        Timer {
+            id: navTimer
+            interval: 80
+            repeat: false
+            onTriggered: contentRoot._navLocked = false
+        }
+
+        Keys.onLeftPressed: event => {
+            contentRoot.navigate(-1);
+            event.accepted = true;
+        }
+        Keys.onRightPressed: event => {
+            contentRoot.navigate(1);
+            event.accepted = true;
         }
         Keys.onReturnPressed: root.fadeOut(true)
         Keys.onEscapePressed: root.fadeOut(false)

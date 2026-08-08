@@ -25,5 +25,3 @@ awww img "$WALLPAPER_PATH" \
 # Запускаем matugen. Он обновит colors.json согласно config.toml
 matugen image "$WALLPAPER_PATH" --prefer saturation --type scheme-vibrant
 matugen image "$WALLPAPER_PATH" --prefer saturation --type scheme-vibrant
-
-echo "Theme set successfully: $WALLPAPER_NAME"

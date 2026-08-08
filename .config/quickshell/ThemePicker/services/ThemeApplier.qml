@@ -24,6 +24,7 @@ QtObject {
         onExited: exitCode => {
             if (exitCode !== 0)
                 console.warn("[ThemeApplier] set-theme завершился с кодом:", exitCode);
+            Qt.quit();
         }
     }
 }

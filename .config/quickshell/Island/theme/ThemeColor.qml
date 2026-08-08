@@ -89,7 +89,6 @@ QtObject {
     // сбрасываем в прозрачный — иначе интерфейс станет невидимым.
     function updateColors() {
         let fileContent = typeof paletteFile.text === "function" ? paletteFile.text() : paletteFile.text;
-        console.log(fileContent);
         if (!fileContent)
             return;
 
@@ -97,7 +96,6 @@ QtObject {
             let json = JSON.parse(fileContent);
             if (json && typeof json.colors === "object" && json.colors !== null) {
                 root.parsedColors = json.colors;
-                console.log(parsedColors.primary, json.colors.primary);
             } else {
                 console.warn("[ThemeColor] colors.json не содержит поля 'colors' — оставляю текущую палитру.");
             }

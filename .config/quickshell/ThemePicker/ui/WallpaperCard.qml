@@ -5,6 +5,7 @@ import QtQuick.Effects
 Item {
     id: root
     anchors.fill: parent
+    smooth: true
 
     property real bevel: 20
     property alias source: image.source
@@ -16,15 +17,20 @@ Item {
 
         layer.enabled: true
         layer.smooth: true
-        layer.samples: 4
-        preferredRendererType: Shape.CurveRenderer
 
+        // Включаем геометрию и сглаживание для идеальных краев
+        preferredRendererType: Shape.GeometryRenderer
+        antialiasing: true
+
+        // ShapePath автоматически пересчитает кривые пиксель-в-пиксель,
+        // так как width и height родителя теперь плавно анимируются.
         ShapePath {
             fillColor: "black"
             strokeWidth: 0
 
             startX: Math.min(root.bevel, root.height)
             startY: 0
+
             PathLine {
                 x: root.width
                 y: 0
@@ -49,7 +55,12 @@ Item {
         anchors.fill: parent
         fillMode: Image.PreserveAspectCrop
         visible: false
-        smooth: true
+        asynchronous: true
+
+        // Размер текстуры загружаем с запасом для центральной (увеличенной) карточки
+        sourceSize.width: 1600
+
+        // Включаем генерацию mipmaps для плавного качества при любых размерах
         mipmap: true
     }
 
