@@ -5,8 +5,7 @@ import Quickshell
 import Quickshell.Io
 
 // Токены Material 3 из ~/.config/quickshell/colors.json с hot-reload.
-// Если файл отсутствует или битый — используется дефолтная палитра,
-// чтобы интерфейс никогда не становился прозрачным/невидимым.
+// Реализация на JsonAdapter.
 QtObject {
     id: root
 
@@ -85,44 +84,30 @@ QtObject {
     readonly property color inverse_on_surface: parsedColors.inverse_on_surface || defaultColors.inverse_on_surface
     readonly property color inverse_primary: parsedColors.inverse_primary || defaultColors.inverse_primary
 
-    // При битом/неполном colors.json оставляем предыдущую палитру, а не
-    // сбрасываем в прозрачный — иначе интерфейс станет невидимым.
-    function updateColors() {
-        let fileContent = typeof paletteFile.text === "function" ? paletteFile.text() : paletteFile.text;
-        if (!fileContent)
-            return;
-
-        try {
-            let json = JSON.parse(fileContent);
-            if (json && typeof json.colors === "object" && json.colors !== null) {
-                root.parsedColors = json.colors;
-            } else {
-                console.warn("[ThemeColor] colors.json не содержит поля 'colors' — оставляю текущую палитру.");
-            }
-        } catch (e) {
-            console.warn(`[ThemeColor] Ошибка парсинга colors.json: ${e.message} — оставляю текущую палитру.`);
-        }
-    }
-
     readonly property FileView fileview: FileView {
         id: paletteFile
         path: root.palettePath
         blockLoading: true
         watchChanges: true
 
-        // onLoadedChanged срабатывает один раз при старте — это точка
-        // первичной инициализации, до неё parsedColors ещё дефолтный.
-        onLoadedChanged: {
-            if (loaded) {
-                root.updateColors();
-            }
-        }
-
-        // watchChanges уже перечитал файл к моменту onFileChanged — повторный
-        // reload() привёл бы к двойному парсингу и лишней перерисовке.
         onFileChanged: {
             paletteFile.reload();
-            root.updateColors();
+        }
+
+        adapter: JsonAdapter {
+            id: jsonAdapter
+
+            property var colors
+
+            onColorsChanged: {
+                if (colors !== undefined && colors !== null) {
+                    try {
+                        root.parsedColors = JSON.parse(JSON.stringify(colors));
+                    } catch (e) {
+                        root.parsedColors = colors;
+                    }
+                }
+            }
         }
     }
 }

@@ -6,7 +6,8 @@ import "./services"
 import "./ui"
 
 // Корневой компонент Theme Picker: полноэкранный overlay с каруселью обоев.
-// Навигация — стрелки влево/вправо, Enter — применить тему, Esc — закрыть.
+// Только декларативный UI. Навигация, жизненный цикл и применение темы
+// делегируются ThemePickerController (см. services/).
 PanelWindow {
     id: root
 
@@ -25,21 +26,19 @@ PanelWindow {
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
 
-    function open() {
-        visible = true;
-        Qt.callLater(() => contentRoot.forceActiveFocus());
+    // Экспортируем элементы, которыми управляет контроллер (id недоступны
+    // через объект, поэтому нужны явные alias).
+    property alias contentRootItem: contentRoot
+    property alias fadeAnimation: fadeAnim
+
+    // Связываем контроллер с этим окном, чтобы он мог управлять visible/opacity.
+    Component.onCompleted: {
+        ThemePickerController.view = root;
+        WallpaperService.load();
+        ThemePickerController.open();
     }
 
-    function close() {
-        visible = false;
-    }
-
-    // Плавный fade-out, затем действие (применить тему или просто закрыть)
-    function fadeOut(applyTheme) {
-        fadeAnim.applyTheme = applyTheme;
-        fadeAnim.start();
-    }
-
+    // Видимая анимация fade-out. Логика завершения — в контроллере.
     PropertyAnimation {
         id: fadeAnim
         target: contentRoot
@@ -51,11 +50,7 @@ PanelWindow {
         property bool applyTheme: false
 
         onFinished: {
-            if (applyTheme)
-                ThemeApplier.apply(WallpaperService.wallpapers[carousel.currentIndex]);
-            root.close();
-            if (!applyTheme)
-                Qt.quit();
+            ThemePickerController.onFadeFinished(applyTheme);
         }
     }
 
@@ -71,10 +66,10 @@ PanelWindow {
             color: Configs.overlayColor
         }
 
-        // Клик вне карусели — закрыть
+        // Клик вне карусели — закрыть без применения темы
         TapHandler {
             acceptedButtons: Qt.LeftButton
-            onTapped: root.fadeOut(false)
+            onTapped: ThemePickerController.fadeOut(false)
         }
 
         Carousel {
@@ -83,43 +78,22 @@ PanelWindow {
             width: parent.width
             height: parent.height * Configs.cardHeightRatio
             model: WallpaperService.wallpapers
-            currentIndex: 0
+            currentIndex: ThemePickerController.currentIndex
             cardHeight: height
             cardWidth: height * Configs.cardAspect
             spacing: cardWidth * Configs.spacingRatio
             bevel: height * Configs.bevelRatio
         }
 
-        // Задержка автоповтора: при зажатой клавише листаем медленнее
-        property bool _navLocked: false
-
-        function navigate(step) {
-            if (contentRoot._navLocked)
-                return;
-            const next = carousel.currentIndex + step;
-            if (next < 0 || next >= carousel.model.length)
-                return;
-            carousel.currentIndex = next;
-            contentRoot._navLocked = true;
-            navTimer.start();
-        }
-
-        Timer {
-            id: navTimer
-            interval: 80
-            repeat: false
-            onTriggered: contentRoot._navLocked = false
-        }
-
         Keys.onLeftPressed: event => {
-            contentRoot.navigate(-1);
+            ThemePickerController.navigate(-1);
             event.accepted = true;
         }
         Keys.onRightPressed: event => {
-            contentRoot.navigate(1);
+            ThemePickerController.navigate(1);
             event.accepted = true;
         }
-        Keys.onReturnPressed: root.fadeOut(true)
-        Keys.onEscapePressed: root.fadeOut(false)
+        Keys.onReturnPressed: ThemePickerController.fadeOut(true)
+        Keys.onEscapePressed: ThemePickerController.fadeOut(false)
     }
 }

@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import "."
 
 // Синглтон палитры. Читает colors.json (генерируется matugen при смене обоев)
 // через FileView с watchChanges — палитра обновляется реактивно без перезапуска.
@@ -10,7 +11,7 @@ import Quickshell.Io
 QtObject {
     id: root
 
-    readonly property string palettePath: "/home/Rostislav/.config/quickshell/colors.json"
+    readonly property string palettePath: Configs.palettePath
 
     property var parsedColors: ({})
 
@@ -72,8 +73,10 @@ QtObject {
         }
 
         onFileChanged: {
+            // reload() асинхронный: обновление произойдёт в onLoadedChanged,
+            // когда новый контент уже доступен. Вызов тут updateColors()
+            // прочитал бы устаревший текст.
             paletteFile.reload();
-            updateColors();
         }
     }
 }

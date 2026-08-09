@@ -4,11 +4,14 @@ import QtQuick.Effects
 
 Item {
     id: root
-    anchors.fill: parent
     smooth: true
 
     property real bevel: 20
     property alias source: image.source
+
+    // Размер текстуры с запасом для центральной (увеличенной) карточки.
+    // Вычисляем от фактического размера, чтобы адаптироваться к DPI и размерам.
+    readonly property real _effectiveSourceWidth: Math.ceil(Math.max(width * Screen.devicePixelRatio * 1.5, 1))
 
     Shape {
         id: maskShape
@@ -58,7 +61,7 @@ Item {
         asynchronous: true
 
         // Размер текстуры загружаем с запасом для центральной (увеличенной) карточки
-        sourceSize.width: 1600
+        sourceSize.width: root._effectiveSourceWidth
 
         // Включаем генерацию mipmaps для плавного качества при любых размерах
         mipmap: true

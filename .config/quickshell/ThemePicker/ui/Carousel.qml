@@ -1,6 +1,9 @@
 import QtQuick
 import "../theme"
 
+// Карусель обоев. Использует плавающий (дробный) offset вместо дискретного
+// currentIndex: это даёт непрерывную анимацию без Behavior на каждой карточке
+// и без ручного управления таймерами в UI.
 Item {
     id: root
 
@@ -11,8 +14,8 @@ Item {
     property real spacing: 0
     property real bevel: 0
 
-    // 1. ЕДИНСТВЕННАЯ АНИМАЦИЯ: Плавающий (дробный) индекс.
-    // Когда currentIndex становится 1, offset плавно ползет 0.0 -> 0.1 -> ... -> 1.0
+    // Плавающий индекс: когда currentIndex меняется, offset плавно
+    // интерполируется, и все карточки пересчитываются непрерывно.
     property real offset: currentIndex
 
     Behavior on offset {
@@ -28,31 +31,29 @@ Item {
         delegate: Item {
             id: card
 
-            // 2. Расстояние теперь дробное.
-            // Например, на середине анимации distance может быть 0.5
+            // Дробное расстояние до центра: 0 = центр, 1 = сосед.
+            // Промежуточные значения дают плавный переход.
             property real distance: Math.abs(index - root.offset)
 
-            // 3. Непрерывная функция масштаба.
-            // Если distance = 0 (центр), множитель = Configs.scaleCenter (1.5)
-            // Если distance >= 1 (соседи), множитель = 1.0
-            // Значения между ними интерполируются плавно!
+            // Непрерывный масштаб: 1.5 в центре, 1.0 у соседей.
+            // Линейная интерполяция между ними.
             property real currentScaleFactor: 1.0 + Math.max(0, 1 - distance) * (Configs.scaleCenter - 1.0)
 
-            // 4. Размеры жестко привязаны к множителю (БЕЗ Behavior)
+            // Размеры и позиция вычисляются напрямую (без Behavior),
+            // потому что offset уже анимируется — двойная анимация не нужна.
             width: root.cardWidth * currentScaleFactor
             height: root.cardHeight * currentScaleFactor
 
-            // 5. Координаты зависят от ПЛАВАЮЩЕГО offset (БЕЗ Behavior)
             x: (root.width - width) / 2 + (index - root.offset) * root.spacing
             y: (root.height - height) / 2
 
-            // 6. Z-индекс. Карточка, которая ближе к центру, всегда выше.
-            // Умножаем на 10, чтобы избежать конфликтов при очень близких значениях.
-            z: 100 - Math.round(distance * 10)
+            // Карточка ближе к центру — выше. Умножаем на шаг, чтобы
+            // избежать конфликтов при очень близких значениях distance.
+            z: Configs.zBase - Math.round(distance * Configs.zStep)
 
             WallpaperCard {
                 anchors.fill: parent
-                source: "file:///home/Rostislav/Pictures/Wallpapers/" + modelData
+                source: "file://" + Configs.wallpaperDir + "/" + modelData
                 bevel: root.bevel * card.currentScaleFactor
             }
         }

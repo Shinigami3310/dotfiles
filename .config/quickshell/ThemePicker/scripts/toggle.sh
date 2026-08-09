@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
 # Toggle Theme Picker: если уже запущен — закрыть, иначе — открыть.
-# Использует PID-файл, чтобы не плодить дубликаты экземпляров.
+# Использует pgrep вместо PID-файла: надёжнее, не зависит от /tmp
+# и не ломается от мусорного содержимого файла.
 set -euo pipefail
 
 CONFIG_DIR="$HOME/.config/quickshell/ThemePicker"
-PID_FILE="/tmp/theme-picker.pid"
+# Ищем процесс quickshell, запущенный именно с этим конфигом, чтобы не
+# задеть другие экземпляры quickshell.
+PID="$(pgrep -f "quickshell -p .*$CONFIG_DIR" | head -n1 || true)"
 
-if [[ -f "$PID_FILE" ]] && kill -0 "$(cat "$PID_FILE")" 2>/dev/null; then
+if [[ -n "$PID" ]]; then
     # Уже запущен — закрываем
-    kill "$(cat "$PID_FILE")" 2>/dev/null || true
-    rm -f "$PID_FILE"
+    kill "$PID" 2>/dev/null || true
     exit 0
 fi
 
 # Не запущен — открываем
-rm -f "$PID_FILE"
 quickshell -p "$CONFIG_DIR/shell.qml" &
-echo $! > "$PID_FILE"

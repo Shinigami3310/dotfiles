@@ -1,14 +1,7 @@
 import QtQuick
 import Quickshell
-import "./services"
 
 ShellRoot {
-    ThemePicker {
-        id: themePicker
-
-        Component.onCompleted: {
-            WallpaperService.load();
-            themePicker.open();
-        }
-    }
+    // ThemePicker сам инициализирует сервисы и открывается через контроллер.
+    ThemePicker {}
 }
