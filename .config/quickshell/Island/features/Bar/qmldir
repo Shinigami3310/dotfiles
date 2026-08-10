@@ -1,0 +1,6 @@
+singleton BarConfig BarConfig.qml
+Bar Bar.qml
+Clock Clock.qml
+RightActions RightActions.qml
+WorkspaceDot WorkspaceDot.qml
+Workspaces Workspaces.qml

@@ -1,33 +1,48 @@
 import QtQuick
 import "../../services"
 import "../../theme"
+import "../../ui"
 
+// Поверхность профиля батареи. Удерживает синглтон BatteryService «в awake»:
+// пока поверхность открыта, мониторинг udev и опрос активны; при выгрузке
+// поверхности (release) сервис засыпает и не тратит ресурсы.
 Item {
     id: root
+
+    ServiceClient { service: BatteryService }
 
     implicitWidth: layout.implicitWidth + BatteryConfig.layoutPadding
     implicitHeight: layout.implicitHeight + BatteryConfig.layoutPadding
 
-    BatteryService {
-        id: batteryService
-    }
-
     property real chargeAnimVal: 0
-    readonly property real displayPercent: batteryService.isCharging ? chargeAnimVal : batteryService.percent
+    readonly property real displayPercent: BatteryService.isCharging ? chargeAnimVal : BatteryService.percent
 
     NumberAnimation on chargeAnimVal {
         id: chargeAnim
-        from: batteryService.percent
+        from: BatteryService.percent
         to: 100
         duration: BatteryConfig.chargeAnimDuration
         loops: Animation.Infinite
-        running: batteryService.isCharging
     }
 
     Connections {
-        target: batteryService
+        target: BatteryService
+        function onIsChargingChanged() {
+            if (BatteryService.isCharging) {
+                // Анимация стартует от реального процента, а не от 0 —
+                // иначе при включении зарядки на 80% шкала «прыгнет» вниз.
+                chargeAnim.from = BatteryService.percent;
+                chargeAnimVal = BatteryService.percent;
+                chargeAnim.restart();
+            } else {
+                chargeAnim.stop();
+                chargeAnimVal = 0;
+            }
+        }
         function onPercentChanged() {
-            if (batteryService.isCharging) {
+            if (BatteryService.isCharging) {
+                chargeAnim.from = BatteryService.percent;
+                chargeAnimVal = BatteryService.percent;
                 chargeAnim.restart();
             }
         }
@@ -42,59 +57,15 @@ Item {
             anchors.horizontalCenter: parent.horizontalCenter
             spacing: BatteryConfig.headerSpacing
 
-            Item {
+            BatteryMeter {
                 anchors.verticalCenter: parent.verticalCenter
-                width: BatteryConfig.frameWidth
-                height: BatteryConfig.frameHeight
-
-                Rectangle {
-                    id: batteryFrame
-                    anchors {
-                        fill: parent
-                        rightMargin: BatteryConfig.terminalWidth + 1
-                    }
-                    radius: BatteryConfig.frameRadius
-                    color: "transparent"
-                    border {
-                        color: ThemeColor.on_surface
-                        width: BatteryConfig.borderWidth
-                    }
-
-                    Rectangle {
-                        anchors {
-                            left: parent.left
-                            top: parent.top
-                            bottom: parent.bottom
-                            margins: BatteryConfig.innerMargin
-                        }
-
-                        width: Math.max(0, (parent.width - (BatteryConfig.innerMargin * 2)) * (root.displayPercent / 100))
-                        radius: BatteryConfig.indicatorRadius
-                        color: batteryService.isCharging ? ThemeColor.primary : ThemeColor.secondary
-
-                        Behavior on color {
-                            ColorAnimation {
-                                duration: Motion.fast
-                            }
-                        }
-                    }
-                }
-
-                Rectangle {
-                    anchors {
-                        right: parent.right
-                        verticalCenter: parent.verticalCenter
-                    }
-                    width: BatteryConfig.terminalWidth
-                    height: BatteryConfig.terminalHeight
-                    radius: BatteryConfig.terminalRadius
-                    color: ThemeColor.on_surface
-                }
+                displayPercent: root.displayPercent
+                isCharging: BatteryService.isCharging
             }
 
             Text {
                 anchors.verticalCenter: parent.verticalCenter
-                text: `${batteryService.percent}%`
+                text: `${BatteryService.percent}%`
                 font {
                     family: Theme.font
                     pixelSize: BatteryConfig.textSize
@@ -111,18 +82,15 @@ Item {
 
             ProfileButton {
                 profileId: "power-saver"
-                iconSource: "../../assets/icons/Eco.png"
-                service: batteryService
+                iconSource: "Eco.png"
             }
             ProfileButton {
                 profileId: "balanced"
-                iconSource: "../../assets/icons/Balance.png"
-                service: batteryService
+                iconSource: "Balance.png"
             }
             ProfileButton {
                 profileId: "performance"
-                iconSource: "../../assets/icons/Turbo.png"
-                service: batteryService
+                iconSource: "Turbo.png"
             }
         }
     }

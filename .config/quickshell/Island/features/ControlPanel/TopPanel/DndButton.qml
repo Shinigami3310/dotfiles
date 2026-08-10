@@ -1,11 +1,11 @@
 import QtQuick
 import "../../../services/"
+import "../../../ui"
 
 ControlButton {
-    DndService {
-        id: dndService
-    }
     icon: "Dnd.png"
-    active: dndService.active
-    onClicked: dndService.toggle()
+    active: DndService.active
+    onClicked: DndService.toggle()
+
+    ServiceClient { service: DndService }
 }

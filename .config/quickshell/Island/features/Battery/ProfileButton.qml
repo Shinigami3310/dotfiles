@@ -1,88 +1,24 @@
 import QtQuick
-import QtQuick.Effects
-import "../../services"
+import "../../ui"
 import "../../theme"
+import "../../services"
 
-Rectangle {
+// Обёртка над ui/IconButton для профиля питания. Активная рамка нужна,
+// чтобы выбранный профиль был виден сразу, не открывая меню — иначе
+// непонятно, какой режим сейчас активен.
+IconButton {
     id: root
 
     required property string profileId
-    required property url iconSource
-    property BatteryService service: null
+    property alias iconSource: root.iconName
 
-    readonly property bool isActive: service?.activeProfile === profileId
-    readonly property bool hovered: hoverHandler.hovered
-    readonly property bool pressed: tapHandler.pressed
+    showBackground: true
+    bgRadius: BatteryConfig.profileBtnRadius
+    bgColor: hovered ? ThemeColor.surface_container_high : ThemeColor.surface_container
+    bgBorderColor: isActive ? ThemeColor.primary : ThemeColor.transparent
+    bgBorderWidth: isActive ? BatteryConfig.profileActiveBorderWidth : 0
 
-    implicitWidth: BatteryConfig.profileBtnSize
-    implicitHeight: BatteryConfig.profileBtnSize
-    radius: BatteryConfig.profileBtnRadius
+    readonly property bool isActive: BatteryService.activeProfile === profileId
 
-    color: hovered ? ThemeColor.surface_container_high : ThemeColor.surface_container
-
-    border {
-        color: isActive ? ThemeColor.primary : "transparent"
-        width: isActive ? BatteryConfig.profileActiveBorderWidth : 0
-    }
-
-    scale: pressed ? Configs.scalePressed : (hovered ? Configs.scaleHover : 1.0)
-
-    Behavior on color {
-        ColorAnimation {
-            duration: Motion.fast
-        }
-    }
-    Behavior on border.color {
-        ColorAnimation {
-            duration: Motion.fast
-        }
-    }
-    Behavior on scale {
-        NumberAnimation {
-            duration: Motion.fast
-        }
-    }
-
-    HoverHandler {
-        id: hoverHandler
-        cursorShape: Qt.PointingHandCursor
-    }
-
-    TapHandler {
-        id: tapHandler
-        onTapped: root.service?.setProfile(root.profileId)
-    }
-
-    Item {
-        anchors.centerIn: parent
-        width: BatteryConfig.profileIconSize
-        height: BatteryConfig.profileIconSize
-
-        Image {
-            id: iconImage
-            anchors.fill: parent
-            source: root.iconSource
-            visible: false
-            asynchronous: true
-            smooth: true
-            fillMode: Image.PreserveAspectFit
-            sourceSize: Qt.size(width, height)
-        }
-
-        MultiEffect {
-            anchors.fill: iconImage
-            source: iconImage
-            colorization: 1.0
-            colorizationColor: (root.isActive || root.pressed) ? ThemeColor.primary : ThemeColor.on_surface
-
-            paddingRect: Qt.rect(0, 0, width, height)
-            autoPaddingEnabled: false
-
-            Behavior on colorizationColor {
-                ColorAnimation {
-                    duration: Motion.fast
-                }
-            }
-        }
-    }
+    onClicked: BatteryService.setProfile(root.profileId)
 }

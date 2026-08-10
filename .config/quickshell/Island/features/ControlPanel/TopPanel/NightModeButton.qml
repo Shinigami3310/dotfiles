@@ -2,11 +2,8 @@ import QtQuick
 import "../../../services/"
 
 ControlButton {
-    NightModeService {
-        id: nightModeService
-    }
     icon: "NightMode.png"
-    active: nightModeService.active
+    active: NightModeService.active
 
-    onClicked: nightModeService.toggle()
+    onClicked: NightModeService.toggle()
 }

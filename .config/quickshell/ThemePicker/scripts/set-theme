@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+
+# Strict mode: fail on any error or unset variable
+set -euo pipefail
+
+WALLPAPER_DIR="$HOME/Pictures/Wallpapers"
+WALLPAPER_NAME="${1:-}" # First argument
+
+# Check required tools so we fail with a clear error
+for cmd in awww matugen; do
+  if ! command -v "$cmd" >/dev/null 2>&1; then
+    echo "Error: '$cmd' is not installed." >&2
+    exit 1
+  fi
+done
+
+WALLPAPER_PATH="$WALLPAPER_DIR/$WALLPAPER_NAME"
+
+# Name validation: forbid path traversal (slashes and ".."),
+# but allow spaces and unicode — real filenames vary.
+if [[ "$WALLPAPER_NAME" == */* || "$WALLPAPER_NAME" == *..* || -z "$WALLPAPER_NAME" ]]; then
+  echo "Error: Invalid wallpaper name '$WALLPAPER_NAME'." >&2
+  exit 1
+fi
+
+if [[ ! -f "$WALLPAPER_PATH" ]]; then
+  echo "Error: File '$WALLPAPER_PATH' not found." >&2
+  exit 1
+fi
+
+# 2. Generate the palette
+# Run matugen. It updates colors.json according to config.toml
+
+matugen image "$WALLPAPER_PATH" --prefer saturation --type scheme-vibrant
+# 1. Run the wallpaper transition animation (awww)
+# transition-pos 0.5,0.5 means start from the center of the screen
+# Run in background; background process errors are not caught by set -e,
+# so explicitly check that the process started.
+awww img "$WALLPAPER_PATH" \
+  --transition-type grow \
+  --transition-pos 0.5,0.5 \
+  --transition-duration 2.4 \
+  --transition-fps 60 &
+AWWW_PID=$!
+sleep 0.2
+if ! kill -0 "$AWWW_PID" 2>/dev/null; then
+  echo "Error: awww failed to start." >&2
+  exit 1
+fi

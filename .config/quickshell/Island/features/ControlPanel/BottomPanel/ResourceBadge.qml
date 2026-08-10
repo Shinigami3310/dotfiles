@@ -15,7 +15,7 @@ Item {
     Rectangle {
         anchors.fill: parent
         radius: ControlPanelConfig.badgeRadius
-        color: "transparent"
+        color: ThemeColor.transparent
         border.color: ThemeColor.outline
         border.width: 1
         clip: true

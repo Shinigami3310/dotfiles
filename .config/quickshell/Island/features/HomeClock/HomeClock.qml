@@ -1,12 +1,15 @@
 import QtQuick
 import Quickshell
 import "../../theme"
+import "../../core"
 
 Item {
     id: root
 
     signal surfaceRequested(string name)
 
+    // Стартовая «заглушка» при запуске shell. Показываем только время
+    // — это привычный и ненавязчивый виджет, не требующий действий.
     readonly property int paddingX: 40
     readonly property int paddingY: 12
 
@@ -32,7 +35,7 @@ Item {
 
     TapHandler {
         acceptedButtons: Qt.LeftButton
-        onTapped: root.surfaceRequested("bar")
+        onTapped: root.surfaceRequested(SurfaceNames.bar)
     }
     HoverHandler {
         cursorShape: Qt.PointingHandCursor

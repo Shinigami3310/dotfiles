@@ -1,7 +1,18 @@
-BatteryService BatteryService.qml
-CalendarService CalendarService.qml
-DndService DndService.qml
+singleton AppService AppService.qml
+singleton AudioService AudioService.qml
+singleton BatteryService BatteryService.qml
+singleton BluetoothService BluetoothService.qml
+singleton BrightnessService BrightnessService.qml
+singleton CalendarService CalendarService.qml
+singleton DndService DndService.qml
+singleton EyeReminderService EyeReminderService.qml
+singleton MusicPlayerService MusicPlayerService.qml
+singleton NightModeService NightModeService.qml
+singleton PomodoroService PomodoroService.qml
+singleton PowerService PowerService.qml
+singleton ServiceConfig ServiceConfig.qml
+singleton SystemStatsService SystemStatsService.qml
+singleton WifiService WifiService.qml
+singleton WorkspaceService WorkspaceService.qml
 ModeController ModeController.qml
-NightModeService NightModeService.qml
-PowerService PowerService.qml
-SystemStatsService SystemStatsService.qml
+ListModelDiff helpers/ListModelDiff.qml

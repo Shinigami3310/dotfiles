@@ -1,47 +1,43 @@
 import QtQuick
 import "../../services"
-import "../../services/integrations"
 import "../../theme"
+import "../../core"
+import "../../ui"
 
 Row {
     id: root
-    spacing: 8
+    spacing: BarConfig.rightActionsSpacing
 
     signal surfaceRequested(string newName)
     signal closeRequested
 
-    Icon {
-        source: "../../assets/icons/Eye.png"
+    IconButton {
+        iconName: "Eye.png"
         active: EyeReminderService.active
         onClicked: EyeReminderService.toggle()
     }
 
-    Icon {
-        source: "../../assets/icons/Pomodoro.png"
+    IconButton {
+        iconName: "Pomodoro.png"
         active: PomodoroService.active
         onClicked: PomodoroService.toggle()
     }
 
-    Icon {
-        source: "../../assets/icons/Settings.png"
-        onClicked: root.surfaceRequested("controlPanel")
+    IconButton {
+        iconName: "Settings.png"
+        onClicked: root.surfaceRequested(SurfaceNames.controlPanel)
     }
 
-    Icon {
-        source: "../../assets/icons/Battery.png"
-        onClicked: root.surfaceRequested("batteryProfile")
+    IconButton {
+        iconName: "Battery.png"
+        onClicked: root.surfaceRequested(SurfaceNames.batteryProfile)
     }
 
-    Icon {
+    IconButton {
         id: powerIcon
-        source: "../../assets/icons/Power.png"
-
-        PowerService {
-            id: powerService
-        }
-
+        iconName: "Power.png"
         onClicked: {
-            powerService.openMenu();
+            PowerService.openMenu();
             root.closeRequested();
         }
     }

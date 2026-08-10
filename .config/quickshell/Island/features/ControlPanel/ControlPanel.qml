@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import "../../theme"
+import "../../ui"
 import "./BottomPanel/"
 import "./CenterPanel/"
 import "./TopPanel/"
@@ -27,23 +28,17 @@ Item {
                 onSurfaceRequested: newName => root.surfaceRequested(newName)
             }
 
-            Item {
-                Layout.fillWidth: true
-            }
+            HSpacer {}
 
             BluetoothButton {
                 onSurfaceRequested: newName => root.surfaceRequested(newName)
             }
 
-            Item {
-                Layout.fillWidth: true
-            }
+            HSpacer {}
 
             DndButton {}
 
-            Item {
-                Layout.fillWidth: true
-            }
+            HSpacer {}
 
             NightModeButton {}
         }

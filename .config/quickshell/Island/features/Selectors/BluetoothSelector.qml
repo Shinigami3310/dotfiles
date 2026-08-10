@@ -1,5 +1,6 @@
 import QtQuick
-import "../../services/integrations"
+import "../../services"
+import "../../ui"
 
 BaseSelector {
     id: root
@@ -9,15 +10,13 @@ BaseSelector {
     isServiceEnabled: BluetoothService.enabled
     listModel: BluetoothService.deviceModel
 
-    Component.onCompleted: BluetoothService.retain()
-    Component.onDestruction: BluetoothService.release()
+    ServiceClient { service: BluetoothService }
 
     onToggleRequested: BluetoothService.toggle()
 
     delegate: Component {
         SelectorItemCard {
             name: model.name
-            security: ""
             isConnected: model.connected
             isConnecting: BluetoothService.connectingMac === model.mac
 

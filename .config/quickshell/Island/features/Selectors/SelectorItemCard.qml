@@ -1,6 +1,8 @@
 import QtQuick
 import "../../theme"
 
+// Карточка элемента списка (Wi-Fi/Bluetooth). Пульсация при подключении
+// даёт обратную связь, что операция идёт — иначе непонятно, зависло ли.
 Rectangle {
     id: root
 
@@ -21,11 +23,11 @@ Rectangle {
     radius: SelectorConfig.cardRadius
 
     color: isConnected ? ThemeColor.primary : ThemeColor.surface_container_low
-    border.color: (hovered && !isConnected) ? ThemeColor.primary : "transparent"
+    border.color: (hovered && !isConnected) ? ThemeColor.primary : ThemeColor.transparent
     border.width: SelectorConfig.cardBorderWidth
     clip: true
 
-    scale: pressed ? SelectorConfig.cardPressedScale : (hovered ? SelectorConfig.cardHoverScale : 0.95)
+    scale: pressed ? SelectorConfig.scalePressed : (hovered ? SelectorConfig.scaleHover : 0.95)
 
     Behavior on scale {
         NumberAnimation {
@@ -78,54 +80,11 @@ Rectangle {
             }
         }
 
-        Rectangle {
-            id: inputContainer
+        PasswordField {
             anchors.horizontalCenter: parent.horizontalCenter
             width: parent.width
-            height: SelectorConfig.inputContainerHeight
-            radius: SelectorConfig.inputRadius
-            color: ThemeColor.surface_container_highest
-            visible: root.isInputting
-            opacity: root.isInputting ? 1.0 : 0.0
-            border.color: pwdInput.activeFocus ? ThemeColor.primary : "transparent"
-            border.width: 1
-
-            Behavior on opacity {
-                NumberAnimation {
-                    duration: Motion.fast
-                }
-            }
-
-            Behavior on border.color {
-                ColorAnimation {
-                    duration: Motion.fast
-                }
-            }
-
-            TextInput {
-                id: pwdInput
-                anchors.fill: parent
-                anchors.margins: SelectorConfig.inputPadding
-                verticalAlignment: TextInput.AlignVCenter
-                color: ThemeColor.on_surface
-                font.pixelSize: SelectorConfig.cardTextSize
-                echoMode: TextInput.Password
-                passwordCharacter: "•"
-
-                onActiveFocusChanged: {
-                    if (!activeFocus && root.isInputting && text === "") {
-                        root.isInputting = false;
-                    }
-                }
-
-                onAccepted: {
-                    if (text.trim() !== "") {
-                        root.isInputting = false;
-                        root.connectRequested(text);
-                        text = "";
-                    }
-                }
-            }
+            active: root.isInputting
+            onSubmitted: password => root.connectRequested(password)
         }
     }
 
@@ -144,7 +103,6 @@ Rectangle {
 
             if (requiresPassword && !root.isInputting) {
                 root.isInputting = true;
-                pwdInput.forceActiveFocus();
             } else if (!root.isInputting) {
                 root.connectRequested("");
             }

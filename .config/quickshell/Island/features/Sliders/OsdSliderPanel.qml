@@ -1,12 +1,16 @@
 import QtQuick
+import "../../ui"
 import "../../theme"
 
+// OSD-панель. Автозакрытие по таймауту нужно, чтобы панель не «залипала»
+// на экране после изменения громкости/яркости извне — она лишь подтверждает
+// действие и исчезает.
 Item {
     id: root
 
-    readonly property int paddingX: 20
-    readonly property int paddingY: 12
-    readonly property int idleTimeout: 2500
+    readonly property int paddingX: UiConfig.osdPaddingX
+    readonly property int paddingY: UiConfig.osdPaddingY
+    readonly property int idleTimeout: UiConfig.osdIdleTimeout
 
     property bool active: true
     property alias slider: innerSlider
@@ -36,6 +40,7 @@ Item {
     Slider {
         id: innerSlider
         anchors.centerIn: parent
-        onInteracted: root.bumpIdle()
+        onSliderMoved: root.bumpIdle()
+        onIconClicked: root.bumpIdle()
     }
 }

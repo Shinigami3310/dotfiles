@@ -1,5 +1,5 @@
 import QtQuick
-import "../../services/integrations"
+import "../../services"
 import "../../theme"
 
 OsdSliderPanel {
@@ -13,8 +13,8 @@ OsdSliderPanel {
     }
 
     slider.value: BrightnessService.level
-    slider.iconSource: Qt.resolvedUrl("../../assets/icons/Brightness.png")
+    slider.iconName: "Brightness.png"
     slider.interactiveIcon: false
 
-    slider.onRequestValueChange: requestedValue => BrightnessService.setLevel(requestedValue)
+    slider.onSliderMoved: requestedValue => BrightnessService.setLevel(requestedValue)
 }

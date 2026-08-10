@@ -1,0 +1,57 @@
+add_newline = true
+
+command_timeout = 50
+
+format = """
+[╭──](bold green) $os$hostname$directory$git_branch$git_status${custom.git_dirty}
+[╰─❯](bold green) $character"""
+
+[character]
+success_symbol = "[❯](bold green)"
+error_symbol = "[❯](bold bright-red)"
+
+[directory]
+style = "bold cyan"
+truncation_length = 3
+truncate_to_repo = true
+truncation_symbol = "…/"
+home_symbol = "󰋜"
+
+[os]
+disabled = false
+style = "bold blue"
+format = "[$symbol]($style) "
+
+[os.symbols]
+Arch = "󰣇 "
+Linux = "󰌽 "
+
+[hostname]
+ssh_only = true
+style = "bold green"
+format = "on [$hostname]($style) "
+
+[git_branch]
+symbol = "󰘬 "
+style = "bold magenta"
+format = "on [$symbol$branch]($style) "
+
+[git_status]
+style = "bold red"
+format = '([$all_status$ahead_behind]($style) )'
+conflicted = "󰞇 "
+ahead = "⇡${count}"
+behind = "⇣${count}"
+diverged = "⇡${ahead_count}⇣${behind_count}"
+stashed = "📦 "
+staged = "✚ "
+untracked = ""
+modified = ""
+renamed = ""
+deleted = ""
+
+[custom.git_dirty]
+command = "echo '?'"
+when = "git status --porcelain | grep -qE '^.[^ ]|^\\?'"
+style = "bold red"
+format = "[$output ]($style)"

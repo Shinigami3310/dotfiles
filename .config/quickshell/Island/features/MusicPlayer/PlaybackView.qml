@@ -1,7 +1,8 @@
 import QtQuick
 import QtQuick.Layouts
 import "../../theme"
-import "../../services/integrations"
+import "../../services"
+import "../../ui"
 
 Item {
     id: root
@@ -10,7 +11,8 @@ Item {
 
     signal closeRequested
 
-    // Исправление 1: Прячем PlaybackView, если мы в режиме плейлиста
+    // В режиме плейлиста скрываем панель управления, чтобы не перекрывать
+    // выбор трека — иначе два интерактивных слоя конфликтуют по фокусу.
     opacity: MusicPlayerService.isPlaylistMode ? 0.0 : 1.0
     visible: opacity > 0
 
@@ -22,7 +24,7 @@ Item {
 
     ColumnLayout {
         anchors.fill: parent
-        spacing: 8
+        spacing: MusicPlayerConfig.playbackSpacing
 
         Item {
             id: trackTextContainer
@@ -33,7 +35,7 @@ Item {
             Row {
                 id: marqueeRow
                 anchors.verticalCenter: parent.verticalCenter
-                spacing: 40
+                spacing: MusicPlayerConfig.marqueeSpacing
 
                 readonly property bool overflows: text1.implicitWidth > trackTextContainer.width
                 property real marqueeX: 0
@@ -45,7 +47,7 @@ Item {
                     text: MusicPlayerService.currentTrackDisplay
                     font {
                         family: Theme.font
-                        pixelSize: 18
+                        pixelSize: MusicPlayerConfig.trackTextSize
                         weight: Font.Bold
                     }
                     color: ThemeColor.primary
@@ -60,11 +62,11 @@ Item {
                 }
 
                 NumberAnimation on marqueeX {
-                    running: marqueeRow.overflows && !MusicPlayerService.isPlaylistMode && root.visible && !root.isClosing
+                    running: marqueeRow.overflows && text1.implicitWidth > 0 && !MusicPlayerService.isPlaylistMode && root.visible && !root.isClosing
                     loops: Animation.Infinite
                     from: 0
                     to: -(text1.implicitWidth + marqueeRow.spacing)
-                    duration: Math.max(3000, text1.implicitWidth * 30)
+                    duration: Math.max(MusicPlayerConfig.marqueeMinDuration, text1.implicitWidth * MusicPlayerConfig.marqueeDurationPerPixel)
                     easing.type: Easing.Linear
                 }
             }
@@ -75,42 +77,38 @@ Item {
             Layout.alignment: Qt.AlignVCenter
 
             IconButton {
-                source: "../../assets/icons/Power.png"
+                iconName: "Power.png"
                 onClicked: {
                     MusicPlayerService.sleep();
                     root.closeRequested();
                 }
             }
 
-            Item {
-                Layout.fillWidth: true
-            }
+            HSpacer {}
 
             RowLayout {
                 spacing: 20
 
                 IconButton {
-                    source: "../../assets/icons/Previous.png"
+                    iconName: "Previous.png"
                     onClicked: MusicPlayerService.previous()
                 }
 
                 IconButton {
-                    source: MusicPlayerService.isPlaying ? "../../assets/icons/Stop.png" : "../../assets/icons/Play.png"
+                    iconName: MusicPlayerService.isPlaying ? "Stop.png" : "Play.png"
                     onClicked: MusicPlayerService.playStop()
                 }
 
                 IconButton {
-                    source: "../../assets/icons/Next.png"
+                    iconName: "Next.png"
                     onClicked: MusicPlayerService.next()
                 }
             }
 
-            Item {
-                Layout.fillWidth: true
-            }
+            HSpacer {}
 
             IconButton {
-                source: "../../assets/icons/Playlist.png"
+                iconName: "Playlist.png"
                 onClicked: MusicPlayerService.togglePlaylistMode()
             }
         }

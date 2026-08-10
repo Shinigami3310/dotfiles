@@ -33,9 +33,12 @@ Rectangle {
         }
     }
 
+    // Во время cross-fade в SurfaceHost контейнер временно пуст (старая
+    // поверхность уничтожена, новая ещё создаётся). Без guard'а implicitWidth
+    // станет 0 и окно «схлопнется» на один кадр.
     Item {
         id: contentContainer
-        implicitWidth: children[0].implicitWidth
-        implicitHeight: children[0].implicitHeight
+        implicitWidth: children.length > 0 ? children[0].implicitWidth : 0
+        implicitHeight: children.length > 0 ? children[0].implicitHeight : 0
     }
 }

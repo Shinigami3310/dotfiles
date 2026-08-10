@@ -1,7 +1,8 @@
 import QtQuick
 import QtQuick.Layouts
 import "../../theme"
-import "../../services/integrations"
+import "../../services"
+import "../../ui"
 
 Rectangle {
     id: root
@@ -19,11 +20,11 @@ Rectangle {
 
     RowLayout {
         anchors.fill: parent
-        anchors.margins: 14
-        spacing: 12
+        anchors.margins: MusicPlayerConfig.playlistMargin
+        spacing: MusicPlayerConfig.playlistSpacing
 
         IconButton {
-            source: "../../assets/icons/PreviousPlaylist.png"
+            iconName: "PreviousPlaylist.png"
             onClicked: MusicPlayerService.previous()
         }
 
@@ -31,7 +32,7 @@ Rectangle {
             text: MusicPlayerService.currentPlaylistName
             font {
                 family: Theme.font
-                pixelSize: 18
+                pixelSize: MusicPlayerConfig.playlistTextSize
                 weight: Font.Bold
             }
             color: ThemeColor.primary
@@ -42,7 +43,7 @@ Rectangle {
         }
 
         IconButton {
-            source: "../../assets/icons/NextPlaylist.png"
+            iconName: "NextPlaylist.png"
             onClicked: MusicPlayerService.next()
         }
     }

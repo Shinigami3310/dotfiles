@@ -1,10 +1,12 @@
+pragma Singleton
 import QtQuick
 import Quickshell
+import "../features/Calendar"
 
 QtObject {
     id: root
 
-    readonly property var locale: Qt.locale("en_US")
+    readonly property var locale: Qt.locale(CalendarConfig.locale)
 
     readonly property SystemClock clock: SystemClock {
         precision: SystemClock.Hours

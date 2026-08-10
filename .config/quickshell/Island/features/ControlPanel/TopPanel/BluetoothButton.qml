@@ -1,15 +1,16 @@
 import QtQuick
-import "../../../services/integrations"
+import "../../../services"
+import "../../../core"
+import "../../../ui"
 
 ControlButton {
     id: root
     signal surfaceRequested(string newName)
-    Component.onCompleted: BluetoothService.retain()
-    Component.onDestruction: BluetoothService.release()
+    ServiceClient { service: BluetoothService }
     icon: "Bluetooth.png"
     active: BluetoothService.enabled
     enableRightClick: true
 
     onClicked: BluetoothService.toggle()
-    onRightClicked: root.surfaceRequested("bluetoothSelector")
+    onRightClicked: root.surfaceRequested(SurfaceNames.bluetoothSelector)
 }

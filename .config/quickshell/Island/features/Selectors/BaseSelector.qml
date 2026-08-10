@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
 import "../../theme"
+import "../../ui"
 
 Item {
     id: root
@@ -9,7 +10,7 @@ Item {
     property string title: "Selector"
     property string iconSource: ""
     property bool isServiceEnabled: false
-    property var listModel: null
+    property ListModel listModel: null
     property Component delegate: null
 
     signal toggleRequested
@@ -44,7 +45,9 @@ Item {
                 fillMode: Image.PreserveAspectFit
                 smooth: true
                 mipmap: true
-                visible: false // Скрыто для MultiEffect
+                // MultiEffect требует исходник, но сам Image не должен рендериться
+                // дважды (сырым и через эффект) — иначе будет двоение иконки.
+                visible: false
             }
 
             MultiEffect {
@@ -78,7 +81,7 @@ Item {
                 Layout.fillWidth: true
             }
 
-            Switch {
+            ToggleSwitch {
                 checked: root.isServiceEnabled
                 onToggled: root.toggleRequested()
                 Layout.alignment: Qt.AlignVCenter
@@ -107,28 +110,12 @@ Item {
                 }
             }
 
-            ListView {
+            AnimatedList {
                 id: listView
                 anchors.fill: parent
                 model: root.listModel
                 delegate: root.delegate
                 spacing: SelectorConfig.cardSpacing
-                boundsBehavior: Flickable.StopAtBounds
-
-                move: Transition {
-                    NumberAnimation {
-                        properties: "x,y"
-                        duration: Motion.standard
-                        easing.type: Easing.OutQuart
-                    }
-                }
-                displaced: Transition {
-                    NumberAnimation {
-                        properties: "x,y"
-                        duration: Motion.standard
-                        easing.type: Easing.OutQuart
-                    }
-                }
             }
         }
     }

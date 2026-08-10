@@ -16,8 +16,6 @@ Item {
     property string pendingName: ""
     property Item pendingItem: null
 
-    signal surfaceChanged(string name)
-
     implicitWidth: currentItem?.implicitWidth ?? 0
     implicitHeight: currentItem?.implicitHeight ?? 0
 
@@ -83,7 +81,6 @@ Item {
 
         onStopped: {
             root.busy = false;
-            root.surfaceChanged(root.currentName);
         }
     }
 
@@ -105,9 +102,7 @@ Item {
         }
 
         pendingName = name;
-        const component = spec.component ?? spec;
-
-        pendingItem = component.createObject(root, {
+        pendingItem = spec.createObject(root, {
             surfaceName: name,
             active: false,
             visible: false,
@@ -117,6 +112,15 @@ Item {
         if (!pendingItem)
             return;
 
+        // Поверхность без enter/exit сломает cross-fade: объект создастся,
+        // но анимация перехода никогда не запустится — валидируем до вставки.
+        if (typeof pendingItem.enter !== "function" || typeof pendingItem.exit !== "function") {
+            console.warn(`[SurfaceHost] Surface "${name}" не реализует интерфейс SurfaceBase (enter/exit). Пропускаю.`);
+            pendingItem.destroy();
+            pendingItem = null;
+            return;
+        }
+
         if (!currentItem) {
             currentItem = pendingItem;
             currentName = name;
@@ -125,7 +129,6 @@ Item {
             currentItem.visible = true;
             currentItem.opacity = 1;
             currentItem.enter();
-            surfaceChanged(currentName);
             return;
         }
 

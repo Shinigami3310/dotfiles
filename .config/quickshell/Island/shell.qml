@@ -5,13 +5,11 @@ import Quickshell.Wayland
 import "core"
 import "theme"
 import "services"
-import "services/integrations"
 
 PanelWindow {
     id: root
 
-    readonly property list<string> nonFocusSurfaces: ["eyeReminder", "brightnessSlider", "volumeSlider", "strip", "homeClock"]
-    readonly property bool requiresFocus: host.currentName !== host.initialSurfaceName && !nonFocusSurfaces.includes(host.currentName)
+    readonly property bool requiresFocus: host.currentName !== host.initialSurfaceName && !SurfaceNames.nonFocusSurfaces.includes(host.currentName)
     readonly property bool isFullscreen: modeController.isFullscreen
 
     anchors {
@@ -21,7 +19,7 @@ PanelWindow {
         bottom: true
     }
 
-    color: "transparent"
+    color: ThemeColor.transparent
     exclusionMode: ExclusionMode.Ignore
 
     WlrLayershell.layer: WlrLayer.Overlay
@@ -56,15 +54,22 @@ PanelWindow {
 
         SurfaceHost {
             id: host
-            initialSurfaceName: root.isFullscreen ? "strip" : "homeClock"
+            initialSurfaceName: root.isFullscreen ? SurfaceNames.strip : SurfaceNames.homeClock
             surfaces: catalog
         }
     }
 
-    function requestSurface(name) {
+    function requestSurface(name: string) {
         if (!root.isFullscreen) {
             host.open(name);
         }
+    }
+
+    // OSD-поверхности (яркость/громкость) не открываем, если активна
+    // controlPanel — у неё свои слайдеры.
+    function openOsd(name: string) {
+        if (host.currentName !== SurfaceNames.controlPanel)
+            host.open(name);
     }
 
     IpcHandler {
@@ -83,13 +88,13 @@ PanelWindow {
     Connections {
         target: BrightnessService
         function onSurfaceRequested(name: string) {
-            host.open(name);
+            root.openOsd(name);
         }
     }
     Connections {
         target: AudioService
         function onSurfaceRequested(name: string) {
-            host.open(name);
+            root.openOsd(name);
         }
     }
 }

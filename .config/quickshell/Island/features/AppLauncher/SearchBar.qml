@@ -23,7 +23,7 @@ FocusScope {
         radius: AppLauncherConfig.searchBarRadius
         color: ThemeColor.surface
         border {
-            color: input.activeFocus ? ThemeColor.primary : "transparent"
+            color: input.activeFocus ? ThemeColor.primary : ThemeColor.transparent
             width: AppLauncherConfig.searchBarBorderWidth
         }
 
@@ -42,6 +42,8 @@ FocusScope {
             }
             spacing: AppLauncherConfig.searchBarSpacing
 
+            // Эмодзи вместо ассета: иконка поиска одна, и не хочется ради неё
+            // плодить файл в assets/icons/ — это дешевле и перекрашивается через color.
             Text {
                 id: searchIcon
                 anchors.verticalCenter: parent.verticalCenter

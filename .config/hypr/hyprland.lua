@@ -11,7 +11,7 @@ require("config")
 local terminal = "kitty"
 local fileManager = "dolphin"
 local menu = "hyprlauncher"
-local browser = "firefox"
+local browser = "zen-browser"
 local ide = "nvim"
 
 hl.env("XCURSOR_SIZE", "24")
@@ -29,6 +29,7 @@ hl.bind(
 	mainMod .. " + J",
 	hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'")
 )
+hl.bind(mainMod .. " + W", hl.dsp.exec_cmd("~/.local/bin/toggle-themepicker"))
 hl.bind(mainMod .. " + B", hl.dsp.exec_cmd(browser))
 hl.bind(mainMod .. " + F", hl.dsp.exec_cmd(fileManager))
 hl.bind(mainMod .. " + R", hl.dsp.exec_cmd(menu))
@@ -63,12 +64,12 @@ end
 -- Laptop multimedia keys for volume and LCD brightness
 hl.bind(
 	"XF86AudioRaiseVolume",
-	hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"),
+	hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 2%+"),
 	{ locked = true, repeating = true }
 )
 hl.bind(
 	"XF86AudioLowerVolume",
-	hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),
+	hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 2%-"),
 	{ locked = true, repeating = true }
 )
 hl.bind(
@@ -156,12 +157,17 @@ hl.window_rule({
 hl.window_rule({
 	name = "move-hyprland-run",
 	match = { class = "hyprland-run" },
-
 	move = "20 monitor_h-120",
 	float = true,
 })
 
 hl.window_rule({
-	match = { class = "firefox" }, -- Укажите класс вашего браузера
-	workspace = "2", -- Отправляем на второй рабочий стол
+	match = { class = ".*" }, -- .* означает "все"
+	no_blur = true,
+})
+
+hl.window_rule({
+	match = { class = "zen" }, -- Укажите класс вашего браузера
+	workspace = "2",
+	no_blur = false,
 })

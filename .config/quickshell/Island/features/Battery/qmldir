@@ -1,3 +1,4 @@
 singleton BatteryConfig BatteryConfig.qml
 Battery Battery.qml
+BatteryMeter BatteryMeter.qml
 ProfileButton ProfileButton.qml
