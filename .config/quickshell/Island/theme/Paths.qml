@@ -16,7 +16,6 @@ QtObject {
     readonly property string notificationCenterConfig: "NotificationCenter"
     readonly property string powerMenuConfig: "PowerMenu"
     readonly property string defaultTerminal: "kitty"
-    readonly property string pomodoroIcon: assetsDir + "PomodoroService.png"
 
     // Каталоги .desktop-файлов для AppService.
     readonly property list<string> appDirs: [homeDir + "/.local/share/applications", "/usr/share/applications"]

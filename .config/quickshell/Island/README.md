@@ -47,7 +47,7 @@
 ## Запуск
 
 ```sh
-quickshell -c shell.qml
+quickshell -c Island
 ```
 
 Тема загружается из `~/.config/quickshell/colors.json` (формат: `{"colors": { "surface": "#...", ... }}` — Material 3 токены). При изменении файла палитра перезагружается на лету.

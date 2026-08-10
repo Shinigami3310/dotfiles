@@ -9,7 +9,7 @@ Rectangle {
     property real value: 0.0
     property bool muted: false
     property real trackHeight: 10
-    property real step: 0.05
+    property real step: 0.02
     readonly property bool pressed: trackMouse.pressed
 
     signal sliderMoved(real newValue)

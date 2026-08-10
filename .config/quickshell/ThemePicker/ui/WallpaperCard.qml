@@ -1,17 +1,23 @@
 import QtQuick
 import QtQuick.Shapes
 import QtQuick.Effects
+import QtQuick.Window // Imported for Screen
 
 Item {
     id: root
     smooth: true
 
     property real bevel: 20
-    property alias source: image.source
-
-    // Размер текстуры с запасом для центральной (увеличенной) карточки.
-    // Вычисляем от фактического размера, чтобы адаптироваться к DPI и размерам.
-    readonly property real _effectiveSourceWidth: Math.ceil(Math.max(width * Screen.devicePixelRatio * 1.5, 1))
+    // Image source. Applied to the Image only when loadRequested becomes true,
+    // so the carousel can stagger loading instead of fetching all at once.
+    property string source: ""
+    // When true, the image starts loading. Set by the carousel to sequence loads.
+    property bool loadRequested: false
+    // Emitted once the image has finished loading.
+    signal loaded()
+    // Texture size is tied to the screen (with DPI), not to the card:
+    // computed once and not reset on every carousel animation frame.
+    readonly property real _effectiveSourceWidth: Math.ceil(Math.max(Screen.width * Screen.devicePixelRatio, 1))
 
     Shape {
         id: maskShape
@@ -21,12 +27,10 @@ Item {
         layer.enabled: true
         layer.smooth: true
 
-        // Включаем геометрию и сглаживание для идеальных краев
+        // Geometry is recomputed every frame for perfect vector sharpness
         preferredRendererType: Shape.GeometryRenderer
         antialiasing: true
 
-        // ShapePath автоматически пересчитает кривые пиксель-в-пиксель,
-        // так как width и height родителя теперь плавно анимируются.
         ShapePath {
             fillColor: "black"
             strokeWidth: 0
@@ -60,11 +64,19 @@ Item {
         visible: false
         asynchronous: true
 
-        // Размер текстуры загружаем с запасом для центральной (увеличенной) карточки
+        // Only load when the carousel requests it, to stagger disk/CPU work.
+        source: root.loadRequested ? root.source : ""
+        // Size tied to the screen, not to the card
         sourceSize.width: root._effectiveSourceWidth
 
-        // Включаем генерацию mipmaps для плавного качества при любых размерах
         mipmap: true
+
+        onStatusChanged: {
+            // Emit on Ready AND Error so a broken file does not block
+            // the sequential loading chain in the carousel.
+            if (status === Image.Ready || status === Image.Error)
+                root.loaded();
+        }
     }
 
     MultiEffect {

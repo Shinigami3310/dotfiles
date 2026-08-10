@@ -5,16 +5,16 @@ import Quickshell
 import Quickshell.Io
 import "../theme"
 
-// Сервис загрузки списка обоев из директории.
-// Работает через Process + SplitParser: накапливает имена во внутреннем буфере,
-// а по завершении отдаёт готовый отсортированный список сигналом loaded().
+// Wallpaper list loading service from a directory.
+// Works via Process + SplitParser: accumulates names in an internal buffer,
+// and on completion emits the ready sorted list via the loaded() signal.
 QtObject {
     id: root
 
     property var wallpapers: []
 
-    // Внутренний буфер для накопления строк вывода. Помечен как приватный:
-    // ни один компонент не должен изменять его напрямую.
+    // Internal buffer for accumulating output lines. Marked private:
+    // no component should modify it directly.
     property var _buffer: []
 
     signal loaded()
@@ -28,8 +28,8 @@ QtObject {
     }
 
     property Process listProc: Process {
-        // Через аргумент (не bash -c), чтобы не зависеть от $HOME и корректно
-        // обрабатывать пути с пробелами.
+        // Via argument (not bash -c), to not depend on $HOME and to correctly
+        // handle paths with spaces.
         command: ["ls", "-1", Configs.wallpaperDir]
         running: false
 
@@ -38,7 +38,7 @@ QtObject {
                 const exts = [".jpg", ".jpeg", ".png", ".webp", ".bmp", ".gif"];
                 const file = data.trim();
 
-                // Проверяем расширение и добавляем во временный массив
+                // Check the extension and add to the temporary array
                 if (file.length > 0 && exts.some(e => file.toLowerCase().endsWith(e))) {
                     root._buffer.push(file);
                 }
@@ -48,14 +48,14 @@ QtObject {
         onExited: exitCode => {
             if (exitCode === 0) {
                 root._buffer.sort();
-                root.wallpapers = root._buffer; // Отдаем в UI разом весь готовый список
+                root.wallpapers = root._buffer; // Hand the whole ready list to the UI
                 root.loaded();
             } else {
-                const msg = "[WallpaperService] Не удалось прочитать директорию, код: " + exitCode;
+                const msg = "[WallpaperService] Failed to read directory, code: " + exitCode;
                 console.warn(msg);
                 root.failed(msg);
             }
-            root._buffer = []; // Очищаем память
+            root._buffer = []; // Free memory
         }
     }
 }

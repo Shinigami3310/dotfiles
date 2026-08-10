@@ -10,7 +10,7 @@ Item {
 
     signal closeRequested
 
-    property bool isClosing: true
+    property bool isClosing: false
 
     focus: true
 

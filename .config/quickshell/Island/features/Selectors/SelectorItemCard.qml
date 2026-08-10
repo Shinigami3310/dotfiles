@@ -27,7 +27,7 @@ Rectangle {
     border.width: SelectorConfig.cardBorderWidth
     clip: true
 
-    scale: pressed ? Theme.scalePressed : (hovered ? Theme.scaleHover : 1.0)
+    scale: pressed ? SelectorConfig.scalePressed : (hovered ? SelectorConfig.scaleHover : 0.95)
 
     Behavior on scale {
         NumberAnimation {

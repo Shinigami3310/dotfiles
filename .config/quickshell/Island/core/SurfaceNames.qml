@@ -18,7 +18,5 @@ QtObject {
     readonly property string volumeSlider: "volumeSlider"
     readonly property string wifiSelector: "wifiSelector"
 
-    readonly property list<string> nonFocusSurfaces: [
-        eyeReminder, brightnessSlider, volumeSlider, strip, homeClock
-    ]
+    readonly property list<string> nonFocusSurfaces: [eyeReminder, brightnessSlider, volumeSlider, strip, homeClock]
 }

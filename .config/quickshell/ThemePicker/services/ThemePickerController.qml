@@ -4,26 +4,26 @@ import QtQuick
 import "."
 import "../theme"
 
-// Контроллер ThemePicker: отделяет логику (навигация, жизненный цикл,
-// применение темы) от декларативного UI. UI остаётся «глупым» и вызывает
-// только методы контроллера.
+// ThemePicker controller: separates logic (navigation, lifecycle,
+// theme application) from the declarative UI. The UI stays "dumb"
+// and only calls controller methods.
 //
-// Соглашение: UI владеет fade-анимацией (визуальный эффект) и после её
-// завершения зовёт onFadeFinished(applyTheme). Контроллер решает, что делать.
+// Convention: the UI owns the fade animation (visual effect) and calls
+// onFadeFinished(applyTheme) when it completes. The controller decides what to do.
 QtObject {
     id: root
 
-    // Ссылка на UI-элемент, который управляет visible/opacity.
-    // Назначается из ThemePicker.qml (property var view).
+    // Reference to the UI element that controls visible/opacity.
+    // Assigned from ThemePicker.qml.
     property var view: null
 
-    // Текущий индекс карусели. Carousel биндится на это свойство.
+    // Current carousel index. Carousel binds to this property.
     property int currentIndex: 0
 
     property bool _isClosing: false
 
-    // Автоповтор при зажатой клавише: блокирует повторную навигацию на 80мс,
-    // чтобы листание было медленным и предсказуемым.
+    // Key auto-repeat: blocks re-navigation for 80ms so scrolling
+    // stays slow and predictable.
     property bool _navLocked: false
 
     function open() {
@@ -31,7 +31,7 @@ QtObject {
             return;
         root._isClosing = false;
         root.view.visible = true;
-        // Сбрасываем opacity на случай, если прошлый fadeOut оставил её в 0.
+        // Reset opacity in case a previous fadeOut left it at 0.
         root.view.contentRootItem.opacity = 1;
         root.view.contentRootItem.forceActiveFocus();
     }
@@ -44,20 +44,23 @@ QtObject {
         Qt.quit();
     }
 
-    // Запускает fade-out. applyTheme=true — после анимации применить тему.
+    // Starts the fade-out. applyTheme=true — apply the theme after the animation.
     function fadeOut(applyTheme) {
         if (root._isClosing)
-            return; // защита от двойного Enter/Esc
+            return; // guard against double Enter/Esc
         root._isClosing = true;
         root.view.fadeAnimation.applyTheme = applyTheme;
         root.view.fadeAnimation.start();
     }
 
-    // Вызывается из UI после завершения fade-анимации.
+    // Called from the UI after the fade animation completes.
     function onFadeFinished(applyTheme) {
         if (applyTheme) {
             const wallpaper = WallpaperService.wallpapers[root.currentIndex];
-            ThemeApplier.applied.connect(() => root.close());
+            // Disconnect the old subscription before re-subscribing to avoid
+            // accumulating callbacks on repeated opens (crash risk on destroyed object).
+            ThemeApplier.applied.disconnect(root.close);
+            ThemeApplier.applied.connect(root.close);
             ThemeApplier.apply(wallpaper);
         } else {
             root.close();

@@ -28,4 +28,7 @@ QtObject {
     readonly property real inputContainerHeight: 28
     readonly property real inputRadius: 6
     readonly property real inputPadding: 8
+
+    readonly property real scaleHover: 1.0
+    readonly property real scalePressed: 0.9
 }

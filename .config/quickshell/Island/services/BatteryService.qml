@@ -73,7 +73,7 @@ QtObject {
                     }
                     root.hasBattery = true;
                     root.percent = parseInt(parts[0], 10) || 0;
-                    root.isCharging = ["Charging", "Full"].includes(parts[1]);
+                    root.isCharging = ["Charging", "Full", "Not charging"].includes(parts[1]);
                 }
             }
         }

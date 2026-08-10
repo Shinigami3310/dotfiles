@@ -8,15 +8,25 @@ QtObject {
     id: root
 
     property bool active: false
+    property int _activeClients: 0
+    property bool isAwake: false
 
     function toggle() {
         active = !active;
         Quickshell.execDetached(["qs", "-c", Paths.notificationCenterConfig, "ipc", "call", "notification-center", "toggleDnd"]);
     }
 
+    // Проверка состояния DND происходит при каждом просыпании (открытии
+    // ControlPanel), а не только при старте — состояние могло измениться
+    // извне, пока сервис спал.
+    property Timer sleepTimer: Timer {
+        interval: ServiceConfig.dndSleepMs
+        onTriggered: root.isAwake = false
+    }
+
     property Process initCheck: Process {
         command: ["qs", "-c", Paths.notificationCenterConfig, "ipc", "call", "notification-center", "getDndState"]
-        running: true
+        running: false
 
         stdout: SplitParser {
             onRead: data => {
@@ -28,5 +38,23 @@ QtObject {
             if (exitCode !== 0)
                 console.warn(`[DndService] getDndState завершился с кодом ${exitCode}`);
         }
+    }
+
+    onIsAwakeChanged: {
+        if (isAwake) {
+            initCheck.running = true;
+        }
+    }
+
+    function retain() {
+        _activeClients++;
+        sleepTimer.stop();
+        isAwake = true;
+    }
+
+    function release() {
+        _activeClients = Math.max(0, _activeClients - 1);
+        if (_activeClients === 0)
+            sleepTimer.restart();
     }
 }

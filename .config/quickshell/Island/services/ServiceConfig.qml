@@ -29,6 +29,9 @@ QtObject {
     // SystemStatsService
     readonly property int statsPollMs: 2000
 
+    // DndService
+    readonly property int dndSleepMs: 1000
+
     // EyeReminderService
     readonly property int eyeReminderIntervalMs: 10 * 60 * 1000
 

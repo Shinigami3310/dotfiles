@@ -3,5 +3,4 @@ BaseSelector BaseSelector.qml
 BluetoothSelector BluetoothSelector.qml
 PasswordField PasswordField.qml
 SelectorItemCard SelectorItemCard.qml
-Switch Switch.qml
 WifiSelector WifiSelector.qml

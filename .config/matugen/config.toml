@@ -9,6 +9,3 @@ output_path = "~/.config/quickshell/colors.json"
 input_path = "~/.config/matugen/templates/kitty.conf"
 output_path = "~/.config/kitty/colors.conf"
 
-[templates.firefox]
-input_path = "~/.config/matugen/templates/firefox_colors.json"
-output_path = "~/.config/firefox/firefox_colors.css"

@@ -27,7 +27,7 @@ Pressable {
 
     // Правый клик тоже подсвечивает кнопку — иначе рамка «мигает»
     // при открытии селектора правой кнопкой.
-    property bool pressed: rightTap.pressed || rightTap.pressed
+    property bool pressed: rightTap.pressed
 
     implicitWidth: showBackground ? UiConfig.iconButtonBgSize : UiConfig.iconButtonSize
     implicitHeight: showBackground ? UiConfig.iconButtonBgSize : UiConfig.iconButtonSize
