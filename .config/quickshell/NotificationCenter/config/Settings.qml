@@ -5,7 +5,6 @@ QtObject {
     readonly property int toastMaxVisible: 3
     readonly property int toastTimeoutLowMs: 3000
     readonly property int toastTimeoutNormalMs: 5000
-    readonly property int criticalTimeoutMs: 0
 
     readonly property bool allowCriticalInDnd: true
 
@@ -15,4 +14,10 @@ QtObject {
     readonly property int centerWidth: 420
     readonly property int centerMaxHeight: 520
     readonly property int maxHistoryItems: 50
+
+    // Геометрия UI (ранее захардкожена в компонентах)
+    readonly property int toastWidth: 360
+    readonly property int listMaxHeight: 340
+    readonly property int centerPadding: 12
+    readonly property int itemPadding: 10
 }

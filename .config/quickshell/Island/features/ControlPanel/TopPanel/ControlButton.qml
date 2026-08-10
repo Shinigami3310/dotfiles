@@ -1,6 +1,6 @@
 import QtQuick
 import "../../../ui"
-import "../../../theme"
+import "../../../shared/theme"
 import "../"
 
 // Тонкая обёртка над единым ui/IconButton для панели управления.

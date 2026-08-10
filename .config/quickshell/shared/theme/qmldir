@@ -1,0 +1,4 @@
+singleton ThemeColor ThemeColor.qml
+singleton Theme Theme.qml
+singleton Motion Motion.qml
+singleton SharedPaths SharedPaths.qml

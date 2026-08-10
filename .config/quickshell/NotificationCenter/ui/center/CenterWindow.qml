@@ -43,48 +43,49 @@ PanelWindow {
         onActivated: root.visible = false
     }
 
-    MouseArea {
-        anchors.fill: parent
-        acceptedButtons: Qt.RightButton
-        onClicked: mouse => {
-            if (mouse.button === Qt.RightButton)
-                root.visible = false;
+    // Фон панели — поверх, чтобы клики по уведомлениям обрабатывались карточками,
+    // а клики по пустой области закрывали панель.
+    Rectangle {
+        id: mainRect
+        width: parent.width
+        implicitHeight: mainLayout.implicitHeight + Settings.centerPadding * 2
+        color: Colors.panel
+        radius: 14
+        border.width: 1.5
+        border.color: Colors.borderNormal
+        focus: true
+
+        MouseArea {
+            anchors.fill: parent
+            acceptedButtons: Qt.RightButton
+            onClicked: mouse => {
+                if (mouse.button === Qt.RightButton)
+                    root.visible = false;
+            }
         }
 
-        Rectangle {
-            id: mainRect
-            width: parent.width
-            implicitHeight: mainLayout.implicitHeight + 24
-            color: Colors.panel
-            radius: 14
-            border.width: 1.5
-            border.color: Colors.borderNormal
-            focus: true
-            Keys.onEscapePressed: root.visible = false
+        ColumnLayout {
+            id: mainLayout
+            anchors {
+                top: parent.top
+                left: parent.left
+                right: parent.right
+                margins: Settings.centerPadding
+            }
+            spacing: hasHistory ? 10 : 0
 
-            ColumnLayout {
-                id: mainLayout
-                anchors {
-                    top: parent.top
-                    left: parent.left
-                    right: parent.right
-                    margins: 12
-                }
-                spacing: hasHistory ? 10 : 0
+            CenterHeader {
+                Layout.fillWidth: true
+                service: root.service
+                onClearAllRequested: root.store?.clear()
+            }
 
-                CenterHeader {
-                    Layout.fillWidth: true
-                    service: root.service
-                    onClearAllRequested: root.store?.clear()
-                }
-
-                NotificationList {
-                    Layout.fillWidth: true
-                    visible: hasHistory
-                    store: root.store
-                    service: root.service
-                    onDismissRequested: id => root.service?.close(id, Constants.closeReason.dismissed)
-                }
+            NotificationList {
+                Layout.fillWidth: true
+                visible: hasHistory
+                store: root.store
+                service: root.service
+                onDismissRequested: id => root.service?.close(id, Constants.CloseReason.Dismissed)
             }
         }
     }

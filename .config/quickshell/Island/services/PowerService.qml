@@ -1,6 +1,7 @@
 pragma Singleton
 import Quickshell
 import QtQuick
+import "../shared/theme"
 import "../theme"
 
 QtObject {

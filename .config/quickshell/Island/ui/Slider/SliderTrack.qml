@@ -1,5 +1,5 @@
 import QtQuick
-import "../../theme"
+import "../../shared/theme"
 
 // Трек слайдера. preventStealing нужен, чтобы drag не перехватывался
 // родительским Flickable/ListView — иначе ползунок «дёргается».

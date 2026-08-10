@@ -1,6 +1,6 @@
 import QtQuick
 import Quickshell.Hyprland
-import "../theme"
+import "../shared/theme"
 import "../core"
 
 QtObject {

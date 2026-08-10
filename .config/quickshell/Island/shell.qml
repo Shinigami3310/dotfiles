@@ -3,7 +3,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import "core"
-import "theme"
+import "./shared/theme"
 import "services"
 
 PanelWindow {

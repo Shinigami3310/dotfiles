@@ -65,8 +65,6 @@ QtObject {
             importance: notif.importance,
             origin: notif.origin,
             persistent: notif.persistent,
-            dismissible: notif.dismissible,
-            read: notif.read,
             expireTimeout: notif.expireTimeout,
             actionsJson: actionsJson,
             rawNotification: notif.rawNotification

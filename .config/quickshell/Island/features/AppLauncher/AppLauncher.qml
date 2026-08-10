@@ -1,6 +1,6 @@
 import QtQuick
 import "../../services"
-import "../../theme"
+import "../../shared/theme"
 
 FocusScope {
     id: root

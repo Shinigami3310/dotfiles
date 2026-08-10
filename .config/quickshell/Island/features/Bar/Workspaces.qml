@@ -1,6 +1,6 @@
 pragma ComponentBehavior: Bound
 import QtQuick
-import "../../theme"
+import "../../shared/theme"
 
 Row {
     id: root

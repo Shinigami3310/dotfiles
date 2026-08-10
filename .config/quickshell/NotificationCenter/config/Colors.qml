@@ -1,20 +1,20 @@
 pragma Singleton
 import QtQuick
+import "../shared/theme"
 
 QtObject {
-    // Основные роли Matugen M3
-    readonly property color surface: "#111318"
-    readonly property color surfaceVariant: "#1d2026"
-    readonly property color surfaceContainer: "#232830"
+    // Семантические роли, привязанные к палитре matugen (ThemeColor) с hot-reload.
+    readonly property color surface: ThemeColor.surface
+    readonly property color surfaceVariant: ThemeColor.surface_container_high
+    readonly property color surfaceContainer: ThemeColor.surface_container
 
-    readonly property color textOnSurface: "#e2e2e9"
-    readonly property color textOnSurfaceVariant: "#8e9199"
+    readonly property color textOnSurface: ThemeColor.on_surface
+    readonly property color textOnSurfaceVariant: ThemeColor.on_surface_variant
 
-    // Акцентные цвета
-    readonly property color primary: "#a8c7ff"
-    readonly property color secondary: "#bec6dc"
-    readonly property color error: "#ffb4ab"
-    readonly property color outlineVariant: "#333842"
+    readonly property color primary: ThemeColor.primary
+    readonly property color secondary: ThemeColor.secondary
+    readonly property color error: ThemeColor.error
+    readonly property color outlineVariant: ThemeColor.outline_variant
 
     // Привязки UI
     readonly property color panel: surface
@@ -22,8 +22,8 @@ QtObject {
     readonly property color text: textOnSurface
     readonly property color muted: textOnSurfaceVariant
 
-    // Границы уведомлений по важности
-    readonly property color borderLow: outlineVariant
-    readonly property color borderNormal: secondary
-    readonly property color borderCritical: error
+    // Границы уведомлений по важности (различимые оттенки)
+    readonly property color borderLow: ThemeColor.outline
+    readonly property color borderNormal: ThemeColor.secondary
+    readonly property color borderCritical: ThemeColor.error
 }

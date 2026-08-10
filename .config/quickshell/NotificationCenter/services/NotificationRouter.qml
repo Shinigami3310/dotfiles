@@ -12,11 +12,11 @@ QtObject {
             return null;
         }
 
-        let importance = Constants.importance.normal;
+        let importance = Constants.Importance.Normal;
         if (notification.urgency === NotificationUrgency.Critical) {
-            importance = Constants.importance.critical;
+            importance = Constants.Importance.Critical;
         } else if (notification.urgency === NotificationUrgency.Low) {
-            importance = Constants.importance.low;
+            importance = Constants.Importance.Low;
         }
 
         const formattedActions = [];
@@ -38,20 +38,18 @@ QtObject {
         if (rawIcon !== "") {
             if (rawIcon.startsWith("/") || rawIcon.startsWith("file://") || rawIcon.startsWith("http://") || rawIcon.startsWith("https://") || rawIcon.startsWith("image://")) {
                 iconSource = rawIcon;
-            } else {
-                iconSource = undefined;
             }
         }
 
         const result = service.notify({
             dbusId: notification.id,
             replacesId: notification.replacesId ?? 0,
-            source: notification.appName ?? "Source not identified",
+            source: notification.appName ?? Constants.sourceUnknown,
             summary: notification.summary ?? "",
             text: notification.body ?? notification.summary ?? "",
             icon: iconSource,
             importance: importance,
-            origin: Constants.origin.dbus,
+            origin: Constants.Origin.Dbus,
             expireTimeout: notification.expireTimeout,
             actions: formattedActions,
             rawNotification: notification
@@ -63,7 +61,7 @@ QtObject {
         if (!service)
             return null;
         const request = Object.assign({}, payload ?? {}, {
-            origin: Constants.origin.api
+            origin: Constants.Origin.Api
         });
         return service.notify(request);
     }

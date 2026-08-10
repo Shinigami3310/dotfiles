@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
-import "../theme"
+import "../shared/theme"
 
 // Единый слайдер. Композиция атомарных компонентов, а не монолит —
 // чтобы фичи (ControlPanel/OSD) могли переиспользовать одинаковое поведение

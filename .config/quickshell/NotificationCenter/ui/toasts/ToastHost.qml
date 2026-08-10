@@ -22,7 +22,7 @@ PanelWindow {
         right: Settings.cornerMargin
     }
 
-    implicitWidth: 360
+    implicitWidth: Settings.toastWidth
     implicitHeight: listView.contentHeight
     color: "transparent"
 
@@ -43,15 +43,10 @@ PanelWindow {
                 readonly property string text: model.text ?? ""
                 readonly property string icon: model.icon ?? ""
                 readonly property date time: model.time
-                readonly property string importance: model.importance ?? ""
+                readonly property var importance: model.importance ?? ""
                 readonly property string actionsJson: model.actionsJson ?? ""
-                // Парсинг сразу при создании, чтобы гарантировать готовый массив
-                readonly property var actions: {
-                    try { return JSON.parse(model.actionsJson || "[]"); }
-                    catch (e) { return []; }
-                }
             }
-            onDismissRequested: root.service?.closeToastOnly(model.id, Constants.closeReason.dismissed)
+            onDismissRequested: root.service?.closeToastOnly(model.id, Constants.CloseReason.Dismissed)
             onActionInvoked: (actionKey) => root.service?.invokeAction(model.id, actionKey)
         }
 

@@ -1,5 +1,5 @@
 import QtQuick
-import "../../theme"
+import "../../shared/theme"
 import "../../services"
 
 // Шапка календаря. Смена месяца через SequentialAnimation, а не мгновенно,

@@ -41,14 +41,14 @@ QtObject {
 
     function shouldShowToast(notification) {
         const imp = notification.importance;
-        if (imp === Constants.importance.low && !filterLow)
+        if (imp === Constants.Importance.Low && !filterLow)
             return false;
-        if (imp === Constants.importance.normal && !filterNormal)
+        if (imp === Constants.Importance.Normal && !filterNormal)
             return false;
-        if (imp === Constants.importance.critical && !filterCritical)
+        if (imp === Constants.Importance.Critical && !filterCritical)
             return false;
         if (dndEnabled)
-            return imp === Constants.importance.critical && Settings.allowCriticalInDnd;
+            return imp === Constants.Importance.Critical && Settings.allowCriticalInDnd;
         return true;
     }
 
@@ -56,15 +56,24 @@ QtObject {
         if (!running || !store)
             return null;
 
-        if (input.replacesId > 0) {
-            input.dbusId = input.replacesId;
-            input.id = "dbus-" + input.replacesId;
+        const request = Object.assign({}, input ?? {});
+        if (request.replacesId > 0) {
+            request.dbusId = request.replacesId;
+            request.id = "dbus-" + request.replacesId;
         }
 
-        const notification = modelFactory.createNotification(input);
+        const notification = modelFactory.createNotification(request);
 
         _cancelTimer(notification.id);
         store.add(notification);
+
+        // Внешнее закрытие (приложение вызвало CloseNotification по DBus)
+        if (notification.rawNotification) {
+            notification.rawNotification.closed.connect(() => {
+                _cancelTimer(notification.id);
+                store?.removeById(notification.id);
+            });
+        }
 
         if (shouldShowToast(notification)) {
             store.addToast(notification);
@@ -74,10 +83,10 @@ QtObject {
     }
 
     function close(id, reason) {
-        reason = reason ?? Constants.closeReason.dismissed;
+        reason = reason ?? Constants.CloseReason.Dismissed;
         const notif = store?.findById(id);
         if (notif?.rawNotification) {
-            const method = reason === Constants.closeReason.expired ? "expire" : "dismiss";
+            const method = reason === Constants.CloseReason.Expired ? "expire" : "dismiss";
             if (typeof notif.rawNotification[method] === "function")
                 notif.rawNotification[method]();
         }
@@ -86,16 +95,25 @@ QtObject {
     }
 
     function closeToastOnly(id, reason) {
-        reason = reason ?? Constants.closeReason.dismissed;
+        reason = reason ?? Constants.CloseReason.Dismissed;
         _cancelTimer(id);
         store?.removeToastById(id);
     }
 
     function invokeAction(id, actionKey) {
         const notif = store?.findById(id);
-        if (notif?.rawNotification?.invokeAction)
-            notif.rawNotification.invokeAction(actionKey);
-        close(id, Constants.closeReason.dismissed);
+        if (notif?.rawNotification) {
+            const actions = notif.rawNotification.actions;
+            if (actions) {
+                for (const act of actions) {
+                    if (act.identifier === actionKey) {
+                        act.invoke();
+                        break;
+                    }
+                }
+            }
+        }
+        close(id, Constants.CloseReason.Dismissed);
     }
 
     function clear() {
@@ -130,14 +148,14 @@ QtObject {
         if (notification.expireTimeout > 0) {
             timeoutMs = notification.expireTimeout;
         } else {
-            if (notification.importance === Constants.importance.critical)
+            if (notification.importance === Constants.Importance.Critical)
                 return;
-            timeoutMs = notification.importance === Constants.importance.low ? Settings.toastTimeoutLowMs : Settings.toastTimeoutNormalMs;
+            timeoutMs = notification.importance === Constants.Importance.Low ? Settings.toastTimeoutLowMs : Settings.toastTimeoutNormalMs;
         }
         const timer = _createTimer();
         timer.interval = timeoutMs;
         timer.repeat = false;
-        timer.triggered.connect(() => closeToastOnly(notification.id, Constants.closeReason.expired));
+        timer.triggered.connect(() => closeToastOnly(notification.id, Constants.CloseReason.Expired));
         _timers[notification.id] = {
             timer,
             startTime: Date.now(),

@@ -1,6 +1,6 @@
 import QtQuick
 import "../../services"
-import "../../theme"
+import "../../shared/theme"
 import "../../ui"
 
 // Поверхность профиля батареи. Удерживает синглтон BatteryService «в awake»:

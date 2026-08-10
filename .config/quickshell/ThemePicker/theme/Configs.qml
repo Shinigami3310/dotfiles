@@ -2,6 +2,7 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
+import "../shared/theme"
 
 // Carousel layout and scaling constants.
 // All "magic numbers" live here for easy tuning.
@@ -9,9 +10,9 @@ QtObject {
     // --- Paths (single source of truth for QML) ---
     // Read from environment variables with defaults as fallback,
     // so QML doesn't need patching when moving to another system.
-    readonly property string wallpaperDir: Quickshell.env("WALLPAPER_DIR") || "/home/Rostislav/Pictures/Wallpapers"
-    readonly property string setThemeScriptPath: Quickshell.env("SET_THEME_SCRIPT") || "/home/Rostislav/.config/quickshell/ThemePicker/scripts/set-theme"
-    readonly property string palettePath: Quickshell.env("PALETTE_PATH") || "/home/Rostislav/.config/quickshell/colors.json"
+    readonly property string wallpaperDir: Quickshell.env("WALLPAPER_DIR") || SharedPaths.homeDir + "/Pictures/Wallpapers"
+    readonly property string setThemeScriptPath: SharedPaths.configDir + "/ThemePicker/scripts/set-theme"
+    readonly property string palettePath: SharedPaths.palettePath
 
     // Card height as a fraction of screen height (~1/3)
     readonly property real cardHeightRatio: 0.3

@@ -1,4 +1,5 @@
 import QtQuick
+import "./shared/theme"
 import "./theme"
 import "./services"
 import "./ui"

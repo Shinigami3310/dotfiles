@@ -1,6 +1,6 @@
 import QtQuick
 import "../../ui"
-import "../../theme"
+import "../../shared/theme"
 import "../../services"
 
 // Обёртка над ui/IconButton для профиля питания. Активная рамка нужна,

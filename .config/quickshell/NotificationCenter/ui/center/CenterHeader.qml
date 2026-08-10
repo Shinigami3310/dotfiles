@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import "../../config"
 import "../../services"
+import "../common"
 
 RowLayout {
     id: root
@@ -12,9 +13,9 @@ RowLayout {
     spacing: 10
 
     Text {
-        text: "Notifications"
+        text: Constants.labelNotifications
         color: Colors.text
-        font.pixelSize: 15
+        font.pixelSize: Constants.fontLarge
         font.bold: true
         Layout.fillWidth: true
     }
@@ -23,93 +24,59 @@ RowLayout {
         spacing: 6
         Layout.alignment: Qt.AlignVCenter
 
-        // Фильтр Low
-        Rectangle {
-            width: 12
-            height: 12
-            radius: 6
-            color: service?.filterLow ? Colors.borderLow : Colors.surfaceContainer
-            border.width: 1
-            border.color: Colors.borderLow
-            MouseArea {
-                anchors.fill: parent
-                onClicked: {
-                    if (service)
-                        service.filterLow = !service.filterLow;
-                }
-            }
+        FilterDot {
+            active: service?.filterLow ?? false
+            dotColor: Colors.borderLow
+            onClicked: if (service) service.filterLow = !service.filterLow
         }
-        // Фильтр Normal
-        Rectangle {
-            width: 12
-            height: 12
-            radius: 6
-            color: service?.filterNormal ? Colors.borderNormal : Colors.surfaceContainer
-            border.width: 1
-            border.color: Colors.borderNormal
-            MouseArea {
-                anchors.fill: parent
-                onClicked: {
-                    if (service)
-                        service.filterNormal = !service.filterNormal;
-                }
-            }
+        FilterDot {
+            active: service?.filterNormal ?? false
+            dotColor: Colors.borderNormal
+            onClicked: if (service) service.filterNormal = !service.filterNormal
         }
-        // Фильтр Critical
-        Rectangle {
-            width: 12
-            height: 12
-            radius: 6
-            color: service?.filterCritical ? Colors.borderCritical : Colors.surfaceContainer
-            border.width: 1
-            border.color: Colors.borderCritical
-            MouseArea {
-                anchors.fill: parent
-                onClicked: {
-                    if (service)
-                        service.filterCritical = !service.filterCritical;
-                }
-            }
+        FilterDot {
+            active: service?.filterCritical ?? false
+            dotColor: Colors.borderCritical
+            onClicked: if (service) service.filterCritical = !service.filterCritical
         }
     }
 
     // Кнопка DND
-    Rectangle {
+    Pressable {
         width: 50
         height: 24
-        radius: 12
-        color: service?.dndEnabled ? Colors.primary : Colors.surfaceContainer
-        Text {
-            anchors.centerIn: parent
-            text: "DND"
-            font.pixelSize: 10
-            font.bold: true
-            color: service?.dndEnabled ? Colors.surface : Colors.muted
-        }
-        MouseArea {
+        onClicked: if (service) service.toggleDnd()
+
+        Rectangle {
             anchors.fill: parent
-            onClicked: {
-                if (service)
-                    service.toggleDnd();
+            radius: 12
+            color: service?.dndEnabled ? Colors.primary : Colors.surfaceContainer
+            Text {
+                anchors.centerIn: parent
+                text: Constants.labelDnd
+                font.pixelSize: Constants.fontTiny
+                font.bold: true
+                color: service?.dndEnabled ? Colors.surface : Colors.muted
             }
         }
     }
 
     // Кнопка очистки
-    Rectangle {
+    Pressable {
         width: 24
         height: 24
-        radius: 12
-        color: Colors.surfaceContainer
-        Text {
-            anchors.centerIn: parent
-            text: "🗑"
-            font.pixelSize: 12
-            color: Colors.text
-        }
-        MouseArea {
+        onClicked: clearAllRequested()
+
+        Rectangle {
             anchors.fill: parent
-            onClicked: clearAllRequested()
+            radius: 12
+            color: Colors.surfaceContainer
+            Text {
+                anchors.centerIn: parent
+                text: Constants.labelClear
+                font.pixelSize: Constants.fontMedium
+                color: Colors.text
+            }
         }
     }
 }

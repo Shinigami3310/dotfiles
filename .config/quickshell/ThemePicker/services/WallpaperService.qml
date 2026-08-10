@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import "../shared/theme"
 import "../theme"
 
 // Wallpaper list loading service from a directory.
@@ -17,7 +18,7 @@ QtObject {
     // no component should modify it directly.
     property var _buffer: []
 
-    signal loaded()
+    signal loaded
     signal failed(string message)
 
     function load() {
@@ -30,7 +31,7 @@ QtObject {
     property Process listProc: Process {
         // Via argument (not bash -c), to not depend on $HOME and to correctly
         // handle paths with spaces.
-        command: ["ls", "-1", Configs.wallpaperDir]
+        command: ["ls", "-1", Configs.wallpaperDir.replace(/^file:\/\//, "")]
         running: false
 
         stdout: SplitParser {
@@ -51,6 +52,7 @@ QtObject {
                 root.wallpapers = root._buffer; // Hand the whole ready list to the UI
                 root.loaded();
             } else {
+                console.log(Configs.wallpaperDir);
                 const msg = "[WallpaperService] Failed to read directory, code: " + exitCode;
                 console.warn(msg);
                 root.failed(msg);

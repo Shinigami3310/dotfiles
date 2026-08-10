@@ -2,6 +2,7 @@ pragma Singleton
 
 import QtQuick
 import "."
+import "../shared/theme"
 import "../theme"
 
 // ThemePicker controller: separates logic (navigation, lifecycle,

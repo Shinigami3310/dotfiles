@@ -4,11 +4,17 @@ import "../config"
 QtObject {
     id: factory
 
+    property int _idCounter: 0
+
+    function _nextId() {
+        return `n-${Date.now()}-${_idCounter++}`;
+    }
+
     function createNotification(input) {
         input = input || {};
-        const imp = input.importance ?? Constants.importance.normal;
+        const imp = input.importance ?? Constants.Importance.Normal;
         const numericId = (typeof input.dbusId === "number" && input.dbusId > 0) ? input.dbusId : 0;
-        const stringId = input.id ?? (numericId > 0 ? `dbus-${numericId}` : `n-${Date.now()}-${Math.floor(Math.random() * 10000)}`);
+        const stringId = input.id ?? (numericId > 0 ? `dbus-${numericId}` : _nextId());
 
         let notificationTime;
         if (input.time instanceof Date) {
@@ -22,22 +28,21 @@ QtObject {
             notificationTime = new Date();
         }
 
+        const actions = Array.isArray(input.actions) ? input.actions : [];
+
         return {
             id: stringId,
             dbusId: numericId,
-            source: input.source ?? "Source not identified",
+            source: input.source ?? Constants.sourceUnknown,
             summary: input.summary ?? "",
             text: input.text ?? "",
             icon: input.icon ?? "",
             time: notificationTime,
             importance: imp,
-            origin: input.origin ?? Constants.origin.api,
-            persistent: input.expireTimeout === 0 || imp === Constants.importance.critical,
-            dismissible: true,
-            read: false,
+            origin: input.origin ?? Constants.Origin.Api,
+            persistent: input.expireTimeout === 0 || imp === Constants.Importance.Critical,
             expireTimeout: input.expireTimeout ?? -1,
-            actions: input.actions || []          // ← ВОЗВРАЩАЕМ МАССИВ ДЕЙСТВИЙ
-            ,
+            actions: actions,
             rawNotification: input.rawNotification ?? null
         };
     }

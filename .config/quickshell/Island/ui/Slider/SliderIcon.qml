@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Effects
+import "../../shared/theme"
 import "../../theme"
 
 // Иконка слайдера. Fade-переключение нужно, чтобы резкая смена иконки

@@ -1,4 +1,5 @@
 import QtQuick
+import "../shared/theme"
 import "../theme"
 
 // Wallpaper carousel. Uses a floating (fractional) offset instead of a discrete
@@ -58,7 +59,7 @@ Item {
 
             WallpaperCard {
                 anchors.fill: parent
-                source: "file://" + Configs.wallpaperDir + "/" + modelData
+                source: Configs.wallpaperDir + "/" + modelData
                 bevel: root.bevel * card.currentScaleFactor
                 // Only the current card loads; the next is unlocked when this one is ready.
                 loadRequested: index < root._nextToLoad

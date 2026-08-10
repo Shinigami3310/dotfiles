@@ -1,5 +1,5 @@
 import QtQuick
-import "../../theme"
+import "../../shared/theme"
 import "../../services"
 
 // Индикатор батареи: рамка с терминалом, fill-заливка и анимация зарядки.

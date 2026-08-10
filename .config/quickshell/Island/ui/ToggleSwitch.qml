@@ -1,5 +1,5 @@
 import QtQuick
-import "../theme"
+import "../shared/theme"
 
 // Переключатель. Наследует Pressable, чтобы hover/pressed/scale-анимация
 // была единой с остальными интерактивными элементами.

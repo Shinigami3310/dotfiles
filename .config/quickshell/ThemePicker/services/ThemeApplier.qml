@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import "../shared/theme"
 import "../theme"
 
 // Theme application service: runs scripts/set-theme with the wallpaper name.
@@ -27,8 +28,8 @@ QtObject {
             root.applied(false);
             return;
         }
-
-        root.applierProc.command = ["bash", Configs.setThemeScriptPath, wallpaperName];
+        console.log(Configs.setThemeScriptPath, wallpaperName);
+        root.applierProc.command = ["bash", Configs.setThemeScriptPath.replace(/^file:\/\//, ""), wallpaperName];
         root.timeoutTimer.start();
         root.applierProc.running = true;
     }

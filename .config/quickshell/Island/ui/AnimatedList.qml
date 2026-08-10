@@ -1,5 +1,5 @@
 import QtQuick
-import "../theme"
+import "../shared/theme"
 
 // Анимированный ListView. Переходы синхронизированы с Motion.morph, чтобы
 // добавление/удаление элементов не «дёргало» список — иначе при частых

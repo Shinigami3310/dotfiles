@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
-import "../../theme"
+import "../../shared/theme"
 import "../../services"
 import "../../ui"
 

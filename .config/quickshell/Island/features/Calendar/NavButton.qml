@@ -1,5 +1,5 @@
 import QtQuick
-import "../../theme"
+import "../../shared/theme"
 import "../../ui"
 
 // Кнопка навигации по месяцам (‹ ›). Использует увеличенный hoverScale,

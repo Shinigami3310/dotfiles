@@ -2,7 +2,8 @@ pragma Singleton
 
 import QtQuick
 
-// Длительности и easing-типы анимаций (паттерн из PowerMenu/Island).
+// Токены анимаций — единый источник для всей экосистемы.
+// Умножение mult позволяет глобально замедлить/ускорить все анимации.
 QtObject {
     readonly property real mult: 1.0
 
@@ -16,5 +17,6 @@ QtObject {
 
     readonly property int easeStandard: Easing.InOutQuad
     readonly property int easeOut: Easing.OutQuad
+    readonly property int easeOutCubic: Easing.OutCubic
     readonly property int easeIn: Easing.InQuad
 }

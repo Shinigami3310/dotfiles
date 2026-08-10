@@ -1,5 +1,5 @@
 import QtQuick
-import "../../theme"
+import "../../shared/theme"
 import "../../ui"
 
 // Ячейка дня календаря. disabled для дней вне месяца, чтобы они не

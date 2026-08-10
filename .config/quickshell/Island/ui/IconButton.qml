@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Effects
+import "../shared/theme"
 import "../theme"
 
 // Единая иконка-кнопка. Все иконки-кнопки проекта (Bar/Icon,

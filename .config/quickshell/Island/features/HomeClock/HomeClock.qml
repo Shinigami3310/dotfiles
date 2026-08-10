@@ -1,6 +1,6 @@
 import QtQuick
 import Quickshell
-import "../../theme"
+import "../../shared/theme"
 import "../../core"
 
 Item {

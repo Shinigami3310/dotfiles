@@ -11,20 +11,24 @@ ShellRoot {
     id: root
 
     NotificationStore {
-        id: appStore
+        id: store
     }
     NotificationService {
-        id: appService
-        store: appStore
+        id: service
+        store: store
     }
     NotificationRouter {
-        id: appRouter
-        service: appService
+        id: router
+        service: service
     }
 
     NotificationServer {
         id: notificationServer
-        onNotification: notification => appRouter.fromDbus(notification)
+        actionsSupported: true
+        imageSupported: true
+        bodySupported: true
+        persistenceSupported: true
+        onNotification: notification => router.fromDbus(notification)
     }
 
     IpcHandler {
@@ -33,24 +37,24 @@ ShellRoot {
             centerWindow.visible = !centerWindow.visible;
         }
         function toggleDnd(): void {
-            appService.toggleDnd();
+            service.toggleDnd();
         }
         function getDndState(): bool {
-            return appService.dndEnabled;
+            return service.dndEnabled;
         }
     }
 
     ToastHost {
         id: toastHost
-        store: appStore
-        service: appService
+        store: store
+        service: service
     }
 
     CenterWindow {
         id: centerWindow
-        store: appStore
-        service: appService
+        store: store
+        service: service
     }
 
-    Component.onCompleted: appService.start()
+    Component.onCompleted: service.start()
 }
