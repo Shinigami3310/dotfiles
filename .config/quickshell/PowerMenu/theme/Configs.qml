@@ -4,7 +4,7 @@ import QtQuick
 
 QtObject {
     // Global UI scale factor (1.2 = 20% larger)
-    readonly property real uiScale: 1.2
+    readonly property real uiScale: 1.25
 
     property real scaleHover: 1.1
     property real scalePressed: 0.9

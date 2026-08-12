@@ -1,6 +1,6 @@
 import QtQuick
 import "../../config"
-
+import "../../shared/theme"
 import "../../services/"
 
 ListView {
@@ -33,6 +33,6 @@ ListView {
     }
 
     displaced: Transition {
-        NumberAnimation { properties: "y"; duration: 200 }
+        NumberAnimation { properties: "y"; duration: Motion.standard }
     }
 }

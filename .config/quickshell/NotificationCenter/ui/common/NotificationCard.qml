@@ -84,6 +84,7 @@ Rectangle {
             Text {
                 text: notificationData?.source ?? ""
                 color: Colors.muted
+                font.family: Constants.fontFamily
                 font.pixelSize: Constants.fontSmall
                 font.bold: true
                 Layout.fillWidth: true
@@ -92,6 +93,7 @@ Rectangle {
             Text {
                 text: notificationData?.time ? Qt.formatTime(notificationData.time, "hh:mm") : ""
                 color: Colors.muted
+                font.family: Constants.fontFamily
                 font.pixelSize: Constants.fontTiny
             }
             Pressable {
@@ -106,6 +108,7 @@ Rectangle {
                     Text {
                         anchors.centerIn: parent
                         text: Constants.labelClose
+                        font.family: Constants.fontFamily
                         font.pixelSize: Constants.fontTiny
                         color: Colors.muted
                     }
@@ -118,6 +121,7 @@ Rectangle {
             Layout.fillWidth: true
             text: notificationData?.summary ?? ""
             color: Colors.text
+            font.family: Constants.fontFamily
             font.pixelSize: compact ? Constants.fontMedium : Constants.fontSummary
             font.bold: true
             elide: Text.ElideRight
@@ -129,6 +133,7 @@ Rectangle {
             text: notificationData?.text ?? ""
             color: Colors.text
             wrapMode: Text.Wrap
+            font.family: Constants.fontFamily
             font.pixelSize: Constants.fontMedium
         }
 
@@ -159,6 +164,7 @@ Rectangle {
                             anchors.centerIn: parent
                             text: modelData.text || modelData.key
                             color: Colors.primary
+                            font.family: Constants.fontFamily
                             font.pixelSize: Constants.fontSmall
                             font.bold: true
                         }

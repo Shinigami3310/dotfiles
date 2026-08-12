@@ -1,0 +1,2 @@
+singleton EyeConfig EyeConfig.qml
+Eye Eye.qml

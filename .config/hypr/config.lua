@@ -1,5 +1,19 @@
 -- Refer to https://wiki.hypr.land/Configuring/Basics/Variables/
+local colors_path = os.getenv("HOME") .. "/.config/hypr/colors.lua"
+local ok, colors = pcall(dofile, colors_path)
 
+-- Функция: убирает '#' и приводит к формату "rgba(RRGGBBAA)"
+local function c(hex, alpha)
+	if not hex then
+		return nil
+	end
+	return "rgba(" .. hex:gsub("#", "") .. (alpha or "ff") .. ")"
+end
+
+-- Формируем финальные цвета с нужной прозрачностью
+local active_1 = ok and c(colors.primary, "ee") or "rgba(33ccffee)"
+local active_2 = ok and c(colors.tertiary, "ee") or "rgba(00ff99ee)"
+local inactive = ok and c(colors.inactive, "aa") or "rgba(595959aa)"
 --------------
 --- Visual ---
 --------------
@@ -11,8 +25,8 @@ hl.config({
 		border_size = 1,
 
 		col = {
-			active_border = { colors = { "rgba(33ccffee)", "rgba(00ff99ee)" }, angle = 45 },
-			inactive_border = "rgba(595959aa)",
+			active_border = { colors = { active_1, active_2 }, angle = 45 },
+			inactive_border = inactive,
 		},
 
 		resize_on_border = false,

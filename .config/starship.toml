@@ -1,6 +1,6 @@
 add_newline = true
 
-command_timeout = 50
+command_timeout = 200
 
 format = """
 [╭──](bold green) $os$hostname$directory$git_branch$git_status${custom.git_dirty}

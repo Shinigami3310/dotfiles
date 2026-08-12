@@ -52,17 +52,17 @@ PanelWindow {
 
         add: Transition {
             ParallelAnimation {
-                NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 200; easing.type: Easing.OutCubic }
-                NumberAnimation { property: "x"; from: 120; to: 0; duration: 200; easing.type: Easing.OutCubic }
+                NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Motion.standard; easing.type: Motion.easeOutCubic }
+                NumberAnimation { property: "x"; from: 120; to: 0; duration: Motion.standard; easing.type: Motion.easeOutCubic }
             }
         }
         displaced: Transition {
-            NumberAnimation { properties: "y"; duration: 200; easing.type: Easing.OutCubic }
+            NumberAnimation { properties: "y"; duration: Motion.standard; easing.type: Motion.easeOutCubic }
         }
         remove: Transition {
             ParallelAnimation {
-                NumberAnimation { property: "opacity"; to: 0; duration: 200 }
-                NumberAnimation { property: "x"; to: 120; duration: 200 }
+                NumberAnimation { property: "opacity"; to: 0; duration: Motion.standard }
+                NumberAnimation { property: "x"; to: 120; duration: Motion.standard }
             }
         }
     }

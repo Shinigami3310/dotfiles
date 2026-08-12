@@ -1,0 +1,2 @@
+singleton HomeClockConfig HomeClockConfig.qml
+HomeClock HomeClock.qml

@@ -16,3 +16,7 @@ singleton WifiService WifiService.qml
 singleton WorkspaceService WorkspaceService.qml
 ModeController ModeController.qml
 ListModelDiff helpers/ListModelDiff.qml
+MpvEngine MusicPlayer/MpvEngine.qml
+PlaylistRepository MusicPlayer/PlaylistRepository.qml
+BluetoothScanner Bluetooth/BluetoothScanner.qml
+BluetoothProcesses Bluetooth/BluetoothProcesses.qml

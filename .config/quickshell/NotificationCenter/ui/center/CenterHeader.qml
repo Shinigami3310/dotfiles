@@ -15,6 +15,7 @@ RowLayout {
     Text {
         text: Constants.labelNotifications
         color: Colors.text
+        font.family: Constants.fontFamily
         font.pixelSize: Constants.fontLarge
         font.bold: true
         Layout.fillWidth: true
@@ -54,6 +55,7 @@ RowLayout {
             Text {
                 anchors.centerIn: parent
                 text: Constants.labelDnd
+                font.family: Constants.fontFamily
                 font.pixelSize: Constants.fontTiny
                 font.bold: true
                 color: service?.dndEnabled ? Colors.surface : Colors.muted
@@ -74,6 +76,7 @@ RowLayout {
             Text {
                 anchors.centerIn: parent
                 text: Constants.labelClear
+                font.family: Constants.fontFamily
                 font.pixelSize: Constants.fontMedium
                 color: Colors.text
             }

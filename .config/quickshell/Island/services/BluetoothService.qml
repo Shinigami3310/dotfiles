@@ -1,11 +1,12 @@
 pragma Singleton
 import QtQuick
-import Quickshell
-import Quickshell.Io
-import "../shared/theme"
-import "../theme"
 import "helpers"
+import "Bluetooth"
 
+// Оркестратор Bluetooth: состояние (вкл/выкл, подключение, активность),
+// модель устройств и связка сканера/процессов.
+// Сырые процессы вынесены в BluetoothScanner (скан) и BluetoothProcesses
+// (power/connect), чтобы сервис оставался тонким и читаемым.
 QtObject {
     id: root
 
@@ -15,8 +16,6 @@ QtObject {
     property bool isAwake: false
     readonly property ListModel deviceModel: ListModel {}
 
-    property ListModelDiff listModelDiff: ListModelDiff {}
-
     property bool _isToggling: false
 
     property Timer sleepTimer: Timer {
@@ -24,123 +23,62 @@ QtObject {
         onTriggered: root.isAwake = false
     }
 
-    property Timer updateThrottleTimer: Timer {
-        interval: ServiceConfig.bluetoothThrottleMs
-        onTriggered: {
-            if (!scanProc.running) {
-                scanParser._lines = [];
-                scanProc.running = true;
-            }
-        }
-    }
-
     property Timer stateCheckTimer: Timer {
         interval: ServiceConfig.bluetoothStateCheckMs
         repeat: true
-        onTriggered: checkStateProc.running = true
+        onTriggered: processes.checkStateProc.running = true
     }
 
-    property Timer retryScanTimer: Timer {
-        interval: ServiceConfig.bluetoothRetryMs
-        onTriggered: startScan()
+    property ListModelDiff listModelDiff: ListModelDiff {}
+
+    // Сканер (непрерывный bluetoothctl scan on + bt_scan.sh)
+    readonly property BluetoothScanner scanner: BluetoothScanner {
+        isAwake: root.isAwake
+        isEnabled: root.enabled
+        isToggling: root._isToggling
+        throttleMs: ServiceConfig.bluetoothThrottleMs
+        retryMs: ServiceConfig.bluetoothRetryMs
+        onScanData: lines => root.updateModel(lines)
     }
 
-    property Process checkStateProc: Process {
-        command: ["bash", "-c", "bluetoothctl show | grep -q 'Powered: yes' && echo 1 || echo 0"]
-        stdout: SplitParser {
-            onRead: data => {
-                if (root._isToggling)
-                    return;
-                const newState = data.trim() === "1";
-                if (root.enabled !== newState) {
-                    root.enabled = newState;
-                }
+    // Процессы управления (power, state, connect)
+    readonly property BluetoothProcesses processes: BluetoothProcesses {
+        isToggling: root._isToggling
+        onStateChanged: newState => {
+            if (root.enabled !== newState) {
+                root.enabled = newState;
             }
         }
-        onExited: exitCode => {
-            if (exitCode !== 0)
-                console.warn(`[BluetoothService] bluetoothctl show завершился с кодом ${exitCode}`);
-        }
-    }
-
-    property Process continuousScanProc: Process {
-        command: ["bluetoothctl", "scan", "on"]
-        stdout: SplitParser {
-            onRead: _ => {
-                if (!updateThrottleTimer.running)
-                    updateThrottleTimer.start();
-            }
-        }
-        stderr: SplitParser {
-            onRead: err => console.error(`[Bluetooth] Scan Error: ${err.trim()}`)
-        }
-        onExited: exitCode => {
-            if (root.isAwake && root.enabled && !root._isToggling) {
-                retryScanTimer.start();
-            }
-        }
-    }
-
-    property Process scanProc: Process {
-        // Сканер вынесен в services/scripts/bt_scan.sh
-        command: ["bash", Paths.scriptsDir + "bt_scan.sh"]
-        stdout: SplitParser {
-            id: scanParser
-            property list<string> _lines: []
-            onRead: data => {
-                if (data.trim())
-                    scanParser._lines.push(data.trim());
-            }
-        }
-        onExited: exitCode => {
-            if (exitCode === 0 && root.isAwake) {
-                root.updateModel(scanParser._lines);
-            } else if (exitCode !== 0) {
-                console.warn(`[BluetoothService] bt_scan.sh завершился с кодом ${exitCode}`);
-            }
-            scanParser._lines = [];
-        }
-    }
-
-    property Process toggleProc: Process {
-        property string targetState: "on"
-        command: ["bluetoothctl", "power", targetState]
-        onExited: () => {
+        onToggleComplete: (enabled) => {
             root._isToggling = false;
-            if (targetState === "on" && root.isAwake) {
-                startScan();
+            if (enabled && root.isAwake) {
+                scanner.startScan();
             }
-            checkStateProc.running = true;
+            processes.checkStateProc.running = true;
         }
-    }
-
-    property Process connectProc: Process {
-        stderr: SplitParser {
-            onRead: err => console.error(`[Bluetooth] Connect Error: ${err.trim()}`)
-        }
-        onExited: () => {
+        onConnectComplete: () => {
             root.connectingMac = "";
-            startScan();
+            scanner.startScan();
         }
     }
 
     onIsAwakeChanged: {
         if (isAwake) {
-            checkStateProc.running = true;
+            processes.checkStateProc.running = true;
             stateCheckTimer.start();
             if (enabled && !_isToggling)
-                startScan();
+                scanner.startScan();
         } else {
             stateCheckTimer.stop();
-            stopScan();
+            scanner.stopScan();
         }
     }
 
     onEnabledChanged: {
         if (enabled && isAwake && !_isToggling) {
-            startScan();
+            scanner.startScan();
         } else if (!enabled) {
-            stopScan();
+            scanner.stopScan();
             deviceModel.clear();
         }
     }
@@ -162,39 +100,14 @@ QtObject {
             return;
         _isToggling = true;
         enabled = !enabled;
-        toggleProc.targetState = enabled ? "on" : "off";
-        toggleProc.running = false;
-        toggleProc.running = true;
+        processes.toggle(enabled);
     }
 
     function connectToDevice(mac: string) {
         if (connectingMac !== "")
             return;
         connectingMac = mac;
-
-        connectProc.command = ["bash", "-c", "bluetoothctl pair \"$1\"; sleep 0.5; bluetoothctl connect \"$1\"; bluetoothctl info \"$1\" | grep -q 'Connected: yes' && echo OK || echo FAIL", "--", mac];
-
-        connectProc.running = false;
-        connectProc.running = true;
-    }
-
-    function startScan() {
-        if (!enabled || continuousScanProc.running)
-            return;
-        retryScanTimer.stop();
-        continuousScanProc.running = false;
-        continuousScanProc.running = true;
-        updateThrottleTimer.start();
-    }
-
-    function stopScan() {
-        retryScanTimer.stop();
-        updateThrottleTimer.stop();
-
-        if (continuousScanProc.running) {
-            continuousScanProc.running = false;
-            Quickshell.execDetached(["bluetoothctl", "scan", "off"]);
-        }
+        processes.connectToDevice(mac);
     }
 
     function updateModel(lines: var) {

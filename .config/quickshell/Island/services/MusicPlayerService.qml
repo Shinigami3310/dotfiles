@@ -1,9 +1,12 @@
 pragma Singleton
 import QtQuick
 import QtCore
-import Qt.labs.folderlistmodel
-import Quickshell.Io
+import "../shared/theme"
+import "MusicPlayer"
 
+// Оркестратор музыкального плеера: состояние навигации + связка
+// MpvEngine (mpv-процесс) и PlaylistRepository (сканирование папок).
+// Вся низкоуровневая работа с mpv и FolderListModel — в MusicPlayer/.
 QtObject {
     id: root
 
@@ -18,12 +21,42 @@ QtObject {
     property var tracks: []
     property string selectedFolder: ""
 
-    readonly property string musicDir: StandardPaths.standardLocations(StandardPaths.MusicLocation)[0]
+    // Каталог музыки; при отсутствии системного каталога — fallback ~/Music.
+    readonly property string musicDir: {
+        const locations = StandardPaths.standardLocations(StandardPaths.MusicLocation);
+        return (locations && locations.length > 0 && locations[0])
+            ? locations[0]
+            : (SharedPaths.homeDir + "/Music");
+    }
+
     readonly property string currentPlaylistName: playlists[playlistIndex] ?? "No playlists"
     readonly property string currentTrackDisplay: tracks[trackIndex]?.cleanName ?? "No track"
     readonly property string socketPath: ServiceConfig.mpvSocketPath
 
-    property bool _explicitStop: false
+    // MpvEngine инкапсулирует процессы; флаг _explicitStop — внутри него.
+    readonly property MpvEngine engine: MpvEngine {
+        socketPath: root.socketPath
+
+        // Естественный конец трека (exitCode == 0 && isPlaying) → автопереход.
+        onExited: root.next()
+    }
+
+    // PlaylistRepository сканирует папки и треки.
+    readonly property PlaylistRepository repository: PlaylistRepository {
+        active: root.active
+        musicDir: root.musicDir
+        selectedFolder: root.selectedFolder
+
+        onPlaylistsReady: list => root.playlists = list
+        onTracksReady: list => {
+            root.tracks = list;
+            if (list.length > 0 && root.trackIndex === 0 && !root.isPlaylistMode) {
+                root.playCurrent();
+            }
+        }
+    }
+
+    // ---- Жизненный цикл ----
 
     function wakeUp() {
         active = true;
@@ -35,11 +68,7 @@ QtObject {
     function sleep() {
         active = false;
         isPlaying = false;
-
-        if (mpvProcess.running) {
-            _explicitStop = true;
-            mpvProcess.running = false;
-        }
+        engine.stopProcess();
 
         isPlaylistMode = true;
         tracks = [];
@@ -47,21 +76,38 @@ QtObject {
         trackIndex = 0;
     }
 
+    // ---- Управление воспроизведением ----
+
     function playStop() {
         if (!tracks.length)
             return;
 
-        if (mpvProcess.running) {
-            if (!mpvCommand.running) {
-                // socketPath — фиксированная константа, не пользовательский ввод,
-                // поэтому конкатенация безопасна.
-                mpvCommand.command = ["sh", "-c", `echo 'cycle pause' | socat - ${socketPath}`];
-                mpvCommand.running = true;
-                isPlaying = !isPlaying;
-            }
+        if (engine.isRunning) {
+            engine.cyclePause();
+            isPlaying = engine.isPlaying;
         } else {
-            _playCurrentTrack();
+            playCurrent();
         }
+    }
+
+    // Проиграть текущий трек индекса (без аргумента — текущий).
+    function playCurrent() {
+        if (!tracks.length || trackIndex < 0 || trackIndex >= tracks.length)
+            return;
+
+        // Полагаемся на filePath из FolderListModel (URL вида file://...).
+        // decodeURIComponent может бросить исключение на «битых» путях —
+        // поэтому защищаемся try/catch и не прерываем воспроизведение.
+        let path;
+        try {
+            path = decodeURIComponent(tracks[trackIndex].filePath.replace(/^file:\/\//, ""));
+        } catch (e) {
+            console.warn(`[MusicPlayerService] Не удалось декодировать путь трека: ${e}`);
+            return;
+        }
+
+        engine.playTrack(path);
+        isPlaying = engine.isPlaying;
     }
 
     function togglePlaylistMode() {
@@ -71,18 +117,18 @@ QtObject {
     function next() {
         _navigate(1);
     }
+
     function previous() {
         _navigate(-1);
     }
+
+    // ---- Выбор плейлиста ----
 
     function confirmSelection() {
         if (!isPlaylistMode || !playlists[playlistIndex])
             return;
 
-        if (mpvProcess.running) {
-            _explicitStop = true;
-            mpvProcess.running = false;
-        }
+        engine.stopProcess();
 
         selectedFolder = `${musicDir}/${playlists[playlistIndex]}`;
         trackIndex = 0;
@@ -94,6 +140,8 @@ QtObject {
             isPlaylistMode = false;
         }
     }
+
+    // ---- Внутренняя навигация ----
 
     function _navigate(step: int) {
         const list = isPlaylistMode ? playlists : tracks;
@@ -107,88 +155,7 @@ QtObject {
             playlistIndex = newIndex;
         } else {
             trackIndex = newIndex;
-            _playCurrentTrack();
-        }
-    }
-
-    function _playCurrentTrack() {
-        if (!tracks.length || trackIndex < 0 || trackIndex >= tracks.length)
-            return;
-
-        const safePath = decodeURIComponent(tracks[trackIndex].filePath.replace(/^file:\/\//, ""));
-
-        if (mpvProcess.running) {
-            root._explicitStop = true;
-            mpvProcess.running = false;
-        }
-
-        mpvProcess.command = ["mpv", "--no-video", "--no-terminal", `--input-ipc-server=${socketPath}`, "--", safePath];
-        mpvProcess.running = true;
-        isPlaying = true;
-    }
-
-    readonly property Process mpvProcess: Process {
-        onExited: exitCode => {
-            if (root._explicitStop) {
-                root._explicitStop = false;
-                return;
-            }
-
-            if (root.isPlaying && exitCode === 0) {
-                root.next();
-            } else {
-                if (exitCode !== 0)
-                    console.warn(`[MusicPlayerService] mpv завершился с кодом ${exitCode}`);
-                root.isPlaying = false;
-            }
-        }
-    }
-
-    readonly property Process mpvCommand: Process {}
-
-    readonly property FolderListModel playlistScanner: FolderListModel {
-        folder: root.active ? root.musicDir : ""
-        showFiles: false
-        showDirs: true
-        showDotAndDotDot: false
-
-        onStatusChanged: {
-            if (status === FolderListModel.Ready) {
-                const list = new Array(count);
-                for (let i = 0; i < count; i++) {
-                    list[i] = get(i, "fileName");
-                }
-                root.playlists = list;
-            }
-        }
-    }
-
-    readonly property FolderListModel trackScanner: FolderListModel {
-        folder: (root.active && root.selectedFolder) ? root.selectedFolder : ""
-        showDirs: false
-        showDotAndDotDot: false
-        nameFilters: ["*.mp3", "*.wav", "*.flac"]
-        sortField: FolderListModel.Name
-
-        onStatusChanged: {
-            if (status === FolderListModel.Ready) {
-                const list = new Array(count);
-                for (let i = 0; i < count; i++) {
-                    const fileName = get(i, "fileName");
-                    const dotIdx = fileName.lastIndexOf('.');
-
-                    list[i] = {
-                        fileName: fileName,
-                        cleanName: dotIdx > 0 ? fileName.substring(0, dotIdx) : fileName,
-                        filePath: String(get(i, "filePath"))
-                    };
-                }
-                root.tracks = list;
-
-                if (list.length > 0 && root.trackIndex === 0 && !root.isPlaylistMode) {
-                    root._playCurrentTrack();
-                }
-            }
+            playCurrent();
         }
     }
 }

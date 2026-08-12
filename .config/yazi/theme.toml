@@ -1,0 +1,50 @@
+
+# ~/.config/yazi/theme.toml
+
+[icon]
+# 1. Специфичные папки (по точному имени)
+prepend_dirs = [
+    { name = "Desktop",   text = "", fg = "blue" },
+    { name = "Documents", text = "", fg = "blue" },
+    { name = "Downloads", text = "󰉍", fg = "magenta" },
+    { name = "Pictures",  text = "󰉏", fg = "yellow" },
+    { name = "Music",     text = "󰎆", fg = "cyan" },
+    { name = "Videos",    text = "󰕧", fg = "magenta" },
+    { name = ".config",   text = "", fg = "cyan" },
+    { name = ".git",      text = "", fg = "red" },
+]
+
+# 2. Иконки по расширениям файлов (без звездочек и точек)
+prepend_exts = [
+    { name = "zip",     text = "", fg = "red" },
+    { name = "rar",     text = "", fg = "red" },
+    { name = "tar",     text = "", fg = "red" },
+    { name = "gz",      text = "", fg = "red" },
+    { name = "jpg",     text = "", fg = "yellow" },
+    { name = "jpeg",    text = "", fg = "yellow" },
+    { name = "png",     text = "", fg = "yellow" },
+    { name = "svg",     text = "󰜡", fg = "yellow" },
+    { name = "mp4",     text = "", fg = "magenta" },
+    { name = "mkv",     text = "", fg = "magenta" },
+    { name = "mp3",     text = "󰎆", fg = "cyan" },
+    { name = "pdf",     text = "", fg = "red" },
+    { name = "txt",     text = "", fg = "white" },
+    { name = "md",      text = "", fg = "white" },
+    { name = "py",      text = "", fg = "blue" },
+    { name = "rs",      text = "", fg = "red" },
+    { name = "js",      text = "", fg = "yellow" },
+    { name = "json",    text = "", fg = "green" },
+    { name = "toml",    text = "", fg = "green" },
+]
+
+# 3. Конкретные файлы по имени
+prepend_files = [
+    { name = ".bashrc", text = "", fg = "green" },
+    { name = ".zshrc",  text = "", fg = "green" },
+]
+
+# 4. Общие условия (fallback для всех остальных папок)
+prepend_conds = [
+    { if = "dir", text = "", fg = "blue" },
+]
+

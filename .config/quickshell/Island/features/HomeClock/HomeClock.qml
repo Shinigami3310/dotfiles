@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import "../../shared/theme"
 import "../../core"
+import "."
 
 Item {
     id: root
@@ -10,8 +11,8 @@ Item {
 
     // Стартовая «заглушка» при запуске shell. Показываем только время
     // — это привычный и ненавязчивый виджет, не требующий действий.
-    readonly property int paddingX: 40
-    readonly property int paddingY: 12
+    readonly property int paddingX: HomeClockConfig.paddingX
+    readonly property int paddingY: HomeClockConfig.paddingY
 
     implicitWidth: timeText.implicitWidth + (paddingX * 2)
     implicitHeight: timeText.implicitHeight + (paddingY * 2)
@@ -27,7 +28,7 @@ Item {
         text: Qt.formatTime(clock.date, "hh:mm")
         font {
             family: Theme.font
-            pixelSize: 18
+            pixelSize: HomeClockConfig.textPixelSize
             weight: Font.Normal
         }
         color: ThemeColor.on_surface

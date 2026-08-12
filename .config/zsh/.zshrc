@@ -1,5 +1,4 @@
 ZDOTDIR="${ZDOTDIR:-$HOME/.config/zsh}"
-
 # Подключаем плагины...
 if [[ -f "$ZDOTDIR/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
     source "$ZDOTDIR/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh"
@@ -26,3 +25,7 @@ setopt APPEND_HISTORY       # Дописывать историю в файл, �
 setopt SHARE_HISTORY        # Делиться историей между всеми открытыми терминалами в реальном времени
 setopt HIST_IGNORE_DUPS     # Не сохранять дубликаты, если команда введена дважды подряд
 setopt HIST_IGNORE_SPACE    # Не сохранять команды, которые начинаются с пробела
+
+if [ "$TERM" = "xterm-kitty" ]; then
+    hyprctl switchxkblayout all 0 > /dev/null 2>&1
+fi
