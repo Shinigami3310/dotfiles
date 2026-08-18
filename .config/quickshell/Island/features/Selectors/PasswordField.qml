@@ -49,7 +49,10 @@ Rectangle {
 
         onAccepted: {
             if (text.trim() !== "") {
-                root.active = false;
+                // НЕ устанавливаем root.active = false здесь: это свойство связано
+                // с isInputting родителя, и прямое присваивание разорвёт биндинг
+                // (поле скроется, но родитель не узнает → высота не сбросится).
+                // Сброс происходит в SelectorItemCard.onSubmitted.
                 root.submitted(text);
                 text = "";
             }

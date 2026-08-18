@@ -43,7 +43,10 @@ QtObject {
         stdout: SplitParser {
             onRead: data => {
                 if (!root._isToggling) {
-                    root.enabled = (data.trim() === "enabled");
+                    const newState = data.trim() === "enabled";
+                    if (root.enabled !== newState) {
+                        root.enabled = newState;
+                    }
                 }
             }
         }
@@ -123,7 +126,7 @@ QtObject {
     }
 
     function scan() {
-        if (!enabled || _isScanning)
+        if (!enabled || _isScanning || !isAwake)
             return;
         _isScanning = true;
 

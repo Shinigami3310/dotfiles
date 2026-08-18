@@ -1,8 +1,4 @@
-
-# ~/.config/yazi/theme.toml
-
 [icon]
-# 1. Специфичные папки (по точному имени)
 prepend_dirs = [
     { name = "Desktop",   text = "", fg = "blue" },
     { name = "Documents", text = "", fg = "blue" },
@@ -14,7 +10,6 @@ prepend_dirs = [
     { name = ".git",      text = "", fg = "red" },
 ]
 
-# 2. Иконки по расширениям файлов (без звездочек и точек)
 prepend_exts = [
     { name = "zip",     text = "", fg = "red" },
     { name = "rar",     text = "", fg = "red" },
@@ -37,13 +32,11 @@ prepend_exts = [
     { name = "toml",    text = "", fg = "green" },
 ]
 
-# 3. Конкретные файлы по имени
 prepend_files = [
     { name = ".bashrc", text = "", fg = "green" },
     { name = ".zshrc",  text = "", fg = "green" },
 ]
 
-# 4. Общие условия (fallback для всех остальных папок)
 prepend_conds = [
     { if = "dir", text = "", fg = "blue" },
 ]

@@ -7,7 +7,6 @@ linemode = "size"
 [preview]
 max_width = 540
 max_height = 960
-image_filter = "catmull-rom"
 
 [file]
 trash = true

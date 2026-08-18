@@ -1,5 +1,4 @@
 add_newline = true
-
 command_timeout = 200
 
 format = """
@@ -52,6 +51,6 @@ deleted = ""
 
 [custom.git_dirty]
 command = "echo '?'"
-when = "git status --porcelain | grep -qE '^.[^ ]|^\\?'"
+when = "git status --porcelain | grep -qE '^.[^ ]'"
 style = "bold red"
 format = "[$output ]($style)"

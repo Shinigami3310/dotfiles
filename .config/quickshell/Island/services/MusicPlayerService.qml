@@ -17,6 +17,10 @@ QtObject {
     property int playlistIndex: 0
     property int trackIndex: 0
 
+    // playlists — имена папок (строки); tracks — объекты {fileName,cleanName,filePath}.
+    // Используем var: FolderListModel отдаёт JS-массивы, а list<T> в QML нельзя
+    // переназначить через присваивание (только через append/clear) — это бы сломало
+    // onPlaylistsReady/onTracksReady.
     property var playlists: []
     property var tracks: []
     property string selectedFolder: ""

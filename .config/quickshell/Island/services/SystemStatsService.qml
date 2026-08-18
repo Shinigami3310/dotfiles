@@ -37,8 +37,11 @@ QtObject {
 
     function _stopProcesses() {
         for (let i = 0; i < _procs.length; i++) {
-            if (_procs[i].running)
-                _procs[i].running = false;
+            const proc = _procs[i];
+            // _procs объявлен раньше процессов в тексте файла — если QML ещё
+            // не связал ссылки, элемент может быть null. Защищаемся.
+            if (proc && proc.running)
+                proc.running = false;
         }
     }
 

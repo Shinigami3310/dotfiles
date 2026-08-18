@@ -84,7 +84,13 @@ Rectangle {
             anchors.horizontalCenter: parent.horizontalCenter
             width: parent.width
             active: root.isInputting
-            onSubmitted: password => root.connectRequested(password)
+            // Сброс isInputting обязателен после submit: PasswordField больше
+            // не управляет active (см. fix), иначе карточка остаётся развёрнутой
+            // и повторный клик по ней игнорируется.
+            onSubmitted: password => {
+                root.isInputting = false;
+                root.connectRequested(password);
+            }
         }
     }
 
