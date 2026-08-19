@@ -23,7 +23,7 @@ fi
 # 2. Generate the palette
 # Run matugen. It updates colors.json according to config.toml
 
-matugen image "$WALLPAPER_PATH" --prefer saturation --type scheme-vibrant
+matugen image "$WALLPAPER_PATH" --prefer saturation --type scheme-content
 # 1. Run the wallpaper transition animation (awww)
 # transition-pos 0.5,0.5 means start from the center of the screen
 # Run in background; background process errors are not caught by set -e,

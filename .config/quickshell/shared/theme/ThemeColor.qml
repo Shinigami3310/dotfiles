@@ -21,11 +21,6 @@ QtObject {
     property color secondary_container: parsedColors.secondary_container ?? _defaultPalette.secondary_container
     property color on_secondary_container: parsedColors.on_secondary_container ?? _defaultPalette.on_secondary_container
 
-    property color tertiary: parsedColors.tertiary ?? _defaultPalette.tertiary
-    property color on_tertiary: parsedColors.on_tertiary ?? _defaultPalette.on_tertiary
-    property color tertiary_container: parsedColors.tertiary_container ?? _defaultPalette.tertiary_container
-    property color on_tertiary_container: parsedColors.on_tertiary_container ?? _defaultPalette.on_tertiary_container
-
     property color error: parsedColors.error ?? _defaultPalette.error
     property color on_error: parsedColors.on_error ?? _defaultPalette.on_error
     property color error_container: parsedColors.error_container ?? _defaultPalette.error_container
@@ -42,9 +37,6 @@ QtObject {
 
     property color outline: parsedColors.outline ?? _defaultPalette.outline
     property color outline_variant: parsedColors.outline_variant ?? _defaultPalette.outline_variant
-    property color inverse_surface: parsedColors.inverse_surface ?? _defaultPalette.inverse_surface
-    property color inverse_on_surface: parsedColors.inverse_on_surface ?? _defaultPalette.inverse_on_surface
-    property color inverse_primary: parsedColors.inverse_primary ?? _defaultPalette.inverse_primary
 
     /// Прозрачный цвет — единый токен вместо хардкода "transparent".
     readonly property color transparent: "transparent"

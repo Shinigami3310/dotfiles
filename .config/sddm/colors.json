@@ -1,9 +1,8 @@
 {
   "colors": {
-    "primary": "#bfc2ff",
-    "on_surface": "#e3e1ef",
-    "surface": "#12131c",
+    "primary": "#90cdff",
+    "on_surface": "#e1e2e7",
+    "surface": "#111417",
     "error": "#ffb4ab"
-    
   }
 }

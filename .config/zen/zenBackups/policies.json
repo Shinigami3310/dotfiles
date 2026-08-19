@@ -1,0 +1,11 @@
+# /opt/zen-browser-bin/distribution/policies.json
+
+{
+  "policies": {
+    "DisableAppUpdate": true,
+    "DefaultSerialGuardSetting": 3,
+    "Preferences": {
+      "browser.urlbar.suggest.topsites": false
+    }
+  }
+}
