@@ -28,7 +28,6 @@ QtObject {
             root.applied(false);
             return;
         }
-        console.log(Configs.setThemeScriptPath, wallpaperName);
         root.applierProc.command = ["bash", Configs.setThemeScriptPath.replace(/^file:\/\//, ""), wallpaperName];
         root.timeoutTimer.start();
         root.applierProc.running = true;
