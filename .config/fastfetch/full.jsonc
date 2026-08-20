@@ -1,0 +1,124 @@
+{
+  "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+"logo": {
+  "type": "none"
+},
+  "display": {
+    "separator": " ",
+    "constants": [
+      "\u001b[36m\u001b[65G│\u001b[0m"
+    ],
+    "key": {
+      "width": 6
+    },
+    "color": {
+      "keys": "cyan"
+    }
+  },
+  "modules": [
+    {
+      "type": "title",
+"format": "\u001b[26G\u001b[1m\u001b[36m{1}\u001b[0m@\u001b[1m\u001b[36m{2}\u001b[0m"
+    },
+    "break",
+
+    {
+      "type": "custom",
+      "format": "\u001b[36m╭─────────────────────────── System ────────────────────────────╮\u001b[0m"
+    },
+    { "type": "os", "key": "│  ", "format": "{3} {12}{$1}" },
+    {
+      "type": "command",
+      "key": "│ 󰃰 ",
+      "text": "birth=$(stat -c %W /); today=$(date +%s); echo $(((today - birth) / 86400)) days",
+      "format": "{1}{$1}"
+    },
+    { "type": "kernel", "key": "│  ", "format": "{1} {2}{$1}" },
+    { "type": "initsystem", "key": "│ 󰿄 ", "format": "{1} {2}{$1}" },
+    { "type": "bios", "key": "│  ", "format": "{1} {2} ({3}){$1}" },
+    { "type": "bootmgr", "key": "│  ", "format": "{1} ({2}){$1}" },
+    { "type": "uptime", "key": "│  ", "format": "{?1}{1} days, {?}{?2}{2} hours, {?}{3} mins{$1}" },
+    { "type": "processes", "key": "│  ", "format": "{1} processes{$1}" },
+    { "type": "packages", "key": "│ 󰏖 ", "format": "{all}{$1}" },
+    
+    {
+      "type": "custom",
+      "format": "\u001b[36m├────────────────────────── Hardware ───────────────────────────┤\u001b[0m"
+    },
+    { "type": "host", "key": "│ 󰌢 ", "format": "{1} {2}{$1}" },
+    { "type": "chassis", "key": "│  ", "format": "{1}{$1}" },
+    { "type": "board", "key": "│  ", "format": "{1} {2}{$1}" },
+    { "type": "cpu", "key": "│  ", "format": "{1}{$1}" },
+    { "type": "cpucache", "key": "│  ", "format": "{1}{$1}" },
+    { "type": "cpuusage", "key": "│ 󰓅 ", "format": "{1}{$1}" },
+    { "type": "gpu", "key": "│ 󰾲 ", "format": "{1} {2}{$1}" },
+    { "type": "vulkan", "key": "│  ", "format": "{1} {2}{$1}" },
+    { "type": "opengl", "key": "│  ", "format": "{1} {2}{$1}" },
+    { "type": "memory", "key": "│  ", "format": "{1} / {2} ({3}){$1}" },
+    { "type": "swap", "key": "│ 󰓡 ", "format": "{1} / {2} ({3}){$1}" },
+    { "type": "disk", "key": "│  ", "format": "{1} / {2} ({3}) - {9}{$1}" },
+    { "type": "physicaldisk", "key": "│ 󰋊 ", "format": "{1} ({2}){$1}" },
+    { "type": "diskio", "key": "│ 󰓅 ", "format": "R: {1} | W: {2}{$1}" },
+    { "type": "battery", "key": "│  ", "format": "{2}{$1}" },
+    
+    {
+      "type": "custom",
+      "format": "\u001b[36m├───────────────────────── Environment ─────────────────────────┤\u001b[0m"
+    },
+    { "type": "shell", "key": "│  ", "format": "{1} {4}{$1}" },
+    { "type": "editor", "key": "│ 󱞎 ", "format": "{2}{$1}" },
+    { "type": "wm", "key": "│  ", "format": "{1}{$1}" },
+    { "type": "lm", "key": "│ 󰧨 ", "format": "{1}{$1}" },
+    { "type": "terminal", "key": "│  ", "format": "{1}{$1}" },
+    { "type": "terminaltheme", "key": "│ 󰔎 ", "format": "{1}{$1}" },
+    { "type": "terminalfont", "key": "│  ", "format": "{1}{$1}" },
+    { "type": "cursor", "key": "│ 󰆿 ", "format": "{1} ({2}px){$1}" },
+    
+    {
+      "type": "custom",
+      "format": "\u001b[36m├─────────────────────────── Devices ───────────────────────────┤\u001b[0m"
+    },
+    { "type": "display", "key": "│ 󰍹 ", "format": "{1}x{2} @ {3}Hz ({name}){$1}" },
+    { "type": "monitor", "key": "│ 󰹑 ", "format": "{1} ({2}x{3}mm){$1}" },
+    { "type": "brightness", "key": "│ 󰯪 ", "format": "{1}{$1}" },
+    { "type": "sound", "key": "│  ", "format": "{2}{$1}" },
+    { "type": "camera", "key": "│ 󰄀 ", "format": "{1}{$1}" },
+    { "type": "bluetoothradio", "key": "│ 󰐻 ", "format": "{1} ({2}){$1}" },
+    { "type": "keyboard", "key": "│  ", "format": "{1}{$1}" },
+    
+    {
+      "type": "custom",
+      "format": "\u001b[36m├─────────────────────────── Network ───────────────────────────┤\u001b[0m"
+    },
+    { "type": "localip", "key": "│ 󰩟 ", "format": "{1}{$1}" },
+    { "type": "publicip", "key": "│ 󰩠 ", "format": "{1}{$1}" },
+    { "type": "dns", "key": "│ 󰇖 ", "format": "{1}{$1}" },
+    { "type": "wifi", "key": "│  ", "format": "{4} ({1}){$1}" },
+    { "type": "netio", "key": "│ 󰾆 ", "format": "In: {1} | Out: {2}{$1}" },
+    
+    {
+      "type": "custom",
+      "format": "\u001b[36m├──────────────────────── Miscellaneous ────────────────────────┤\u001b[0m"
+    },
+    { "type": "weather", "key": "│ 󰖙 ", "format": "{1}{$1}" },
+    { "type": "locale", "key": "│  ", "format": "{1}{$1}" },
+    { "type": "datetime", "key": "│  ", "format": "{1} {2}{$1}" },
+    { "type": "loadavg", "key": "│  ", "format": "{1} (1m), {2} (5m), {3} (15m){$1}" },
+    { "type": "users", "key": "│  ", "format": "{1}{$1}" },
+    { "type": "version", "key": "│  ", "format": "{1} ({2}){$1}" },
+
+    {
+      "type": "custom",
+      "format": "\u001b[36m├──────────────────────────── Color ────────────────────────────┤\u001b[0m"
+    },
+    {
+      "type": "custom",
+      "key": "│  ",
+      "format": "\u001b[31m██ \u001b[32m██ \u001b[33m██ \u001b[34m██ \u001b[35m██ \u001b[36m██ \u001b[37m██ \u001b[0m{$1}"
+    },
+    {
+      "type": "custom",
+      "format": "\u001b[36m╰───────────────────────────────────────────────────────────────╯\u001b[0m"
+    }
+  ]
+}
