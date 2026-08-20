@@ -23,7 +23,6 @@ fi
 # 2. Generate the palette
 # Run matugen. It updates colors.json according to config.toml
 
-matugen image "$WALLPAPER_PATH" --prefer saturation --type scheme-smart
 # 1. Run the wallpaper transition animation (awww)
 # transition-pos 0.5,0.5 means start from the center of the screen
 # Run in background; background process errors are not caught by set -e,
@@ -34,4 +33,8 @@ awww img "$WALLPAPER_PATH" \
   --transition-duration 2.4 \
   --transition-fps 60
 
+matugen image "$WALLPAPER_PATH" --prefer saturation --type scheme-smart
+
 sudo "$HOME/.local/bin/update-sddm-wallpaper.sh" "$WALLPAPER_PATH"
+
+cp "$WALLPAPER_PATH" "$HOME/.config/telegram/background.jpg"

@@ -1,6 +1,6 @@
 local colors = {
-	primary = "#57d5ff",
-	inactive = "#3d484d",
+	primary = "#f1b3e7",
+	inactive = "#4e444b",
 }
 
 return colors

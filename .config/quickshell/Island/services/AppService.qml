@@ -11,7 +11,7 @@ QtObject {
 
     property var allApps: []
     readonly property ListModel filteredApps: ListModel {}
-    readonly property list<string> blackList: ["Avahi SSH Server Browser", "Avahi VNC Server Browser", "Avahi Zeroconf Browser", "mpv Media Player", "Qt V4L2 test Utility", "Qt V4L2 video capture utility"]
+    readonly property list<string> blackList: ["Avahi SSH Server Browser", "Avahi VNC Server Browser", "Avahi Zeroconf Browser", "mpv Media Player", "Qt V4L2 test Utility", "Qt V4L2 video capture utility", "Qt5 Settings", "Qt6 Settings"]
 
     property var _rawAppsBuffer: []
     property string _pendingQuery: ""
