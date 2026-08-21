@@ -1,0 +1,179 @@
+import QtQuick 2.15
+import QtQuick.Controls 2.15
+import QtQuick.Layouts 1.15
+import QtGraphicalEffects 1.15
+
+Item {
+    id: root
+    anchors.fill: parent
+
+    property color colorOnSurface: "#cdd6f4"
+    property color colorPrimary:   "#89b4fa"
+    property color colorSurface:   "#11111b"
+    property color colorError:     "#f38ba8"
+
+    Component.onCompleted: {
+        loadThemeColors()
+        password.forceActiveFocus()
+    }
+
+    Connections {
+        target: sddm
+        function onLoginFailed() {
+            password.text = ""
+            password.isError = true
+            shakeAnim.start()
+        }
+    }
+
+    function loadThemeColors() {
+        const req = new XMLHttpRequest()
+        req.onload = () => {
+            if (req.status === 200) {
+                const c = JSON.parse(req.responseText).colors
+                root.colorOnSurface = c.on_surface || root.colorOnSurface
+                root.colorPrimary   = c.primary    || root.colorPrimary
+                root.colorSurface   = c.surface    || root.colorSurface
+                root.colorError     = c.error      || root.colorError
+            }
+        }
+        req.open("GET", Qt.resolvedUrl("colors.json"))
+        req.send()
+    }
+
+    component StyledInput : TextField {
+        id: control
+        Layout.fillWidth: true
+        font { family: "JetBrainsMono Nerd Font"; pixelSize: 18 }
+        color: root.colorOnSurface
+        horizontalAlignment: TextInput.AlignHCenter
+        
+        property bool isError: false
+        onTextChanged: isError = false
+
+        background: Rectangle {
+            color: Qt.rgba(0, 0, 0, 0.3)
+            radius: 20
+            border.width: 2
+            border.color: control.isError ? root.colorError : 
+                          (control.activeFocus ? root.colorPrimary : "transparent")
+            
+            Behavior on border.color { ColorAnimation { duration: 150 } }
+        }
+    }
+
+    Image {
+        id: bg
+        anchors.fill: parent
+        source: "background.jpg"
+        asynchronous: true
+    }
+
+    Item {
+        id: cardContainer 
+        width: 440
+        anchors {
+            top: parent.top; bottom: parent.bottom
+            horizontalCenter: parent.horizontalCenter
+        }
+        clip: true
+
+        FastBlur {
+            x: -cardContainer.x
+            y: -cardContainer.y
+            width: root.width
+            height: root.height
+            source: bg
+            radius: 32
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            color: Qt.rgba(root.colorSurface.r, root.colorSurface.g, root.colorSurface.b, 0.5)
+        }
+
+        ColumnLayout {
+            anchors.centerIn: parent
+            anchors.verticalCenterOffset: 40
+            width: parent.width - 120
+            spacing: 40
+
+            ColumnLayout {
+                Layout.alignment: Qt.AlignHCenter
+                spacing: -12
+
+                property date now: new Date()
+                
+                Timer {
+                    interval: 1000; running: true; repeat: true
+                    onTriggered: parent.now = new Date()
+                }
+
+                Text {
+                    text: Qt.formatTime(parent.now, "HH:mm")
+                    font { family: "JetBrainsMono Nerd Font"; pixelSize: 90; bold: true }
+                    color: root.colorOnSurface
+                    Layout.alignment: Qt.AlignHCenter
+                }
+
+                Text {
+                    text: Qt.formatDate(parent.now, "dd MMMM")
+                    font { family: "JetBrainsMono Nerd Font"; pixelSize: 20 }
+                    color: Qt.rgba(root.colorOnSurface.r, root.colorOnSurface.g, root.colorOnSurface.b, 0.8)
+                    Layout.alignment: Qt.AlignHCenter
+                }
+            }
+
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: 12
+
+                StyledInput {
+                    id: username
+                    text: userModel.lastUser
+                }
+
+                StyledInput {
+                    id: password
+                    echoMode: TextInput.Password
+                    font.letterSpacing: 4
+                    onAccepted: sddm.login(username.text, password.text, sessionModel.lastIndex)
+
+                    transform: Translate {
+                        NumberAnimation on x {
+                            id: shakeAnim
+                            running: false
+                            from: -16; to: 0; duration: 600
+                            easing { type: Easing.OutElastic; amplitude: 1.5; period: 0.25 }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    Button {
+        id: powerBtn
+        anchors {
+            bottom: parent.bottom; horizontalCenter: parent.horizontalCenter
+            bottomMargin: 40
+        }
+
+        scale: pressed ? 0.9 : (hovered ? 1.1 : 1.0)
+        Behavior on scale { NumberAnimation { duration: 150 } }
+
+        background: null
+
+        contentItem: Text {
+            text: "󰐥"
+            font { family: "JetBrainsMono Nerd Font"; pixelSize: 32 }
+            color: (powerBtn.pressed) ? root.colorPrimary : root.colorOnSurface
+            horizontalAlignment: Text.AlignHCenter
+            
+            Behavior on color { ColorAnimation { duration: 150 } }
+        }
+
+        onClicked: sddm.powerOff()
+    }
+}
+

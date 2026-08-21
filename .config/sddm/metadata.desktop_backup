@@ -1,0 +1,6 @@
+[SDDM Theme]
+Name=Custom-Astronaut
+Description=Minimal blurred theme without extra UI elements
+Author=User
+Type=sddm-theme
+MainScript=Main.qml
