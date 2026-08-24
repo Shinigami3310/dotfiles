@@ -3,8 +3,6 @@ import "../../shared/theme"
 import "../../services/"
 import "../../ui"
 
-// Точка рабочего стола. Цвет кодирует состояние (активна/занята/пуста),
-// чтобы пользователь видел статус без чтения текста — это быстрее сканируется.
 Pressable {
     id: root
 
@@ -32,12 +30,12 @@ Pressable {
 
         Behavior on color {
             ColorAnimation {
-                duration: Motion.fast
+                duration: Motion.durationFast
             }
         }
         Behavior on border.color {
             ColorAnimation {
-                duration: Motion.fast
+                duration: Motion.durationFast
             }
         }
     }

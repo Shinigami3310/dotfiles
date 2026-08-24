@@ -1,20 +1,19 @@
 import QtQuick
+import "../common"
 import "../../config"
 
 Pressable {
-    id: root
-
     property bool active: false
     property color dotColor: Colors.borderNormal
 
-    width: 12
-    height: 12
+    width: CommonConfig.filterDotSize
+    height: CommonConfig.filterDotSize
 
     Rectangle {
         anchors.fill: parent
         radius: width / 2
         color: active ? dotColor : Colors.surfaceContainer
-        border.width: 1
+        border.width: CommonConfig.filterDotBorderWidth
         border.color: dotColor
     }
 }

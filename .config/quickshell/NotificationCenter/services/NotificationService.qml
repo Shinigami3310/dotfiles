@@ -1,6 +1,7 @@
 import QtQuick
 import QtCore as QtSys
 import "../config"
+import "../ui/toasts"
 
 QtObject {
     id: service
@@ -29,6 +30,11 @@ QtObject {
     property var _timers: ({})
 
     function start() {
+        // Не стартуем, пока нет хранилища и сервиса уведомлений.
+        if (!store) {
+            console.warn("[NotificationService] start() skipped: store is not ready");
+            return;
+        }
         running = true;
     }
     function stop() {
@@ -56,30 +62,40 @@ QtObject {
         if (!running || !store)
             return null;
 
-        const request = Object.assign({}, input ?? {});
-        if (request.replacesId > 0) {
-            request.dbusId = request.replacesId;
-            request.id = "dbus-" + request.replacesId;
-        }
-
-        const notification = modelFactory.createNotification(request);
-
-        _cancelTimer(notification.id);
-        store.add(notification);
-
-        // Внешнее закрытие (приложение вызвало CloseNotification по DBus)
-        if (notification.rawNotification) {
-            notification.rawNotification.closed.connect(() => {
-                _cancelTimer(notification.id);
-                store?.removeById(notification.id);
+        try {
+            const request = Object.assign({}, input ?? {}, {
+                // Валидация: action должны быть массивом объектов с ключами
+                actions: Array.isArray(input?.actions) ? input.actions : []
             });
-        }
+            if (request.replacesId > 0) {
+                request.dbusId = request.replacesId;
+                request.id = "dbus-" + request.replacesId;
+            }
 
-        if (shouldShowToast(notification)) {
-            store.addToast(notification);
-            _scheduleRemoval(notification);
+            const notification = modelFactory.createNotification(request);
+
+            _cancelTimer(notification.id);
+            store.add(notification);
+
+            // Внешнее закрытие (приложение вызвало CloseNotification по DBus)
+            if (notification.rawNotification) {
+                if (typeof notification.rawNotification.closed?.connect === "function") {
+                    notification.rawNotification.closed.connect(() => {
+                        _cancelTimer(notification.id);
+                        store?.removeById(notification.id);
+                    });
+                }
+            }
+
+            if (shouldShowToast(notification)) {
+                store.addToast(notification);
+                _scheduleRemoval(notification);
+            }
+            return notification.id;
+        } catch (e) {
+            console.warn("[NotificationService] notify() failed:", e);
+            return null;
         }
-        return notification.id;
     }
 
     function close(id, reason) {
@@ -107,7 +123,13 @@ QtObject {
             if (actions) {
                 for (const act of actions) {
                     if (act.identifier === actionKey) {
-                        act.invoke();
+                        if (typeof act.invoke === "function") {
+                            try {
+                                act.invoke();
+                            } catch (e) {
+                                console.warn("[NotificationService] invokeAction failed:", e);
+                            }
+                        }
                         break;
                     }
                 }
@@ -150,7 +172,7 @@ QtObject {
         } else {
             if (notification.importance === Constants.Importance.Critical)
                 return;
-            timeoutMs = notification.importance === Constants.Importance.Low ? Settings.toastTimeoutLowMs : Settings.toastTimeoutNormalMs;
+            timeoutMs = notification.importance === Constants.Importance.Low ? ToastsConfig.timeoutLowMs : ToastsConfig.timeoutNormalMs;
         }
         const timer = _createTimer();
         timer.interval = timeoutMs;

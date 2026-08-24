@@ -5,19 +5,31 @@ import "./services"
 import "./ui"
 
 Item {
-    id: root
     focus: true
 
-    property alias contentRootItem: contentRoot
-    property alias fadeAnimation: fadeAnim
+    Component.onCompleted: {
+        ThemePickerController.contentRootItem = contentRoot;
+        ThemePickerController.fadeAnimation = fadeAnim;
+        ThemePickerController.enterAnimation = enterAnim;
+        ThemePickerController.open();
+    }
+
+    PropertyAnimation {
+        id: enterAnim
+        target: contentRoot
+        property: "opacity"
+        to: 1
+        duration: Motion.durationSlow
+        easing.type: Motion.curveOpacityIn
+    }
 
     PropertyAnimation {
         id: fadeAnim
         target: contentRoot
         property: "opacity"
         to: 0
-        duration: Motion.fade
-        easing.type: Motion.easeOut
+        duration: Motion.durationSlow
+        easing.type: Motion.curveOpacityOut
 
         property bool applyTheme: false
 
@@ -30,16 +42,11 @@ Item {
         id: contentRoot
         anchors.fill: parent
         focus: true
-        opacity: 1
+        opacity: 0
 
         Rectangle {
             anchors.fill: parent
             color: Configs.overlayColor
-        }
-
-        TapHandler {
-            acceptedButtons: Qt.LeftButton
-            onTapped: ThemePickerController.fadeOut(false)
         }
 
         Carousel {
@@ -55,14 +62,8 @@ Item {
             bevel: height * Configs.bevelRatio
         }
 
-        Keys.onLeftPressed: event => {
-            ThemePickerController.navigate(-1);
-            event.accepted = true;
-        }
-        Keys.onRightPressed: event => {
-            ThemePickerController.navigate(1);
-            event.accepted = true;
-        }
+        Keys.onLeftPressed: event => { ThemePickerController.navigate(-1); event.accepted = true; }
+        Keys.onRightPressed: event => { ThemePickerController.navigate(1); event.accepted = true; }
         Keys.onReturnPressed: ThemePickerController.fadeOut(true)
         Keys.onEscapePressed: ThemePickerController.fadeOut(false)
     }

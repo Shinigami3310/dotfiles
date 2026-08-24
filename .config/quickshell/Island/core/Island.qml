@@ -22,20 +22,17 @@ Rectangle {
 
     Behavior on implicitWidth {
         NumberAnimation {
-            duration: Motion.standard
-            easing.type: Easing.InOutQuad
+            duration: Motion.durationSlow
+            easing.type: Motion.curveResize
         }
     }
     Behavior on implicitHeight {
         NumberAnimation {
-            duration: Motion.standard
-            easing.type: Easing.InOutQuad
+            duration: Motion.durationSlow
+            easing.type: Motion.curveResize
         }
     }
 
-    // Во время cross-fade в SurfaceHost контейнер временно пуст (старая
-    // поверхность уничтожена, новая ещё создаётся). Без guard'а implicitWidth
-    // станет 0 и окно «схлопнется» на один кадр.
     Item {
         id: contentContainer
         implicitWidth: children.length > 0 ? children[0].implicitWidth : 0

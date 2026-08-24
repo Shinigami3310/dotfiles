@@ -1,3 +1,6 @@
 singleton Settings Settings.qml
 singleton Constants Constants.qml
 singleton Colors Colors.qml
+singleton CommonConfig CommonConfig.qml
+singleton CenterConfig CenterConfig.qml
+singleton ToastsConfig ToastsConfig.qml

@@ -1,10 +1,6 @@
 pragma Singleton
 import QtQuick
 
-// Единый конфиг переиспользуемых UI-примитивов (ui/).
-// Размеры и масштабы жестов собраны здесь, чтобы не дублировать их
-// в каждой фиче (Bar/Icon, MusicPlayer/IconButton, ControlButton, ProfileButton,
-// Slider, ControlSlider, Switch).
 QtObject {
     // --- IconButton ---
     readonly property real iconButtonSize: 24
@@ -14,17 +10,10 @@ QtObject {
 
     // --- Slider ---
     readonly property real sliderIconBoxSize: 32
-    readonly property real sliderIconSize: 24
     readonly property real sliderTrackHeight: 10
     readonly property real sliderTrackDefaultWidth: 200
     readonly property real sliderTextWidth: 32
     readonly property real sliderTextSize: 13
-    readonly property real sliderRowHeight: 36
-    readonly property real sliderRowTrackHeight: 24
-    readonly property real sliderRowRadius: 10
-    readonly property real sliderRowIconContainerSize: 36
-    readonly property real sliderRowTextWidth: 36
-    readonly property real sliderRowTextSize: 11
 
     // --- ToggleSwitch ---
     readonly property real switchWidth: 44

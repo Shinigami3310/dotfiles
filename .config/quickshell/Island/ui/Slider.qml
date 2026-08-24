@@ -2,10 +2,6 @@ import QtQuick
 import QtQuick.Layouts
 import "../shared/theme"
 
-// Единый слайдер. Композиция атомарных компонентов, а не монолит —
-// чтобы фичи (ControlPanel/OSD) могли переиспользовать одинаковое поведение
-// с разными размерами, не дублируя drag/wheel-логику.
-// - trackWidth: если 0 — трек растягивается (для панели управления).
 RowLayout {
     id: root
 
@@ -18,7 +14,6 @@ RowLayout {
     property real trackWidth: UiConfig.sliderTrackDefaultWidth
     property real trackHeight: UiConfig.sliderTrackHeight
     property real iconBoxSize: UiConfig.sliderIconBoxSize
-    property real iconSize: UiConfig.sliderIconSize
     property real textWidth: UiConfig.sliderTextWidth
     property real textSize: UiConfig.sliderTextSize
 
@@ -34,8 +29,8 @@ RowLayout {
     Behavior on visualValue {
         enabled: !track.pressed
         NumberAnimation {
-            duration: Motion.fast
-            easing.type: Motion.easeStandard
+            duration: Motion.durationMicro
+            easing.type: Motion.curveContinuous
         }
     }
 

@@ -1,8 +1,6 @@
 import QtQuick
 import "../../shared/theme"
 
-// Карточка элемента списка (Wi-Fi/Bluetooth). Пульсация при подключении
-// даёт обратную связь, что операция идёт — иначе непонятно, зависло ли.
 Rectangle {
     id: root
 
@@ -31,27 +29,27 @@ Rectangle {
 
     Behavior on scale {
         NumberAnimation {
-            duration: Motion.fast
-            easing.type: Easing.OutBack
+            duration: Motion.durationFast
+            easing.type: Motion.curveScaleRelease
         }
     }
 
     Behavior on height {
         NumberAnimation {
-            duration: Motion.fast
-            easing.type: Easing.OutQuart
+            duration: Motion.durationFast
+            easing.type: Motion.curveResize
         }
     }
 
     Behavior on color {
         ColorAnimation {
-            duration: Motion.fast
+            duration: Motion.durationFast
         }
     }
 
     Behavior on border.color {
         ColorAnimation {
-            duration: Motion.fast
+            duration: Motion.durationFast
         }
     }
 
@@ -84,9 +82,6 @@ Rectangle {
             anchors.horizontalCenter: parent.horizontalCenter
             width: parent.width
             active: root.isInputting
-            // Сброс isInputting обязателен после submit: PasswordField больше
-            // не управляет active (см. fix), иначе карточка остаётся развёрнутой
-            // и повторный клик по ней игнорируется.
             onSubmitted: password => {
                 root.isInputting = false;
                 root.connectRequested(password);

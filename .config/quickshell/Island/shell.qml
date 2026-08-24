@@ -65,8 +65,6 @@ PanelWindow {
         }
     }
 
-    // OSD-поверхности (яркость/громкость) не открываем, если активна
-    // controlPanel — у неё свои слайдеры.
     function openOsd(name: string) {
         if (host.currentName !== SurfaceNames.controlPanel)
             host.open(name);

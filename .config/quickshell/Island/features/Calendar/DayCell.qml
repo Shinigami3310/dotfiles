@@ -2,9 +2,6 @@ import QtQuick
 import "../../shared/theme"
 import "../../ui"
 
-// Ячейка дня календаря. disabled для дней вне месяца, чтобы они не
-// срабатывали по клику и не «подсвечивались» при наведении — иначе
-// пользователь пытается кликнуть по пустой клетке.
 Pressable {
     id: root
 
@@ -33,13 +30,13 @@ Pressable {
 
         Behavior on color {
             ColorAnimation {
-                duration: Motion.fast
+                duration: Motion.durationFast
             }
         }
 
         Behavior on border.color {
             ColorAnimation {
-                duration: Motion.fast
+                duration: Motion.durationFast
             }
         }
     }

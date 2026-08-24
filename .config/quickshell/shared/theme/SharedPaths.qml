@@ -10,10 +10,10 @@ QtObject {
     id: root
 
     /// XDG_CONFIG_HOME или дефолт ~/.config
-    readonly property string xdgConfigHome: Quickshell.env("XDG_CONFIG_HOME") ?? StandardPaths.standardLocations(StandardPaths.HomeLocation)[0] + "/.config"
+    readonly property string xdgConfigHome: homeDir + "/.config"
 
     /// Домашняя директория
-    readonly property string homeDir: StandardPaths.standardLocations(StandardPaths.HomeLocation)[0] ?? ""
+    readonly property string homeDir: String(StandardPaths.standardLocations(StandardPaths.HomeLocation)[0]).replace(/^file:\/\//, "")
 
     /// ~/.config/quickshell/
     readonly property string configDir: xdgConfigHome + "/quickshell"

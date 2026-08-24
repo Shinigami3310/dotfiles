@@ -45,8 +45,6 @@ Item {
                 fillMode: Image.PreserveAspectFit
                 smooth: true
                 mipmap: true
-                // MultiEffect требует исходник, но сам Image не должен рендериться
-                // дважды (сырым и через эффект) — иначе будет двоение иконки.
                 visible: false
             }
 
@@ -61,12 +59,12 @@ Item {
 
                 Behavior on opacity {
                     NumberAnimation {
-                        duration: Motion.fast
+                        duration: Motion.durationFast
                     }
                 }
                 Behavior on colorizationColor {
                     ColorAnimation {
-                        duration: Motion.fast
+                        duration: Motion.durationFast
                     }
                 }
             }
@@ -99,14 +97,14 @@ Item {
 
             Behavior on height {
                 NumberAnimation {
-                    duration: Motion.fast
-                    easing.type: Easing.OutCubic
+                    duration: Motion.durationFast
+                    easing.type: Motion.curveResize
                 }
             }
             Behavior on opacity {
                 NumberAnimation {
-                    duration: Motion.fast
-                    easing.type: Easing.OutQuad
+                    duration: Motion.durationFast
+                    easing.type: Motion.curveOpacityOut
                 }
             }
 

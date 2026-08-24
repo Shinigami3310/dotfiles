@@ -107,5 +107,7 @@ QtObject {
                 }
             }
         }
+
+        Component.onCompleted: fileView.reload()
     }
 }

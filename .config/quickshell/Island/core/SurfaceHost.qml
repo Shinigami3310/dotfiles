@@ -34,7 +34,7 @@ Item {
 
     Timer {
         id: resizeTimer
-        interval: Motion.standard
+        interval: Motion.durationSlow
         onTriggered: {
             if (root.currentItem)
                 fadeIn.restart();
@@ -48,8 +48,8 @@ Item {
         target: root.outgoingItem
         property: "opacity"
         to: 0
-        duration: Motion.fade
-        easing.type: Easing.InOutQuad
+        duration: Motion.durationStandard
+        easing.type: Motion.curveOpacityOut
 
         onStopped: {
             if (!root.busy || !root.outgoingItem || !root.pendingItem)
@@ -76,8 +76,8 @@ Item {
         target: root.currentItem
         property: "opacity"
         to: 1
-        duration: Motion.fade
-        easing.type: Easing.InOutQuad
+        duration: Motion.durationStandard
+        easing.type: Motion.curveOpacityIn
 
         onStopped: {
             root.busy = false;
@@ -111,15 +111,6 @@ Item {
 
         if (!pendingItem)
             return;
-
-        // Поверхность без enter/exit сломает cross-fade: объект создастся,
-        // но анимация перехода никогда не запустится — валидируем до вставки.
-        if (typeof pendingItem.enter !== "function" || typeof pendingItem.exit !== "function") {
-            console.warn(`[SurfaceHost] Surface "${name}" не реализует интерфейс SurfaceBase (enter/exit). Пропускаю.`);
-            pendingItem.destroy();
-            pendingItem = null;
-            return;
-        }
 
         if (!currentItem) {
             currentItem = pendingItem;

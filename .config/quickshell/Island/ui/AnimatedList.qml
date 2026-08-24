@@ -1,9 +1,6 @@
 import QtQuick
 import "../shared/theme"
 
-// Анимированный ListView. Переходы синхронизированы с Motion.morph, чтобы
-// добавление/удаление элементов не «дёргало» список — иначе при частых
-// обновлениях модели (Wi-Fi скан) список будет мигать.
 ListView {
     id: root
 
@@ -17,13 +14,13 @@ ListView {
             property: "opacity"
             from: 0
             to: 1
-            duration: Motion.morph
+            duration: Motion.durationMorph
         }
         NumberAnimation {
             property: "y"
             from: root.addOffset
-            duration: Motion.morph
-            easing.type: Easing.OutQuart
+            duration: Motion.durationMorph
+            easing.type: Motion.curveMoveIn
         }
     }
 
@@ -31,23 +28,23 @@ ListView {
         NumberAnimation {
             property: "opacity"
             to: 0
-            duration: Motion.morph
+            duration: Motion.durationMorph
         }
     }
 
     addDisplaced: Transition {
         NumberAnimation {
             properties: "x,y"
-            duration: Motion.morph
-            easing.type: Easing.OutQuart
+            duration: Motion.durationMorph
+            easing.type: Motion.curveMoveIn
         }
     }
 
     displaced: Transition {
         NumberAnimation {
             properties: "x,y"
-            duration: Motion.standard
-            easing.type: Easing.OutQuart
+            duration: Motion.durationStandard
+            easing.type: Motion.curveMoveIn
         }
     }
 }

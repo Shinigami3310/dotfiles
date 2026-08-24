@@ -1,23 +1,40 @@
 import QtQuick
+import "../core"
 import "../surfaces"
 
-// Реестр поверхностей. Каждая запись — Component, создаваемый SurfaceHost
-// по имени. Чтобы добавить новую поверхность:
-//   1. Создайте surfaces/MySurface.qml на основе SurfaceBase.
-//   2. Создайте фичу в features/MyFeature/.
-//   3. Добавьте строку: readonly property Component mySurface: MySurface {}
+import "../features/AppLauncher"
+import "../features/Bar"
+import "../features/Battery"
+import "../features/Calendar"
+import "../features/ControlPanel"
+import "../features/Eye"
+import "../features/HomeClock"
+import "../features/MusicPlayer"
+import "../features/Selectors/"
+import "../features/Sliders/"
+import "../features/Strip/"
+
 QtObject {
-    readonly property Component appLauncher: AppLauncherSurface {}
-    readonly property Component bar: BarSurface {}
-    readonly property Component batteryProfile: BatteryProfileSurface {}
-    readonly property Component bluetoothSelector: BluetoothSelectorSurface {}
-    readonly property Component brightnessSlider: BrightnessSliderSurface {}
-    readonly property Component calendar: CalendarSurface {}
-    readonly property Component controlPanel: ControlPanelSurface {}
-    readonly property Component eyeReminder: EyeReminderSurface {}
-    readonly property Component homeClock: HomeClockSurface {}
-    readonly property Component musicPlayer: MusicPlayerSurface {}
-    readonly property Component strip: StripSurface {}
-    readonly property Component volumeSlider: VolumeSliderSurface {}
-    readonly property Component wifiSelector: WifiSelectorSurface {}
+    readonly property Component appLauncher: Surface { feature: AppLauncher {} }
+    readonly property Component bar: Surface { feature: Bar {} }
+    readonly property Component batteryProfile: Surface { feature: Battery {} }
+    readonly property Component bluetoothSelector: Surface { feature: BluetoothSelector {} }
+    readonly property Component brightnessSlider: Surface { feature: Brightness {} }
+    readonly property Component calendar: Surface { feature: Calendar {} }
+    readonly property Component controlPanel: Surface { feature: ControlPanel {} }
+    readonly property Component eyeReminder: Surface {
+        feature: Eye {}
+        canGoBack: false
+    }
+    readonly property Component homeClock: Surface {
+        feature: HomeClock {}
+        backTarget: SurfaceNames.strip
+    }
+    readonly property Component musicPlayer: Surface { feature: MusicPlayer {} }
+    readonly property Component strip: Surface {
+        feature: Strip {}
+        canGoBack: false
+    }
+    readonly property Component volumeSlider: Surface { feature: Volume {} }
+    readonly property Component wifiSelector: Surface { feature: WifiSelector {} }
 }

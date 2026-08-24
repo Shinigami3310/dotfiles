@@ -2,9 +2,6 @@ import QtQuick
 import "../../ui"
 import "../../shared/theme"
 
-// OSD-панель. Автозакрытие по таймауту нужно, чтобы панель не «залипала»
-// на экране после изменения громкости/яркости извне — она лишь подтверждает
-// действие и исчезает.
 Item {
     id: root
 
@@ -16,13 +13,15 @@ Item {
     property alias slider: innerSlider
     signal closeRequested
 
+    readonly property bool hovered: hoverHandler.hovered
+
     implicitWidth: innerSlider.implicitWidth + paddingX * 2
     implicitHeight: innerSlider.implicitHeight + paddingY * 2
 
     Timer {
         id: idleTimer
         interval: idleTimeout
-        running: root.active
+        running: root.active && !root.hovered
         repeat: false
         onTriggered: root.closeRequested()
     }
@@ -35,6 +34,10 @@ Item {
     onActiveChanged: {
         if (root.active)
             bumpIdle();
+    }
+
+    HoverHandler {
+        id: hoverHandler
     }
 
     Slider {

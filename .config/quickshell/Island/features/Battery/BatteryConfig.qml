@@ -21,8 +21,6 @@ QtObject {
     readonly property int textSize: 28
     readonly property int chargeAnimDuration: 2700
 
-    readonly property int profileBtnSize: 68
     readonly property int profileBtnRadius: 16
-    readonly property int profileIconSize: 24
     readonly property int profileActiveBorderWidth: 2
 }

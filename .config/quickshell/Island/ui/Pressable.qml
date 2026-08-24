@@ -1,9 +1,6 @@
 import QtQuick
 import "../shared/theme"
 
-// Базовый интерактивный элемент. Наследуют все кликабельные компоненты,
-// чтобы hover/pressed/scale-анимация была единой — иначе каждый компонент
-// определяет свою и визуально «разъезжается».
 Item {
     id: root
 
@@ -21,8 +18,8 @@ Item {
 
     Behavior on scale {
         NumberAnimation {
-            duration: Motion.fast
-            easing.type: Easing.OutBack
+            duration: Motion.durationFast
+            easing.type: Motion.curveScaleRelease
         }
     }
 

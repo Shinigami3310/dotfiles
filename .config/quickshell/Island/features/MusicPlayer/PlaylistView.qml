@@ -14,7 +14,7 @@ Rectangle {
 
     Behavior on opacity {
         NumberAnimation {
-            duration: Motion.standard
+            duration: Motion.durationStandard
         }
     }
 

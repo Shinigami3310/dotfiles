@@ -29,8 +29,8 @@ FocusScope {
 
         Behavior on border.color {
             ColorAnimation {
-                duration: Motion.fast
-                easing.type: Motion.easeStandard
+                duration: Motion.durationFast
+                easing.type: Motion.curveOpacityOut
             }
         }
 
@@ -42,8 +42,6 @@ FocusScope {
             }
             spacing: AppLauncherConfig.searchBarSpacing
 
-            // Эмодзи вместо ассета: иконка поиска одна, и не хочется ради неё
-            // плодить файл в assets/icons/ — это дешевле и перекрашивается через color.
             Text {
                 id: searchIcon
                 anchors.verticalCenter: parent.verticalCenter

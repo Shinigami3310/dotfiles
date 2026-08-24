@@ -1,0 +1,13 @@
+[general]
+live-config = 1
+
+max_height = 80
+
+[output]
+
+orientation = bottom
+
+[color]
+
+theme = 'custom'
+

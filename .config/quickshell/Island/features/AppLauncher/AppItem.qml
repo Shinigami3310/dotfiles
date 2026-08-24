@@ -22,8 +22,8 @@ Rectangle {
 
     Behavior on color {
         ColorAnimation {
-            duration: Motion.fast
-            easing.type: Motion.easeStandard
+            duration: Motion.durationFast
+            easing.type: Motion.curveOpacityOut
         }
     }
 
@@ -71,8 +71,8 @@ Rectangle {
 
             Behavior on color {
                 ColorAnimation {
-                    duration: Motion.fast
-                    easing.type: Motion.easeStandard
+                    duration: Motion.durationFast
+                    easing.type: Motion.curveOpacityOut
                 }
             }
         }

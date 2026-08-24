@@ -1,7 +1,9 @@
 import QtQuick
+import "../center"
+import "../common"
 import "../../config"
+import "../../services"
 import "../../shared/theme"
-import "../../services/"
 
 ListView {
     id: root
@@ -10,29 +12,36 @@ ListView {
     property NotificationService service
     signal dismissRequested(string notificationId)
 
-    width: parent?.width ?? Settings.centerWidth
+    width: parent?.width ?? CenterConfig.width
     clip: true
     model: root.store?.historyModel ?? null
-    spacing: 8
-    implicitHeight: Math.min(contentHeight, Settings.listMaxHeight)
+    spacing: CenterConfig.listSpacing
+    implicitHeight: Math.min(contentHeight, CenterConfig.listMaxHeight)
 
-    delegate: NotificationListItem {
-        width: root.width
-        notificationData: QtObject {
-            readonly property string id: model.id ?? ""
-            readonly property string source: model.source ?? ""
-            readonly property string summary: model.summary ?? ""
-            readonly property string text: model.text ?? ""
-            readonly property string icon: model.icon ?? ""
-            readonly property date time: model.time
-            readonly property var importance: model.importance ?? ""
-            readonly property string actionsJson: model.actionsJson ?? ""
+Behavior on implicitHeight {
+        NumberAnimation {
+            duration: Motion.durationSlow
+            easing.type: Easing.OutQuad
         }
+    }
+
+    delegate: NotificationCard {
+        width: root.width
+        compact: true
+        notificationData: model
         onDismissRequested: root.dismissRequested(model.id)
         onActionInvoked: (actionKey) => root.service?.invokeAction(model.id, actionKey)
     }
 
+    remove: Transition {
+        NumberAnimation { property: "opacity"; to: 0; duration: Motion.durationSlow }
+    }
+
+    removeDisplaced: Transition {
+        NumberAnimation { properties: "y"; duration: Motion.durationSlow; easing.type: Easing.OutQuad }
+    }
+
     displaced: Transition {
-        NumberAnimation { properties: "y"; duration: Motion.standard }
+        NumberAnimation { properties: "y"; duration: Motion.durationSlow; easing.type: Easing.OutQuad }
     }
 }

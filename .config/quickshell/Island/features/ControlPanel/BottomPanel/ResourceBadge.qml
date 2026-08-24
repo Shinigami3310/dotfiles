@@ -31,8 +31,8 @@ Item {
 
             Behavior on height {
                 NumberAnimation {
-                    duration: Motion.expand
-                    easing.type: Easing.OutCubic
+                    duration: Motion.durationExpand
+                    easing.type: Motion.curveResize
                 }
             }
         }

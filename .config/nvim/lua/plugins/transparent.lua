@@ -1,19 +1,34 @@
 return {
-  "xiyaowong/transparent.nvim",
-  lazy = false, -- Плагин должен загружаться сразу при старте
-  priority = 1000, -- Высокий приоритет, чтобы загрузиться до цветовой схемы
-  opts = {
-    -- Список дополнительных групп, которые нужно сделать прозрачными
-    extra_groups = {
-      "NormalFloat", -- Всплывающие окна (LSP подсказки, автокомплит)
-      "FloatBorder", -- Границы всплывающих окон
-      "NeoTreeNormal", -- Дерево файлов Neo-tree (дефолтное в LazyVim)
-      "NeoTreeNormalNC", -- Неактивное дерево файлов Neo-tree
-      "NeoTreeWinSeparator", -- Разделитель для Neo-tree
-      "BufferLineWidget", -- Панель вкладок
-      "BufferLineBackground",
-      "BufferLineFill",
-    },
-    exclude_groups = {}, -- Оставьте пустым
-  },
+	"xiyaowong/transparent.nvim",
+	lazy = false,
+	priority = 1000,
+	config = function()
+		local transparent = require("transparent")
+
+		transparent.setup({
+			extra_groups = {
+				"NormalFloat",
+				"FloatBorder",
+				"FloatTitle",
+				"Pmenu",
+				"PmenuSel",
+				"PmenuSbar",
+				"PmenuThumb",
+				"CursorLine",
+				"StatusLine",
+				"StatusLineNC",
+			},
+		})
+
+		-- Очищает все группы, начинающиеся с этих префиксов (где используется surface_container)
+		transparent.clear_prefix("BufferLine")
+		transparent.clear_prefix("NeoTree")
+		transparent.clear_prefix("Telescope")
+		transparent.clear_prefix("Snacks")
+		transparent.clear_prefix("BlinkCmp")
+		transparent.clear_prefix("Noice")
+		transparent.clear_prefix("WhichKey")
+		transparent.clear_prefix("Lazy")
+		transparent.clear_prefix("Mason")
+	end,
 }

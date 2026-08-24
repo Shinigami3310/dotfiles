@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import "../center"
 import "../../config"
 import "../../services"
 import "../common"
@@ -10,7 +11,7 @@ RowLayout {
 
     signal clearAllRequested
 
-    spacing: 10
+    spacing: CenterConfig.headerSpacing
 
     Text {
         text: Constants.labelNotifications
@@ -22,7 +23,7 @@ RowLayout {
     }
 
     Row {
-        spacing: 6
+        spacing: CenterConfig.dotSpacing
         Layout.alignment: Qt.AlignVCenter
 
         FilterDot {
@@ -42,15 +43,14 @@ RowLayout {
         }
     }
 
-    // Кнопка DND
     Pressable {
-        width: 50
-        height: 24
+        width: CenterConfig.dndWidth
+        height: CenterConfig.dndHeight
         onClicked: if (service) service.toggleDnd()
 
         Rectangle {
             anchors.fill: parent
-            radius: 12
+            radius: CenterConfig.buttonRadius
             color: service?.dndEnabled ? Colors.primary : Colors.surfaceContainer
             Text {
                 anchors.centerIn: parent
@@ -63,15 +63,14 @@ RowLayout {
         }
     }
 
-    // Кнопка очистки
     Pressable {
-        width: 24
-        height: 24
+        width: CenterConfig.clearButtonSize
+        height: CenterConfig.clearButtonSize
         onClicked: clearAllRequested()
 
         Rectangle {
             anchors.fill: parent
-            radius: 12
+            radius: CenterConfig.buttonRadius
             color: Colors.surfaceContainer
             Text {
                 anchors.centerIn: parent

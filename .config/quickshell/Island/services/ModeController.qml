@@ -10,7 +10,7 @@ QtObject {
 
     readonly property Timer timer: Timer {
         id: switchTimer
-        interval: Motion.fade * 2 + Motion.standard // wait until switch animation finishes
+        interval: Motion.durationSlow * 2 + Motion.durationSlow // wait until switch animation finishes
         repeat: false
         onTriggered: host.close()
     }

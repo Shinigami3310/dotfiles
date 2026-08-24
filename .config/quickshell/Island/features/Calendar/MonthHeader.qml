@@ -2,9 +2,6 @@ import QtQuick
 import "../../shared/theme"
 import "../../services"
 
-// Шапка календаря. Смена месяца через SequentialAnimation, а не мгновенно,
-// чтобы пользователь видел направление перехода (влево/вправо) — иначе
-// непонятно, куда «уехал» месяц.
 Item {
     id: root
 
@@ -22,8 +19,8 @@ Item {
             target: monthTitleText
             property: "opacity"
             to: 0
-            duration: Motion.morph
-            easing.type: Easing.InOutQuad
+            duration: Motion.durationMorph
+            easing.type: Motion.curveOpacityOut
         }
 
         ScriptAction {
@@ -37,8 +34,8 @@ Item {
             target: monthTitleText
             property: "opacity"
             to: 1
-            duration: Motion.morph
-            easing.type: Easing.InOutQuad
+            duration: Motion.durationMorph
+            easing.type: Motion.curveOpacityIn
         }
     }
 

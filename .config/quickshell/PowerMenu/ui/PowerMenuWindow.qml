@@ -1,6 +1,4 @@
 import QtQuick
-import "../shared/theme"
-import "../theme"
 
 Item {
     id: root
@@ -9,94 +7,57 @@ Item {
     signal closeRequested
     signal actionRequested(var command)
 
-    readonly property var buttons: [rebootBtn, suspendBtn, powerOffBtn, hibernateBtn, lockBtn]
-    property int lastIndex: 2
-
-    function open() {
-        Qt.callLater(() => powerOffBtn.forceActiveFocus());
+    Rectangle {
+        anchors.fill: parent
+        color: "#66000000"
     }
 
+    readonly property var actions: [
+        { label: "Reboot",    source: "../icons/Reboot.png",    command: ["systemctl", "reboot"] },
+        { label: "Suspend",   source: "../icons/Suspend.png",   command: ["systemctl", "suspend"] },
+        { label: "Power Off", source: "../icons/Power.png",     command: ["systemctl", "poweroff"] },
+        { label: "Hibernate", source: "../icons/Hibernate.png", command: ["systemctl", "hibernate"] },
+        { label: "Lock",      source: "../icons/Lock.png",      command: ["hyprlock"] }
+    ]
+
+    property int lastIndex: 2
+
+    Component.onCompleted: buttonsRepeater.itemAt(2).forceActiveFocus()
+
     function moveFocus(step) {
-        const currentIndex = buttons.findIndex(btn => btn.activeFocus);
-        const targetIndex = currentIndex !== -1 ? Math.max(0, Math.min(buttons.length - 1, currentIndex + step)) : lastIndex;
-        buttons[targetIndex].forceActiveFocus();
+        const count = buttonsRepeater.count
+        for (let i = 0; i < count; i++) {
+            if (buttonsRepeater.itemAt(i).activeFocus) {
+                buttonsRepeater.itemAt(Math.max(0, Math.min(count - 1, i + step))).forceActiveFocus()
+                return
+            }
+        }
+        buttonsRepeater.itemAt(lastIndex).forceActiveFocus()
     }
 
     Keys.onPressed: function (event) {
-        switch (event.key) {
-        case Qt.Key_Escape:
-            root.closeRequested();
-            event.accepted = true;
-            break;
-        case Qt.Key_Right:
-            root.moveFocus(1);
-            event.accepted = true;
-            break;
-        case Qt.Key_Left:
-            root.moveFocus(-1);
-            event.accepted = true;
-            break;
-        }
-    }
-
-    Rectangle {
-        anchors.fill: parent
-        color: "#22000000"
-    }
-
-    TapHandler {
-        acceptedButtons: Qt.LeftButton
-        onTapped: root.closeRequested()
+        if (event.key === Qt.Key_Escape) closeRequested()
+        if (event.key === Qt.Key_Right) moveFocus(1)
+        if (event.key === Qt.Key_Left) moveFocus(-1)
     }
 
     Row {
-        id: buttonsRow
         anchors.centerIn: parent
-        spacing: 18 * Configs.uiScale
 
-        ActionButton {
-            id: rebootBtn
-            source: "../icons/Reboot.png"
-            label: "Reboot"
-            onActiveFocusChanged: if (activeFocus)
-                root.lastIndex = 0
-            onActivated: root.actionRequested(["/usr/bin/systemctl", "reboot"])
-        }
+        Repeater {
+            id: buttonsRepeater
+            model: actions
 
-        ActionButton {
-            id: suspendBtn
-            source: "../icons/Suspend.png"
-            label: "Suspend"
-            onActiveFocusChanged: if (activeFocus)
-                root.lastIndex = 1
-            onActivated: root.actionRequested(["/usr/bin/systemctl", "suspend"])
-        }
+            delegate: ActionButton {
+                required property var modelData
+                required property int index
 
-        ActionButton {
-            id: powerOffBtn
-            source: "../icons/Power.png"
-            label: "Power Off"
-            onActiveFocusChanged: if (activeFocus)
-                root.lastIndex = 2
-            onActivated: root.actionRequested(["/usr/bin/systemctl", "poweroff"])
-        }
+                source: modelData.source
+                label: modelData.label
 
-        ActionButton {
-            id: hibernateBtn
-            source: "../icons/Hibernate.png"
-            label: "Hibernate"
-            onActiveFocusChanged: if (activeFocus)
-                root.lastIndex = 3
-            onActivated: root.actionRequested(["/usr/bin/systemctl", "hibernate"])
-        }
-
-        ActionButton {
-            id: lockBtn
-            source: "../icons/Lock.png"
-            label: "Lock"
-            onActiveFocusChanged: if (activeFocus)
-                root.lastIndex = 4
-            onActivated: root.actionRequested(["/usr/bin/hyprlock"])
+                onActiveFocusChanged: if (activeFocus) root.lastIndex = index
+                onActivated: root.actionRequested(modelData.command)
+            }
         }
     }
 }

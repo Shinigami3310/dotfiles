@@ -1,7 +1,6 @@
 pragma Singleton
 import QtQuick
 
-// Конфиг панели (Bar): размеры и отступы.
 QtObject {
     readonly property int spacing: 32
     readonly property int paddingX: 24

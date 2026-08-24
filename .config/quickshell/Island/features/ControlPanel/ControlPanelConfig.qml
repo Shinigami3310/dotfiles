@@ -6,14 +6,9 @@ QtObject {
     readonly property real panelPadding: 16
     readonly property real rowSpacing: 16
 
-    readonly property real buttonSize: 64
-    readonly property real buttonIconSize: 28
     readonly property real buttonRadius: 12
 
-    readonly property real sliderHeight: 36
     readonly property real sliderTrackHeight: 24
-    readonly property real sliderRadius: 10
-    readonly property real sliderIconSize: 24
     readonly property real sliderIconContainerSize: 36
     readonly property real sliderTextWidth: 36
     readonly property real sliderTextSize: 11

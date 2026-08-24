@@ -17,9 +17,6 @@ QtObject {
         Quickshell.execDetached(["qs", "-c", Paths.notificationCenterConfig, "ipc", "call", "notification-center", "toggleDnd"]);
     }
 
-    // Проверка состояния DND происходит при каждом просыпании (открытии
-    // ControlPanel), а не только при старте — состояние могло измениться
-    // извне, пока сервис спал.
     property Timer sleepTimer: Timer {
         interval: ServiceConfig.dndSleepMs
         onTriggered: root.isAwake = false
@@ -33,11 +30,6 @@ QtObject {
             onRead: data => {
                 root.active = (data.trim() === "true");
             }
-        }
-
-        onExited: exitCode => {
-            if (exitCode !== 0)
-                console.warn(`[DndService] getDndState завершился с кодом ${exitCode}`);
         }
     }
 

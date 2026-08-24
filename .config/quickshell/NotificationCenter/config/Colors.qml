@@ -3,7 +3,6 @@ import QtQuick
 import "../shared/theme"
 
 QtObject {
-    // Семантические роли, привязанные к палитре matugen (ThemeColor) с hot-reload.
     readonly property color surface: ThemeColor.surface
     readonly property color surfaceVariant: ThemeColor.surface_container_high
     readonly property color surfaceContainer: ThemeColor.surface_container
@@ -16,13 +15,11 @@ QtObject {
     readonly property color error: ThemeColor.error
     readonly property color outlineVariant: ThemeColor.outline_variant
 
-    // Привязки UI
     readonly property color panel: surface
     readonly property color panelAlt: surfaceVariant
     readonly property color text: textOnSurface
     readonly property color muted: textOnSurfaceVariant
 
-    // Границы уведомлений по важности (различимые оттенки)
     readonly property color borderLow: ThemeColor.outline
     readonly property color borderNormal: ThemeColor.secondary
     readonly property color borderCritical: ThemeColor.error

@@ -1,9 +1,7 @@
 import QtQuick
+import QtQuick.Layouts
 import "../../shared/theme"
 
-// Процентное значение слайдера. Вынос в отдельный компонент нужен, чтобы
-// размер/шрифт были едиными между OSD и панелью управления — иначе текст
-// «прыгает» при переходе между ними.
 Text {
     id: root
 
@@ -13,6 +11,11 @@ Text {
     property real textSize: 13
 
     width: textWidth
+    // Жёстко фиксируем Layout-ширину: иначе RowLayout отдаёт значение по
+    // implicitWidth, и поле «прыгает» при переходе 5% ↔ 100%.
+    Layout.preferredWidth: textWidth
+    Layout.minimumWidth: textWidth
+    Layout.maximumWidth: textWidth
     horizontalAlignment: Text.AlignRight
     text: Math.round((root.muted ? 0 : root.value) * 100) + "%"
     color: ThemeColor.on_surface

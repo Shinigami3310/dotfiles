@@ -11,8 +11,6 @@ FocusScope {
 
     readonly property int targetSurfaceHeight: layout.implicitHeight + (AppLauncherConfig.windowPadding * 2)
 
-    // При росте списка расширяемся сразу, при сжатии — с задержкой.
-    // Иначе при каждом удалении символа окно «дёргается» вверх-вниз.
     onTargetSurfaceHeightChanged: {
         if (targetSurfaceHeight > implicitHeight) {
             resizeDebounce.stop();

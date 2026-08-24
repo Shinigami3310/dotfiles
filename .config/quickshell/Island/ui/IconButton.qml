@@ -3,19 +3,10 @@ import QtQuick.Effects
 import "../shared/theme"
 import "../theme"
 
-// Единая иконка-кнопка. Все иконки-кнопки проекта (Bar/Icon,
-// MusicPlayer/IconButton, ControlButton, ProfileButton) используют этот
-// компонент, чтобы hover/pressed/цвет был консистентным.
-// - showBackground: фон-подложка нужен кнопкам «на панели» (ControlButton/ProfileButton),
-//   чтобы они читались на фоне — иначе иконка «теряется».
-// - enableRightClick: правый клик открывает селектор (Wi-Fi/Bluetooth).
-// - iconName: резолвится через Paths.icon() от базового каталога проекта,
-//   поэтому не зависит от того, из какой папки вызывается компонент.
 Pressable {
     id: root
 
     property string iconName: ""
-    property string source: ""
     property bool active: false
     property bool showBackground: false
     property bool enableRightClick: false
@@ -25,10 +16,6 @@ Pressable {
     property real bgBorderWidth: 1
 
     signal rightClicked
-
-    // Правый клик тоже подсвечивает кнопку — иначе рамка «мигает»
-    // при открытии селектора правой кнопкой.
-    property bool pressed: rightTap.pressed
 
     implicitWidth: showBackground ? UiConfig.iconButtonBgSize : UiConfig.iconButtonSize
     implicitHeight: showBackground ? UiConfig.iconButtonBgSize : UiConfig.iconButtonSize
@@ -44,8 +31,8 @@ Pressable {
 
         Behavior on border.color {
             ColorAnimation {
-                duration: Motion.standard
-                easing.type: Easing.OutCubic
+                duration: Motion.durationSlow
+                easing.type: Motion.curveOpacityOut
             }
         }
     }
@@ -55,7 +42,7 @@ Pressable {
         anchors.centerIn: parent
         width: root.showBackground ? UiConfig.iconButtonIconSize : UiConfig.iconButtonSize
         height: root.showBackground ? UiConfig.iconButtonIconSize : UiConfig.iconButtonSize
-        source: root.source !== "" ? root.source : (root.iconName !== "" ? Paths.icon(root.iconName) : "")
+        source: root.iconName !== "" ? Paths.icon(root.iconName) : ""
         sourceSize: Qt.size(width * 2, height * 2)
         fillMode: Image.PreserveAspectFit
         smooth: true
@@ -76,7 +63,7 @@ Pressable {
 
         Behavior on colorizationColor {
             ColorAnimation {
-                duration: Motion.fast
+                duration: Motion.durationFast
             }
         }
     }

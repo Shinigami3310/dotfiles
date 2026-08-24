@@ -3,8 +3,6 @@ import QtQuick.Effects
 import "../../shared/theme"
 import "../../theme"
 
-// Иконка слайдера. Fade-переключение нужно, чтобы резкая смена иконки
-// (например Volume → VolumeMute) не «мигала» — плавность скрывает подмену.
 Item {
     id: root
 
@@ -22,8 +20,8 @@ Item {
             target: iconEffect
             property: "opacity"
             to: 0.0
-            duration: Motion.morph
-            easing.type: Motion.easeStandard
+            duration: Motion.durationFast
+            easing.type: Motion.curveOpacityOut
         }
         ScriptAction {
             script: root.displayedIcon = root.iconName
@@ -32,8 +30,8 @@ Item {
             target: iconEffect
             property: "opacity"
             to: 1.0
-            duration: Motion.morph
-            easing.type: Motion.easeStandard
+            duration: Motion.durationFast
+            easing.type: Motion.curveOpacityIn
         }
     }
 
@@ -69,7 +67,7 @@ Item {
 
         Behavior on colorizationColor {
             ColorAnimation {
-                duration: Motion.fast
+                duration: Motion.durationFast
             }
         }
     }

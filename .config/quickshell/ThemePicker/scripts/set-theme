@@ -1,32 +1,21 @@
 #!/usr/bin/env bash
 
-# Strict mode: fail on any error or unset variable
 set -euo pipefail
 
 WALLPAPER_DIR="$HOME/Pictures/Wallpapers"
-WALLPAPER_NAME="${1:-}" # First argument
-
+WALLPAPER_NAME="${1:-}"
 WALLPAPER_PATH="$WALLPAPER_DIR/$WALLPAPER_NAME"
 
-# Name validation: forbid path traversal (slashes and ".."),
-# but allow spaces and unicode — real filenames vary.
-if [[ "$WALLPAPER_NAME" == */* || "$WALLPAPER_NAME" == *..* || -z "$WALLPAPER_NAME" ]]; then
-  echo "Error: Invalid wallpaper name '$WALLPAPER_NAME'." >&2
+if [[ -z "$WALLPAPER_NAME" || "$WALLPAPER_NAME" == */* || "$WALLPAPER_NAME" == *..* ]]; then
+  echo "Error: invalid wallpaper name." >&2
   exit 1
 fi
 
 if [[ ! -f "$WALLPAPER_PATH" ]]; then
-  echo "Error: File '$WALLPAPER_PATH' not found." >&2
+  echo "Error: file not found." >&2
   exit 1
 fi
 
-# 2. Generate the palette
-# Run matugen. It updates colors.json according to config.toml
-
-# 1. Run the wallpaper transition animation (awww)
-# transition-pos 0.5,0.5 means start from the center of the screen
-# Run in background; background process errors are not caught by set -e,
-# so explicitly check that the process started.
 awww img "$WALLPAPER_PATH" \
   --transition-type grow \
   --transition-pos 0.5,0.5 \
@@ -36,5 +25,3 @@ awww img "$WALLPAPER_PATH" \
 matugen image "$WALLPAPER_PATH" --prefer saturation --type scheme-smart
 
 sudo "$HOME/.local/bin/update-sddm-wallpaper.sh" "$WALLPAPER_PATH"
-
-cp "$WALLPAPER_PATH" "$HOME/.config/telegram/background.jpg"

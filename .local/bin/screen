@@ -1,0 +1,14 @@
+#!/bin/bash
+
+DIR="$HOME/Pictures/Screenshots"
+
+LAST=$(ls "$DIR"/screen*.png 2>/dev/null | tail -n 1)
+
+if [ -n "$LAST" ]; then
+  MAX=$(echo "$LAST" | tr -dc '0-9')
+  NEXT=$((10#$MAX + 1))
+else
+  NEXT=0
+fi
+
+grim "$DIR/screen$(printf "%03d" $NEXT).png"

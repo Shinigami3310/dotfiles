@@ -17,6 +17,9 @@ hl.bind(
 	hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'")
 )
 
+hl.bind("Print", hl.dsp.exec_cmd("~/.local/bin/screen"))
+hl.bind(mainMod .. " + R", hl.dsp.exec_cmd("~/.local/bin/record"))
+
 hl.bind(mainMod .. " + P", hl.dsp.exec_cmd("~/.local/bin/toggle-powermenu"))
 hl.bind(mainMod .. " + N", hl.dsp.exec_cmd("qs ipc -c NotificationCenter call notification-center toggle"))
 hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("qs ipc -c Island call island openSurface musicPlayer"))

@@ -1,8 +1,11 @@
 import QtQuick
 import Quickshell
 import Quickshell.Wayland
-import "../../services/"
+import "../toasts"
+import "../common"
 import "../../config"
+import "../../services"
+import "../../shared/theme"
 
 PanelWindow {
     id: root
@@ -18,52 +21,48 @@ PanelWindow {
         right: true
     }
     margins {
-        top: Settings.cornerMargin
-        right: Settings.cornerMargin
+        top: ToastsConfig.cornerMargin
+        right: ToastsConfig.cornerMargin
     }
 
-    implicitWidth: Settings.toastWidth
-    implicitHeight: listView.contentHeight
+    implicitWidth: ToastsConfig.width
+    // Статичная высота контейнера тостов предотвращает лаги при частых удалених/добавлениях
+    implicitHeight: ToastsConfig.maxHeight ?? 600
     color: "transparent"
 
     ListView {
         id: listView
         anchors.fill: parent
-        spacing: Settings.toastSpacing
+        spacing: ToastsConfig.spacing
         interactive: false
         model: root.store?.activeToastsModel ?? null
 
-        delegate: ToastItem {
+        delegate: NotificationCard {
             width: ListView.view.width
             service: root.service
-            notificationData: QtObject {
-                readonly property string id: model.id ?? ""
-                readonly property string source: model.source ?? ""
-                readonly property string summary: model.summary ?? ""
-                readonly property string text: model.text ?? ""
-                readonly property string icon: model.icon ?? ""
-                readonly property date time: model.time
-                readonly property var importance: model.importance ?? ""
-                readonly property string actionsJson: model.actionsJson ?? ""
-            }
+            showHoverPause: true
+            notificationData: model
             onDismissRequested: root.service?.closeToastOnly(model.id, Constants.CloseReason.Dismissed)
             onActionInvoked: (actionKey) => root.service?.invokeAction(model.id, actionKey)
         }
 
         add: Transition {
             ParallelAnimation {
-                NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Motion.standard; easing.type: Motion.easeOutCubic }
-                NumberAnimation { property: "x"; from: 120; to: 0; duration: Motion.standard; easing.type: Motion.easeOutCubic }
+                NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Motion.durationStandard; easing.type: Motion.curveOpacityIn }
+                NumberAnimation { property: "x"; from: 120; to: 0; duration: Motion.durationStandard; easing.type: Motion.curveOpacityIn }
             }
         }
         displaced: Transition {
-            NumberAnimation { properties: "y"; duration: Motion.standard; easing.type: Motion.easeOutCubic }
+            NumberAnimation { properties: "y"; duration: Motion.durationSlow; easing.type: Motion.curveMoveIn }
         }
         remove: Transition {
             ParallelAnimation {
-                NumberAnimation { property: "opacity"; to: 0; duration: Motion.standard }
-                NumberAnimation { property: "x"; to: 120; duration: Motion.standard }
+                NumberAnimation { property: "opacity"; to: 0; duration: Motion.durationSlow }
+                NumberAnimation { property: "x"; to: 120; duration: Motion.durationSlow }
             }
+        }
+        removeDisplaced: Transition {
+            NumberAnimation { properties: "y"; duration: Motion.durationSlow; easing.type: Motion.curveMoveIn }
         }
     }
 }

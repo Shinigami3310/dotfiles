@@ -1,0 +1,5 @@
+[mgr]
+prepend_keymap = [
+    { on = [ "M" ], run = "plugin mount", desc = "Менеджер дисков (Mount/Unmount)" },
+    { on = [ "g", "m" ], run = "cd /run/media/username", desc = "Перейти к флешкам" }
+]

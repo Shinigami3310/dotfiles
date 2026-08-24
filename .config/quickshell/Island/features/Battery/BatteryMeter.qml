@@ -2,7 +2,6 @@ import QtQuick
 import "../../shared/theme"
 import "../../services"
 
-// Индикатор батареи: рамка с терминалом, fill-заливка и анимация зарядки.
 Item {
     id: root
 
@@ -39,7 +38,7 @@ Item {
 
             Behavior on color {
                 ColorAnimation {
-                    duration: Motion.fast
+                    duration: Motion.durationFast
                 }
             }
         }

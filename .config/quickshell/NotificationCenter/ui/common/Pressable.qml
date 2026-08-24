@@ -1,22 +1,28 @@
 import QtQuick
+import "../../shared/theme"
 
 Item {
     id: root
 
     signal clicked
-    readonly property bool hovered: pressArea.containsMouse
-    readonly property bool pressed: pressArea.pressed
+    readonly property bool hovered: hoverHandler.hovered
+    readonly property bool pressed: tapHandler.pressed
 
-    scale: pressed ? 0.9 : (hovered ? 1.1 : 1.0)
+    scale: pressed ? Theme.scalePressed : (hovered ? Theme.scaleHover : 1.0)
     Behavior on scale {
-        NumberAnimation { duration: 100; easing.type: Easing.OutCubic }
+        NumberAnimation {
+            duration: Motion.durationFast
+            easing.type: Motion.curveScaleRelease
+        }
     }
 
-    MouseArea {
-        id: pressArea
-        anchors.fill: parent
-        hoverEnabled: true
+    TapHandler {
+        id: tapHandler
         cursorShape: Qt.PointingHandCursor
-        onClicked: root.clicked()
+        onTapped: root.clicked()
+    }
+
+    HoverHandler {
+        id: hoverHandler
     }
 }

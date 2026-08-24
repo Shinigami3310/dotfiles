@@ -9,8 +9,6 @@ Item {
 
     signal surfaceRequested(string name)
 
-    // Стартовая «заглушка» при запуске shell. Показываем только время
-    // — это привычный и ненавязчивый виджет, не требующий действий.
     readonly property int paddingX: HomeClockConfig.paddingX
     readonly property int paddingY: HomeClockConfig.paddingY
 

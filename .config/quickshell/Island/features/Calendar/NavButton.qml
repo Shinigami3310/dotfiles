@@ -2,9 +2,6 @@ import QtQuick
 import "../../shared/theme"
 import "../../ui"
 
-// Кнопка навигации по месяцам (‹ ›). Использует увеличенный hoverScale,
-// чтобы стрелка «оживала» сильнее маленькой кнопки — иначе клик по ней
-// визуально не ощущается.
 Pressable {
     id: root
 
@@ -27,7 +24,7 @@ Pressable {
 
         Behavior on color {
             ColorAnimation {
-                duration: Motion.fast
+                duration: Motion.durationFast
             }
         }
     }

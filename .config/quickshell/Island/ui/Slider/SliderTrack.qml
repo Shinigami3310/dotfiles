@@ -1,8 +1,6 @@
 import QtQuick
 import "../../shared/theme"
 
-// Трек слайдера. preventStealing нужен, чтобы drag не перехватывался
-// родительским Flickable/ListView — иначе ползунок «дёргается».
 Rectangle {
     id: root
 
@@ -14,8 +12,6 @@ Rectangle {
 
     signal sliderMoved(real newValue)
 
-    // Внешние размеры задаёт родитель (Slider.qml): width по Layout,
-    // здесь только высота и скругление.
     height: trackHeight
     radius: height / 2
     color: ThemeColor.surface_container_high
@@ -25,7 +21,7 @@ Rectangle {
 
     Behavior on border.color {
         ColorAnimation {
-            duration: Motion.fast
+            duration: Motion.durationInstant
         }
     }
 
@@ -39,8 +35,8 @@ Rectangle {
         Behavior on width {
             enabled: !trackMouse.pressed
             NumberAnimation {
-                duration: Motion.fast
-                easing.type: Motion.easeStandard
+                duration: Motion.durationInstant
+                easing.type: Motion.curveContinuous
             }
         }
     }

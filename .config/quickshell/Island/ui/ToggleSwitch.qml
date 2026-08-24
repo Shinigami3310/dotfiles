@@ -1,8 +1,6 @@
 import QtQuick
 import "../shared/theme"
 
-// Переключатель. Наследует Pressable, чтобы hover/pressed/scale-анимация
-// была единой с остальными интерактивными элементами.
 Pressable {
     id: root
 
@@ -22,8 +20,8 @@ Pressable {
 
         Behavior on color {
             ColorAnimation {
-                duration: Motion.fast
-                easing.type: Easing.OutQuad
+                duration: Motion.durationMicro
+                easing.type: Motion.curveOpacityOut
             }
         }
 
@@ -38,13 +36,14 @@ Pressable {
 
             Behavior on x {
                 NumberAnimation {
-                    duration: Motion.fast
+                    duration: Motion.durationMicro
                     easing.type: Easing.OutBack
+                    easing.overshoot: 1.2
                 }
             }
             Behavior on color {
                 ColorAnimation {
-                    duration: Motion.fast
+                    duration: Motion.durationMicro
                 }
             }
         }

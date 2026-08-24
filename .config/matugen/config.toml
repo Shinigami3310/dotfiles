@@ -53,3 +53,7 @@ output_path = '~/.config/qt6ct/colors/matugen.conf'
 [templates.telegram]
 input_path = '~/.config/matugen/templates/telegram.tdesktop-theme'
 output_path = '~/.config/telegram/theme.tdesktop-theme'
+
+[templates.cava]
+input_path = '~/.config/matugen/templates/cava'
+output_path = '~/.config/cava/themes/custom'

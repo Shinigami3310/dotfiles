@@ -2,8 +2,10 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
+import "../center"
 import "../../config"
-import "../../services/"
+import "../../services"
+import "../../shared/theme"
 
 PanelWindow {
     id: root
@@ -22,12 +24,12 @@ PanelWindow {
         right: true
     }
     margins {
-        top: Settings.cornerMargin
-        right: Settings.cornerMargin
+        top: CenterConfig.cornerMargin
+        right: CenterConfig.cornerMargin
     }
 
-    implicitWidth: Settings.centerWidth
-    implicitHeight: mainRect.implicitHeight
+    implicitWidth: CenterConfig.width
+    implicitHeight: CenterConfig.listMaxHeight + CenterConfig.padding * 2
     color: "transparent"
     visible: false
 
@@ -43,25 +45,27 @@ PanelWindow {
         onActivated: root.visible = false
     }
 
-    // Фон панели — поверх, чтобы клики по уведомлениям обрабатывались карточками,
-    // а клики по пустой области закрывали панель.
     Rectangle {
         id: mainRect
         width: parent.width
-        implicitHeight: mainLayout.implicitHeight + Settings.centerPadding * 2
+        implicitHeight: mainLayout.implicitHeight + CenterConfig.padding * 2
         color: Colors.panel
-        radius: 14
-        border.width: 1.5
+        radius: CenterConfig.radius
+        border.width: CenterConfig.borderWidth
         border.color: Colors.borderNormal
         focus: true
+
+        Behavior on implicitHeight {
+            NumberAnimation {
+                duration: Motion.durationSlow
+                easing.type: Easing.OutQuad
+            }
+        }
 
         MouseArea {
             anchors.fill: parent
             acceptedButtons: Qt.RightButton
-            onClicked: mouse => {
-                if (mouse.button === Qt.RightButton)
-                    root.visible = false;
-            }
+            onClicked: root.visible = false
         }
 
         ColumnLayout {
@@ -70,9 +74,9 @@ PanelWindow {
                 top: parent.top
                 left: parent.left
                 right: parent.right
-                margins: Settings.centerPadding
+                margins: CenterConfig.padding
             }
-            spacing: hasHistory ? 10 : 0
+            spacing: hasHistory ? CenterConfig.columnSpacing : 0
 
             CenterHeader {
                 Layout.fillWidth: true

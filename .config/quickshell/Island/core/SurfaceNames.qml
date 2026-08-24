@@ -1,8 +1,6 @@
 pragma Singleton
 import QtQuick
 
-// Централизованный реестр имён поверхностей. Используется сервисами и фичами,
-// чтобы не хардкодить строки и не зависеть от их изменения в SurfaceCatalog.
 QtObject {
     readonly property string appLauncher: "appLauncher"
     readonly property string bar: "bar"

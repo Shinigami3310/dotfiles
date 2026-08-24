@@ -1,9 +1,6 @@
 import QtQuick
 import "../../shared/theme"
 
-// Поле ввода пароля. Автофокус при появлении обязателен: иначе пользователь
-// начнёт печатать, а символы уйдут в никуда (фокус ещё на списке).
-// Потеря фокуса с пустым полем = отмена — это дешевле, чем кнопка «отмена».
 Rectangle {
     id: root
 
@@ -21,21 +18,29 @@ Rectangle {
 
     Behavior on opacity {
         NumberAnimation {
-            duration: Motion.fast
+            duration: Motion.durationFast
         }
     }
 
     Behavior on border.color {
         ColorAnimation {
-            duration: Motion.fast
+            duration: Motion.durationFast
         }
     }
 
     TextInput {
         id: pwdInput
-        anchors.fill: parent
-        anchors.margins: SelectorConfig.inputPadding
+        // Высота = весь контейнер: при узких отступах строка шрифта (~15px)
+        // была выше бокса TextInput (12px), и центрирование ломалось — курсор
+        // уезжал вверх. Растягиваем по вертикали и центрируем внутри полной
+        // высоты, по горизонтали ограничиваем только паддингами.
+        anchors {
+            fill: parent
+            leftMargin: SelectorConfig.inputPadding
+            rightMargin: SelectorConfig.inputPadding
+        }
         verticalAlignment: TextInput.AlignVCenter
+        horizontalAlignment: TextInput.AlignHCenter
         color: ThemeColor.on_surface
         font.pixelSize: SelectorConfig.cardTextSize
         echoMode: TextInput.Password
@@ -49,10 +54,6 @@ Rectangle {
 
         onAccepted: {
             if (text.trim() !== "") {
-                // НЕ устанавливаем root.active = false здесь: это свойство связано
-                // с isInputting родителя, и прямое присваивание разорвёт биндинг
-                // (поле скроется, но родитель не узнает → высота не сбросится).
-                // Сброс происходит в SelectorItemCard.onSubmitted.
                 root.submitted(text);
                 text = "";
             }

@@ -6,14 +6,12 @@ FocusScope {
     property string surfaceName: ""
     property bool active: false
     property bool canGoBack: true
+    property string backTarget: ""
 
     signal surfaceRequested(string name)
     signal backRequested
     signal closeRequested
 
-    // Только активная поверхность с навигацией назад получает клавиатуру.
-    // Без этого OSD (brightnessSlider) перехватывал бы Esc, хотя закрывать
-    // его должен клик мимо, а не клавиша.
     readonly property bool requiresKeyboard: active && canGoBack
 
     focus: requiresKeyboard
@@ -28,8 +26,14 @@ FocusScope {
 
     TapHandler {
         acceptedButtons: Qt.RightButton
-        onTapped: if (canGoBack)
-            backRequested()
+        onTapped: {
+            if (!canGoBack)
+                return;
+            if (root.backTarget !== "")
+                root.surfaceRequested(root.backTarget)
+            else
+                root.backRequested()
+        }
     }
 
     function enter() {

@@ -4,12 +4,20 @@ return {
 		lazy = false,
 		priority = 999,
 		opts = {
-			load_theme = true, -- Automatically apply the theme
-			-- Point this to the output_path from your config.toml
+			load_theme = true,
 			palette_path = vim.fn.expand("~/.config/nvim/nvim-colors.json"),
 		},
+		config = function(_, opts)
+			-- 1. Применяем тему matugen
+			require("matugen").setup(opts)
+
+			-- 2. Сразу после применения затираем фон через transparent.nvim
+			local ok, transparent = pcall(require, "transparent")
+			if ok then
+				transparent.clear()
+			end
+		end,
 	},
-	-- Tell LazyVim to use matugen as the default colorscheme
 	{
 		"LazyVim/LazyVim",
 		opts = {

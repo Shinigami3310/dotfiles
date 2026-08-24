@@ -1,0 +1,13 @@
+#!/bin/bash
+
+DIR="$HOME/Videos/ScreenRecords"
+FILE="$DIR/recording_$(date +%Y-%m-%d_%H-%M-%S).mp4"
+
+if pgrep -x "wl-screenrec" > /dev/null; then
+    pkill -INT -x wl-screenrec
+    notify-send "Video recorder" "Video saved" -u normal
+else
+    notify-send "Video recorder" "Recording started" -u low
+    AUDIO_DEV="$(pactl get-default-sink).monitor"
+    wl-screenrec --codec avc --audio --audio-device "$AUDIO_DEV" -f "$FILE" &
+fi

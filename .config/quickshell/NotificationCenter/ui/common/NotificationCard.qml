@@ -1,12 +1,11 @@
 import QtQuick
 import QtQuick.Layouts
+import "../common"
 import "../../config"
 import "../../services"
 
 Rectangle {
-    id: root
-
-    property QtObject notificationData
+    property var notificationData
     property NotificationService service
     property bool showHoverPause: false
     property bool compact: false
@@ -14,9 +13,9 @@ Rectangle {
     signal dismissRequested
     signal actionInvoked(string actionKey)
 
-    radius: compact ? 10 : 12
+    radius: compact ? CommonConfig.cardRadiusCompact : CommonConfig.cardRadius
     color: compact ? Colors.panelAlt : Colors.panel
-    implicitHeight: contentColumn.implicitHeight + (compact ? Settings.itemPadding * 2 : 24)
+    implicitHeight: contentColumn.implicitHeight + (compact ? CommonConfig.cardPaddingCompact : CommonConfig.cardVPadding) * 2
 
     readonly property bool hasSummary: notificationData?.summary !== "" && notificationData?.summary !== notificationData?.text
     readonly property var actions: {
@@ -28,7 +27,7 @@ Rectangle {
     }
     readonly property bool hasActions: actions.length > 0
 
-    border.width: compact ? 1 : 1.5
+    border.width: compact ? CommonConfig.cardBorderWidthCompact : CommonConfig.cardBorderWidth
     border.color: {
         if (!notificationData)
             return compact ? Colors.outlineVariant : Colors.borderNormal;
@@ -42,16 +41,18 @@ Rectangle {
         }
     }
 
-    MouseArea {
-        id: outerArea
-        anchors.fill: parent
+    TapHandler {
         acceptedButtons: Qt.RightButton
-        hoverEnabled: showHoverPause
-        onEntered: if (showHoverPause) service?.pauseTimer(notificationData?.id)
-        onExited: if (showHoverPause) service?.resumeTimer(notificationData?.id)
-        onClicked: mouse => {
-            if (mouse.button === Qt.RightButton)
-                dismissRequested();
+        onTapped: dismissRequested()
+    }
+
+    HoverHandler {
+        enabled: showHoverPause
+        onHoveredChanged: if (showHoverPause) {
+            if (hovered)
+                service?.pauseTimer(notificationData?.id)
+            else
+                service?.resumeTimer(notificationData?.id)
         }
     }
 
@@ -61,25 +62,22 @@ Rectangle {
             top: parent.top
             left: parent.left
             right: parent.right
-            margins: compact ? Settings.itemPadding : 12
+            margins: compact ? CommonConfig.cardPaddingCompact : CommonConfig.cardPadding
         }
-        spacing: 6
+        spacing: CommonConfig.contentSpacing
 
         RowLayout {
             Layout.fillWidth: true
-            spacing: 6
+            spacing: CommonConfig.contentSpacing
 
             Image {
                 visible: notificationData?.icon !== ""
                 source: notificationData?.icon ?? ""
-                Layout.preferredWidth: compact ? 14 : 16
-                Layout.preferredHeight: compact ? 14 : 16
+                Layout.preferredWidth: compact ? CommonConfig.iconSizeCompact : CommonConfig.iconSize
+                Layout.preferredHeight: compact ? CommonConfig.iconSizeCompact : CommonConfig.iconSize
                 fillMode: Image.PreserveAspectFit
                 asynchronous: true
-                onStatusChanged: {
-                    if (status === Image.Error)
-                        source = "";
-                }
+                onStatusChanged: if (status === Image.Error) source = ""
             }
             Text {
                 text: notificationData?.source ?? ""
@@ -97,8 +95,8 @@ Rectangle {
                 font.pixelSize: Constants.fontTiny
             }
             Pressable {
-                width: compact ? 16 : 18
-                height: compact ? 16 : 18
+                width: compact ? CommonConfig.closeButtonSizeCompact : CommonConfig.closeButtonSize
+                height: compact ? CommonConfig.closeButtonSizeCompact : CommonConfig.closeButtonSize
                 onClicked: dismissRequested()
 
                 Rectangle {
@@ -140,7 +138,7 @@ Rectangle {
         RowLayout {
             visible: hasActions
             Layout.fillWidth: true
-            spacing: compact ? 6 : 8
+            spacing: compact ? CommonConfig.contentSpacing : CommonConfig.contentSpacing + 2
             Layout.topMargin: 4
 
             Repeater {
@@ -148,15 +146,15 @@ Rectangle {
                 delegate: Pressable {
                     required property var modelData
                     visible: modelData.key !== ""
-                    implicitWidth: actionText.implicitWidth + (compact ? 16 : 20)
-                    implicitHeight: compact ? 22 : 26
+                    implicitWidth: actionText.implicitWidth + (compact ? CommonConfig.actionHPaddingCompact : CommonConfig.actionHPadding)
+                    implicitHeight: compact ? CommonConfig.actionHeightCompact : CommonConfig.actionHeight
                     onClicked: actionInvoked(modelData.key)
 
                     Rectangle {
                         anchors.fill: parent
-                        radius: 6
+                        radius: CommonConfig.actionRadius
+                        border.width: CommonConfig.actionBorderWidth
                         color: parent.hovered ? Colors.surfaceContainer : (compact ? Colors.surface : Colors.surfaceVariant)
-                        border.width: 1
                         border.color: parent.hovered ? Colors.primary : Colors.outlineVariant
 
                         Text {

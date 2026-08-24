@@ -3,9 +3,6 @@ import "../../services"
 import "../../shared/theme"
 import "../../ui"
 
-// Поверхность профиля батареи. Удерживает синглтон BatteryService «в awake»:
-// пока поверхность открыта, мониторинг udev и опрос активны; при выгрузке
-// поверхности (release) сервис засыпает и не тратит ресурсы.
 Item {
     id: root
 
@@ -29,8 +26,6 @@ Item {
         target: BatteryService
         function onIsChargingChanged() {
             if (BatteryService.isCharging) {
-                // Анимация стартует от реального процента, а не от 0 —
-                // иначе при включении зарядки на 80% шкала «прыгнет» вниз.
                 chargeAnim.from = BatteryService.percent;
                 chargeAnimVal = BatteryService.percent;
                 chargeAnim.restart();

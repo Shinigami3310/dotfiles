@@ -4,9 +4,6 @@ import Quickshell
 import Quickshell.Io
 import "helpers"
 
-// Управление Wi-Fi через nmcli. Нет ни одного постоянного процесса —
-// nmcli завершает работу после каждого вызова, поэтому retain/release
-// лишь держит sleepTimer, чтобы сервис не «засыпал» между сканами.
 QtObject {
     id: root
 

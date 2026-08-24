@@ -11,14 +11,12 @@ Item {
 
     signal closeRequested
 
-    // В режиме плейлиста скрываем панель управления, чтобы не перекрывать
-    // выбор трека — иначе два интерактивных слоя конфликтуют по фокусу.
     opacity: MusicPlayerService.isPlaylistMode ? 0.0 : 1.0
     visible: opacity > 0
 
     Behavior on opacity {
         NumberAnimation {
-            duration: Motion.standard
+            duration: Motion.durationStandard
         }
     }
 
@@ -67,14 +65,14 @@ Item {
                     from: 0
                     to: -(text1.implicitWidth + marqueeRow.spacing)
                     duration: Math.max(MusicPlayerConfig.marqueeMinDuration, text1.implicitWidth * MusicPlayerConfig.marqueeDurationPerPixel)
-                    easing.type: Easing.Linear
+                    easing.type: Motion.curveLinear
                 }
             }
         }
 
         RowLayout {
-            Layout.fillWidth: true
-            Layout.alignment: Qt.AlignVCenter
+            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+            spacing: MusicPlayerConfig.playbackSpacing
 
             IconButton {
                 iconName: "Power.png"
@@ -84,28 +82,24 @@ Item {
                 }
             }
 
-            HSpacer {}
+            Item { Layout.preferredWidth: MusicPlayerConfig.playbackGroupGap }
 
-            RowLayout {
-                spacing: 20
-
-                IconButton {
-                    iconName: "Previous.png"
-                    onClicked: MusicPlayerService.previous()
-                }
-
-                IconButton {
-                    iconName: MusicPlayerService.isPlaying ? "Stop.png" : "Play.png"
-                    onClicked: MusicPlayerService.playStop()
-                }
-
-                IconButton {
-                    iconName: "Next.png"
-                    onClicked: MusicPlayerService.next()
-                }
+            IconButton {
+                iconName: "Previous.png"
+                onClicked: MusicPlayerService.previous()
             }
 
-            HSpacer {}
+            IconButton {
+                iconName: MusicPlayerService.isPlaying ? "Stop.png" : "Play.png"
+                onClicked: MusicPlayerService.playStop()
+            }
+
+            IconButton {
+                iconName: "Next.png"
+                onClicked: MusicPlayerService.next()
+            }
+
+            Item { Layout.preferredWidth: MusicPlayerConfig.playbackGroupGap }
 
             IconButton {
                 iconName: "Playlist.png"

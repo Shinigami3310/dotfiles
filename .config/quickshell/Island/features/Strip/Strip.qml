@@ -7,8 +7,6 @@ Item {
 
     signal surfaceRequested(string name)
 
-    // Полоска в fullscreen-режиме — минимальный «якорь» для возврата
-    // к HomeClock. Размер 60×12 — это граница клика, а не визуальный элемент.
     implicitWidth: 60
     implicitHeight: 12
 
