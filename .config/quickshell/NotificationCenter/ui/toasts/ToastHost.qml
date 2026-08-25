@@ -26,8 +26,7 @@ PanelWindow {
     }
 
     implicitWidth: ToastsConfig.width
-    // Статичная высота контейнера тостов предотвращает лаги при частых удалених/добавлениях
-    implicitHeight: ToastsConfig.maxHeight ?? 600
+    implicitHeight: ToastsConfig.maxHeight
     color: "transparent"
 
     ListView {
@@ -48,8 +47,8 @@ PanelWindow {
 
         add: Transition {
             ParallelAnimation {
-                NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Motion.durationStandard; easing.type: Motion.curveOpacityIn }
-                NumberAnimation { property: "x"; from: 120; to: 0; duration: Motion.durationStandard; easing.type: Motion.curveOpacityIn }
+                NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Motion.durationSlow; easing.type: Motion.curveOpacityIn }
+                NumberAnimation { property: "x"; from: 120; to: 0; duration: Motion.durationSlow; easing.type: Motion.curveOpacityIn }
             }
         }
         displaced: Transition {

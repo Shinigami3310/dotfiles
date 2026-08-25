@@ -8,8 +8,5 @@ QtObject {
     readonly property int timeoutLowMs: 3000
     readonly property int timeoutNormalMs: 5000
     readonly property int maxVisible: 3
-
-    // Пауза перед применением итоговой высоты окна. Покрывает remove
-    // (240 мс) + displaced (240 мс) тостов (см. CenterConfig).
-    readonly property int resizeDebounceInterval: 300
+    readonly property int maxHeight: 600
 }

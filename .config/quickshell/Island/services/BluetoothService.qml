@@ -1,214 +1,222 @@
 pragma Singleton
 import QtQuick
 import Quickshell
-import Quickshell.Bluetooth
+import Quickshell.Io
+import "../shared/theme"
+import "../theme"
+import "helpers"
 
 QtObject {
     id: root
 
     property bool enabled: false
     property string connectingMac: ""
-    readonly property ListModel deviceModel: ListModel {}
+    property int _activeClients: 0
     property bool isAwake: false
+    readonly property ListModel deviceModel: ListModel {}
 
-    readonly property QtObject adapter: Bluetooth.defaultAdapter
+    property ListModelDiff listModelDiff: ListModelDiff {}
 
-    Component.onCompleted: {
-        console.log("[BT Service] Запуск. Адаптер найден:", !!root.adapter);
-        if (root.adapter) {
-            root.enabled = root.adapter.enabled;
-            console.log("[BT Service] Статус адаптера (enabled):", root.enabled);
-            
-            // Проверяем, поддерживает ли адаптер свойство discovering
-            if (root.adapter.discovering !== undefined) {
-                console.log("[BT Service] Режим сканирования (discovering):", root.adapter.discovering);
-            } else {
-                console.log("[BT Service] Свойство 'discovering' у адаптера не найдено.");
+    property bool _isToggling: false
+
+    property Timer sleepTimer: Timer {
+        interval: ServiceConfig.bluetoothSleepMs
+        onTriggered: root.isAwake = false
+    }
+
+    property Timer updateThrottleTimer: Timer {
+        interval: ServiceConfig.bluetoothThrottleMs
+        onTriggered: {
+            if (!scanProc.running) {
+                scanParser._lines = [];
+                scanProc.running = true;
             }
-            
-            root._syncDevices();
         }
     }
 
-    onAdapterChanged: {
-        console.log("[BT Service] Сменился адаптер:", !!root.adapter);
-        if (root.adapter) {
-            root.enabled = root.adapter.enabled;
-            root._syncDevices();
+    property Timer stateCheckTimer: Timer {
+        interval: ServiceConfig.bluetoothStateCheckMs
+        repeat: true
+        onTriggered: checkStateProc.running = true
+    }
+
+    property Timer retryScanTimer: Timer {
+        interval: ServiceConfig.bluetoothRetryMs
+        onTriggered: startScan()
+    }
+
+    property Timer scanRefreshTimer: Timer {
+        interval: ServiceConfig.bluetoothThrottleMs
+        repeat: true
+        onTriggered: {
+            if (scanProc.running)
+                return;
+            scanParser._lines = [];
+            scanProc.running = true;
+        }
+    }
+
+    property Process checkStateProc: Process {
+        command: ["bash", "-c", "bluetoothctl show | grep -q 'Powered: yes' && echo 1 || echo 0"]
+        stdout: SplitParser {
+            onRead: data => {
+                if (root._isToggling)
+                    return;
+                const newState = data.trim() === "1";
+                if (root.enabled !== newState) {
+                    root.enabled = newState;
+                }
+            }
+        }
+        onExited: exitCode => {
+            if (exitCode !== 0)
+                console.warn(`[BluetoothService] bluetoothctl show завершился с кодом ${exitCode}`);
+        }
+    }
+
+    property Process continuousScanProc: Process {
+        command: ["bluetoothctl", "scan", "on"]
+        stdout: SplitParser {
+            onRead: _ => {
+                if (!updateThrottleTimer.running)
+                    updateThrottleTimer.start();
+            }
+        }
+        stderr: SplitParser {
+            onRead: err => console.error(`[Bluetooth] Scan Error: ${err.trim()}`)
+        }
+        onExited: exitCode => {
+            if (root.isAwake && root.enabled && !root._isToggling) {
+                retryScanTimer.start();
+            }
+        }
+    }
+
+    property Process scanProc: Process {
+        command: ["bash", Paths.scriptsDir + "bt_scan.sh"]
+        stdout: SplitParser {
+            id: scanParser
+            property list<string> _lines: []
+            onRead: data => {
+                if (data.trim())
+                    scanParser._lines.push(data.trim());
+            }
+        }
+        onExited: exitCode => {
+            if (exitCode === 0 && root.isAwake) {
+                root.updateModel(scanParser._lines);
+            } else if (exitCode !== 0) {
+                console.warn(`[BluetoothService] bt_scan.sh завершился с кодом ${exitCode}`);
+            }
+            scanParser._lines = [];
+        }
+    }
+
+    property Process toggleProc: Process {
+        property string targetState: "on"
+        command: ["bluetoothctl", "power", targetState]
+        onExited: () => {
+            root._isToggling = false;
+            if (targetState === "on" && root.isAwake) {
+                startScan();
+            }
+            checkStateProc.running = true;
+        }
+    }
+
+    property Process connectProc: Process {
+        stderr: SplitParser {
+            onRead: err => console.error(`[Bluetooth] Connect Error: ${err.trim()}`)
+        }
+        onExited: () => {
+            root.connectingMac = "";
+            startScan();
+        }
+    }
+
+    onIsAwakeChanged: {
+        if (isAwake) {
+            checkStateProc.running = true;
+            stateCheckTimer.start();
+            if (enabled && !_isToggling)
+                startScan();
         } else {
-            root.enabled = false;
-            root.deviceModel.clear();
+            stateCheckTimer.stop();
+            stopScan();
         }
     }
 
-    property Connections adapterConnections: Connections {
-        target: root.adapter
-        enabled: root.adapter != null
-        
-        function onEnabledChanged() { 
-            console.log("[BT Service] Адаптер вкл/выкл изменился на:", root.adapter.enabled);
-            root.enabled = root.adapter.enabled;
+    onEnabledChanged: {
+        if (enabled && isAwake && !_isToggling) {
+            startScan();
+        } else if (!enabled) {
+            stopScan();
+            deviceModel.clear();
         }
-        
-        // Если у адаптера есть сигнал onDiscoveringChanged, раскомментируйте код ниже:
-        /*
-        function onDiscoveringChanged() {
-            console.log("[BT Service] Состояние сканирования изменилось на:", root.adapter.discovering);
-        }
-        */
     }
 
-    property Connections devicesConnections: Connections {
-        target: root.adapter ? root.adapter.devices : null
-        
-        function onValuesChanged() { 
-            console.log("[BT Service] Список устройств в адаптере изменился (onValuesChanged)!");
-            root._syncDevices();
-        }
+    function retain() {
+        _activeClients++;
+        sleepTimer.stop();
+        isAwake = true;
+    }
+
+    function release() {
+        _activeClients = Math.max(0, _activeClients - 1);
+        if (_activeClients === 0)
+            sleepTimer.restart();
     }
 
     function toggle() {
-        console.log("[BT Service] Вызван toggle()");
-        if (root.adapter)
-            root.adapter.enabled = !root.adapter.enabled;
-    }
-
-    // Добавим функцию-помощник для попытки запустить сканирование.
-    // Если она выдаст ошибку, значит API в Quickshell отличается.
-    function startScan() {
-        console.log("[BT Service] Попытка запустить сканирование...");
-        if (!root.adapter) return;
-        
-        try {
-            // Попробуем два самых частых варианта API:
-            if (typeof root.adapter.startDiscovery === "function") {
-                root.adapter.startDiscovery();
-                console.log("[BT Service] Вызван метод startDiscovery()");
-            } else {
-                root.adapter.discovering = true;
-                console.log("[BT Service] Установлено свойство discovering = true");
-            }
-        } catch (e) {
-            console.error("[BT Service] Ошибка при запуске сканирования:", e);
-        }
-    }
-    
-    function stopScan() {
-        console.log("[BT Service] Попытка остановить сканирование...");
-        if (!root.adapter) return;
-        
-        try {
-            if (typeof root.adapter.stopDiscovery === "function") {
-                root.adapter.stopDiscovery();
-            } else {
-                root.adapter.discovering = false;
-            }
-        } catch (e) {}
+        if (_isToggling)
+            return;
+        _isToggling = true;
+        enabled = !enabled;
+        toggleProc.targetState = enabled ? "on" : "off";
+        toggleProc.running = false;
+        toggleProc.running = true;
     }
 
     function connectToDevice(mac: string) {
-        console.log("[BT Service] Попытка подключения к:", mac);
-        if (root.connectingMac !== "") {
-            console.log("[BT Service] Уже идет подключение к", root.connectingMac);
+        if (connectingMac !== "")
             return;
-        }
-        
-        const d = root._findDevice(mac);
-        if (!d) {
-            console.log("[BT Service] ОШИБКА: Устройство", mac, "не найдено");
+        connectingMac = mac;
+
+        connectProc.command = ["bash", "-c", "bluetoothctl pair \"$1\"; sleep 0.5; bluetoothctl connect \"$1\"; bluetoothctl info \"$1\" | grep -q 'Connected: yes' && echo OK || echo FAIL", "--", mac];
+
+        connectProc.running = false;
+        connectProc.running = true;
+    }
+
+    function startScan() {
+        if (!enabled || continuousScanProc.running)
             return;
-        }
-        
-        root.connectingMac = mac;
-        d.connect();
-        connectingTimer.restart();
+        retryScanTimer.stop();
+        continuousScanProc.running = false;
+        continuousScanProc.running = true;
+        updateThrottleTimer.start();
+        scanRefreshTimer.start();
     }
 
-    function _findDevice(mac: string): QtObject {
-        const devs = root.adapter ? root.adapter.devices.values : null;
-        if (!devs) return null;
-        
-        for (let i = 0; i < devs.length; i++) {
-            if (devs[i].address === mac) 
-                return devs[i];
+    function stopScan() {
+        retryScanTimer.stop();
+        updateThrottleTimer.stop();
+        scanRefreshTimer.stop();
+
+        if (continuousScanProc.running) {
+            continuousScanProc.running = false;
+            Quickshell.execDetached(["bluetoothctl", "scan", "off"]);
         }
-        return null;
     }
 
-    function _syncDevices() {
-        console.log("[BT Service] --- Начало _syncDevices ---");
-        const devs = root.adapter ? root.adapter.devices.values : null;
-        
-        if (!devs) {
-            console.log("[BT Service] Нет устройств (devs is null)");
-            return;
-        }
+    function updateModel(lines: var) {
+        const targets = lines.map(line => line.split('|')).filter(parts => parts.length >= 4).map(parts => ({
+                    mac: parts[0],
+                    connected: parts[1] === "true",
+                    paired: parts[2] === "true",
+                    name: parts.slice(3).join('|') || "Unknown Device"
+                })).sort((a, b) => b.connected - a.connected || b.paired - a.paired || a.name.localeCompare(b.name));
 
-        console.log("[BT Service] Всего устройств получено от BlueZ:", devs.length);
-
-        const targets = [];
-        for (let i = 0; i < devs.length; i++) {
-            const d = devs[i];
-            
-            console.log(`[BT Service] Устройство [${i}]: MAC=${d.address} Name="${d.name || d.deviceName}" Paired=${d.paired} Connected=${d.connected}`);
-
-            targets.push({
-                mac: d.address,
-                name: d.name || d.deviceName || "Unknown Device",
-                connected: !!d.connected,
-                paired: !!d.paired,
-                object: d
-            });
-        }
-
-        targets.sort((x, y) => (y.connected - x.connected) || (y.paired - x.paired) || x.name.localeCompare(y.name));
-
-        const keyMap = {};
-        for (let i = 0; i < targets.length; i++)
-            keyMap[targets[i].mac] = targets[i];
-
-        let removed = 0;
-        for (let i = root.deviceModel.count - 1; i >= 0; i--) {
-            if (!keyMap[root.deviceModel.get(i).mac]) {
-                root.deviceModel.remove(i);
-                removed++;
-            }
-        }
-
-        let added = 0;
-        let updated = 0;
-        for (let i = 0; i < targets.length; i++) {
-            const target = targets[i];
-            let found = -1;
-            for (let j = 0; j < root.deviceModel.count; j++) {
-                if (root.deviceModel.get(j).mac === target.mac) {
-                    found = j;
-                    root.deviceModel.setProperty(j, "connected", target.connected);
-                    root.deviceModel.setProperty(j, "paired", target.paired);
-                    updated++;
-                    break;
-                }
-            }
-            if (found === -1) {
-                root.deviceModel.append(target);
-                added++;
-            }
-        }
-        
-        console.log(`[BT Service] --- Итог _syncDevices: Добавлено ${added}, Обновлено ${updated}, Удалено ${removed}. Итого в модели: ${root.deviceModel.count} ---`);
+        root.listModelDiff.sync(root.deviceModel, targets, "mac", ["connected", "paired", "name"]);
     }
-
-    property Timer connectingTimer: Timer {
-        interval: 10000
-        repeat: false
-        onTriggered: root.connectingMac = ""
-    }
-
-    property Connections deviceStateConn: Connections {
-        target: null
-        enabled: false
-    }
-
-    function retain() {}
-    function release() {}
 }

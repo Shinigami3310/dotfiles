@@ -1,19 +1,16 @@
 #!/bin/bash
-# bluetoothctl не даёт сводного списка со статусами — собираем его сами,
-# чтобы UI не дёргал bluetoothctl по разу на устройство.
-# Вызывается из BluetoothService.scanProc.
 set -e
 
 p=$(bluetoothctl devices Paired | awk '{print $2}')
 devs=$(bluetoothctl devices | awk '{print $2}')
 c=""
 for mac in $devs; do
-    info=$(bluetoothctl info "$mac" | sed 's/\x1b\[[0-9;]*m//g')
-    if echo "$info" | grep -q "Connected: yes"; then
-        if echo "$info" | grep -q "ServicesResolved: yes"; then
-            c="$c $mac"
-        fi
+  info=$(bluetoothctl info "$mac" | sed 's/\x1b\[[0-9;]*m//g')
+  if echo "$info" | grep -q "Connected: yes"; then
+    if echo "$info" | grep -q "ServicesResolved: yes"; then
+      c="$c $mac"
     fi
+  fi
 done
 
 bluetoothctl devices | awk -v c_list="$c" -v p_list="$p" '
