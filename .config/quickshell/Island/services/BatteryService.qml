@@ -17,13 +17,16 @@ QtObject {
     function setProfile(profileName: string) {
         if (activeProfile !== profileName) {
             activeProfile = profileName;
-            Quickshell.execDetached(["powerprofilesctl", "set", profileName]);
+            Quickshell.execDetached([
+                "busctl", "--system", "set-property",
+                "net.hadess.PowerProfiles",
+                "/net/hadess/PowerProfiles",
+                "net.hadess.PowerProfiles",
+                "ActiveProfile", "s", profileName
+            ]);
         }
     }
 
-    // Мониторинг udev и poll-опрос — это постоянные процессы. Держим их
-    // активными только пока открыта поверхность BatteryProfile, иначе
-    // батарея опрашивается в фоне даже когда UI не виден.
     function retain() {
         _activeClients++;
         isAwake = true;
@@ -47,9 +50,6 @@ QtObject {
         }
     }
 
-    // Fallback: периодический опрос состояния батареи.
-    // udevadm monitor не всегда доставляет события при подключении зарядки,
-    // поэтому гарантируем обновление isCharging/percent даже без событий.
     property Timer pollTimer: Timer {
         interval: ServiceConfig.batteryPollMs
         repeat: true
@@ -85,20 +85,24 @@ QtObject {
     }
 
     property Process profileProc: Process {
-        command: ["powerprofilesctl", "get"]
+        command: [
+            "busctl", "--system", "get-property",
+            "net.hadess.PowerProfiles",
+            "/net/hadess/PowerProfiles",
+            "net.hadess.PowerProfiles",
+            "ActiveProfile"
+        ]
         running: false
         stdout: SplitParser {
             onRead: data => {
-                let trimmed = data.trim();
-                if (trimmed)
-                    root.activeProfile = trimmed;
+                let m = data.trim().match(/"([^"]+)"/);
+                if (m)
+                    root.activeProfile = m[1];
             }
         }
     }
 
     onIsAwakeChanged: {
-        // При каждом пробуждении перечитываем состояние с нуля — счётчик
-        // батареи мог измениться, пока сервис спал.
         if (isAwake) {
             eventListener.running = true;
             pollTimer.start();
