@@ -1,1 +1,8 @@
 .zsh_history
+
+.config/hypr/hyprland/colors.lua
+.config/hypr/hyprlock/colors.conf
+.config/kitty/colors.conf
+.config/quickshell/colors.json
+.config/sddm/colors.json
+.config/telegram/theme.tdesktop-theme

@@ -1,5 +1,5 @@
 [config]
-wallpaper_dir = "~/Pictures/Wallpaper"
+wallpaper_dir = "~/Pictures/Wallpapers"
 
 [templates.hyprland]
 input_path = "~/.config/matugen/templates/hyprland.lua"

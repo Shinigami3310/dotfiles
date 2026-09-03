@@ -13,6 +13,8 @@ PanelWindow {
     property NotificationStore store
     property NotificationService service
 
+    readonly property int toastCount: root.store?.activeToastsModel?.count ?? 0
+
     WlrLayershell.layer: WlrLayer.Overlay
     exclusionMode: ExclusionMode.Ignore
 
@@ -26,7 +28,10 @@ PanelWindow {
     }
 
     implicitWidth: ToastsConfig.width
-    implicitHeight: ToastsConfig.maxHeight
+    implicitHeight: root.toastCount > 0
+    ? Math.min(listView.contentHeight + ToastsConfig.spacing, ToastsConfig.maxHeight)
+    : 0
+
     color: "transparent"
 
     ListView {
