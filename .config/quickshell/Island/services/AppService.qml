@@ -18,14 +18,12 @@ QtObject {
 
     property ListModelDiff listModelDiff: ListModelDiff {}
 
-    // Дебаунс фильтрации: не пересчитываем список на каждое нажатие клавиши.
     property Timer filterDebounce: Timer {
         interval: 100
         onTriggered: root._applyFilter()
     }
 
     property Process appFetcher: Process {
-        // Парсер .desktop вынесен в services/scripts/desktop_scan.awk
         command: ["sh", "-c", `find ${Paths.appDirs.join(" ")} -type f -name "*.desktop" -print0 2>/dev/null | xargs -0 gawk -f "${Paths.scriptsDir}desktop_scan.awk"`]
         running: true
 
@@ -67,9 +65,6 @@ QtObject {
         root.listModelDiff.sync(root.filteredApps, targetApps, "id", []);
     }
 
-    // Exec из .desktop — это не просто команда, а строка с кавычками и
-    // экранированием. Передаём её в execDetached как argv-массив, а не через
-    // sh -c, чтобы исключить shell-инъекции из имени файла/аргументов.
     function parseExec(execString: string): var {
         const args = [];
         let current = "";
@@ -143,6 +138,10 @@ QtObject {
         let argv = parseExec(arg.exec);
         if (argv.length === 0)
             return;
+
+        if (arg.id === "anki.desktop" || argv[0].endsWith("anki")) {
+            argv = ["env", "QTWEBENGINE_CHROMIUM_FLAGS=--disable-gpu", ...argv];
+        }
 
         if (arg.terminal) {
             argv = [Paths.defaultTerminal, "-e", ...argv];

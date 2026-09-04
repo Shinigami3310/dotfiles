@@ -10,3 +10,6 @@ export VISUAL="nvim"
 
 # Dotfiles 
 ZDOTDIR="$XDG_CONFIG_HOME/zsh"
+
+# qtwebengine
+export QTWEBENGINE_CHROMIUM_FLAGS="--disable-gpu"

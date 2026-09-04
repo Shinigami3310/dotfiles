@@ -18,6 +18,7 @@ hl.bind(
 )
 
 hl.bind("Print", hl.dsp.exec_cmd("~/.local/bin/screen"))
+hl.bind("CONTROL + Print", hl.dsp.exec_cmd("~/.local/bin/screen-region"))
 hl.bind(mainMod .. " + R", hl.dsp.exec_cmd("~/.local/bin/record"))
 
 hl.bind(mainMod .. " + P", hl.dsp.exec_cmd("~/.local/bin/toggle-powermenu"))
