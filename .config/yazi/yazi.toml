@@ -13,7 +13,7 @@ trash = true
 
 [opener]
 nvim = [
-    { run = 'nvim "%s"', block = true, desc = "Neovim" }
+    { run = 'nvim %s', block = true, desc = "Neovim" }
 ]
 
 [open]
@@ -21,5 +21,5 @@ prepend_rules = [
     { mime = "text/*", use = "nvim" },
     { mime = "application/{json,javascript,typescript,xml,toml,x-shellscript}", use = "nvim" },
 
-    { url = "*.{txt,md,json,toml,yaml,yml,ini,conf,log,sh,bash,zsh,lua,py,c,cpp,h,hpp,rs,go,js,ts,jsx,tsx,html,css,scss,sql}", use = "nvim" },
+    { url = "*.{csv,txt,md,json,toml,yaml,yml,ini,conf,log,sh,bash,zsh,lua,py,c,cpp,h,hpp,rs,go,js,ts,jsx,tsx,html,css,scss,sql}", use = "nvim" },
 ]

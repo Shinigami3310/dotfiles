@@ -1,0 +1,16 @@
+#!/bin/bash
+
+BATTERY="BAT0"
+WARNING_LEVEL=20
+
+while true; do
+  BATTERY_LEVEL=$(cat /sys/class/power_supply/$BATTERY/capacity)
+  STATUS=$(cat /sys/class/power_supply/$BATTERY/status)
+
+  if [ "$STATUS" = "Discharging" ] && [ "$BATTERY_LEVEL" -le "$WARNING_LEVEL" ]; then
+    notify-send -u critical "Low battery" "Remaining: ${BATTERY_LEVEL}%"
+    sleep 300
+  else
+    sleep 60
+  fi
+done
