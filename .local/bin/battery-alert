@@ -10,6 +10,8 @@ while true; do
   if [ "$STATUS" = "Discharging" ] && [ "$BATTERY_LEVEL" -le "$WARNING_LEVEL" ]; then
     notify-send -u critical "Low battery" "Remaining: ${BATTERY_LEVEL}%"
     sleep 300
+  elif [ "$STATUS" != "Discharging" ] || [ "$BATTERY_LEVEL" -gt 30 ]; then
+    sleep 300
   else
     sleep 60
   fi
